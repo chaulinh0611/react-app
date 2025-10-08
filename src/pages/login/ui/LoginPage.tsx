@@ -1,8 +1,10 @@
 
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
+
+import { Button } from "@/shared/ui/button/button";
+
 import styled from "styled-components";
+
+import LoginForm from "../../../features/login/ui/LoginForm";
 
 const Container = styled.div`
     display: flex;
@@ -40,55 +42,6 @@ const Description = styled.p`
     line-height: 1.5;
 `;
 
-const Email = styled.div`
-    margin-bottom: 25px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    font-size: 18px;
-    gap: 10px;
-    input{
-        background-color: #373636ff;}
-`;
-
-const Password = styled.div`
-    margin-bottom: 25px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    font-size: 18px;
-    gap: 10px;
-    div {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-            }
-    a {;
-    color: #ebeaeaff;
-        text-decoration: none;
-        font-size: 14px;
-        &:hover {
-            text-decoration: underline;
-        }
-    }
-        input{
-        background-color: #373636ff;}
-`;
-
-const LoginButton = styled(Button)`
-    width: 100%;
-    padding: 10px;
-    background-color: #f6f4f4ff;
-    color: black;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-bottom: 15px;
-    &:hover {
-        background-color: #d6d3d3ff;
-    }
-`;
 const LoginGoogleButton = styled(Button)`
     width: 100%;
     padding: 10px;
@@ -119,23 +72,7 @@ export default function LoginPage(){
         <Card>
             <Title>Login to your account</Title>
             <Description>Enter your email below to login to your account</Description>
-            <Email>
-               <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
-                  required
-                />
-            </Email>
-            <Password>
-                <div>
-                    <Label>Password</Label>
-                    <a href="#">Forgot your password?</a>
-                </div>
-                <Input type="password"></Input>
-            </Password>
-            <LoginButton>Login</LoginButton>
+            <LoginForm/>
             <LoginGoogleButton>Login with Google</LoginGoogleButton>
             <SignUpLabel>Don't have an account? 
                 <a href="#"> Sign up</a></SignUpLabel>

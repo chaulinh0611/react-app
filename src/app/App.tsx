@@ -1,5 +1,5 @@
-import LoginPage from "./modules/login/LoginPage"
-import Cau2 from "./modules/login/cau2"
+import LoginPage from "../pages/login/ui/LoginPage"
+import Cau2 from "../pages/login/ui/cau2"
 function App() {
  
   return (
