@@ -1,82 +1,10 @@
-
-
-import { Button } from "@/shared/ui/button/button";
-
-import styled from "styled-components";
-
-import LoginForm from "../../../features/login/ui/LoginForm";
-
-const Container = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background-color: black;
-    color: white;
-    padding: 20px;
-`;
-const Card = styled.div`
-    background-color: #292828ff;
-    padding: 50px;
-    border-radius: 10px;
-    border: 1px solid #4c4c4cff;
-    box-shadow: 0 4px 6px rgba(30, 30, 30, 1);
-    width: 100%;
-    max-width: 500px;
-    text-align: center;
-    margin-bottom: 20px;
-`;
-const Title = styled.h2`
-    margin-bottom: 5px;
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-    text-align: left;
-`;
-const Description = styled.p`
-    margin-bottom: 30px;
-    color: #aba9a9ff;
-    text-align: left;
-    font-size: 16px;
-    line-height: 1.5;
-`;
-
-const LoginGoogleButton = styled(Button)`
-    width: 100%;
-    padding: 10px;
-    background-color: #373636ff;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-bottom: 25px;
-    &:hover {
-        background-color: #6a6969ff;
-    }
-`;
-const SignUpLabel = styled.p`
-    font-size: 15px;
-    color: #efededff;
-    gap: 10px;
-    a {
-        color: #ffffffff;
-        text-decoration: underline;
-    }
-`;
-
-export default function LoginPage(){
-    return <>
-    <Container>
-        <Card>
-            <Title>Login to your account</Title>
-            <Description>Enter your email below to login to your account</Description>
-            <LoginForm/>
-            <LoginGoogleButton>Login with Google</LoginGoogleButton>
-            <SignUpLabel>Don't have an account? 
-                <a href="#"> Sign up</a></SignUpLabel>
-        </Card>
-    </Container>
-    </>
+import { LoginForm } from "@/features/login/ui/LoginForm"
+export default function Page() {
+  return (
+    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+      <div className="w-full max-w-sm">
+        <LoginForm />
+      </div>
+    </div>
+  )
 }

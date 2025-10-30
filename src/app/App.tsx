@@ -1,13 +1,12 @@
-import LoginPage from "../pages/login/ui/LoginPage"
-import Cau2 from "../pages/login/ui/cau2"
+// import LoginPage from "../pages/login/ui/LoginPage"
+import Path from "./PATH"
+
 function App() {
- 
+  console.log("app render")
   return (
     <>
-    <LoginPage></LoginPage>
-    <Cau2></Cau2>
+     <Path></Path>
      </>
   )
 }
-
 export default App

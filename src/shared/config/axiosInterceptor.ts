@@ -1,121 +1,115 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
+import type { AxiosResponse, InternalAxiosRequestConfig, AxiosRequestHeaders } from "axios";
 import queryString from "query-string";
-import { getCookie, setCookie } from "@/shared/lib/cookie";
-import { getLocalStorage, setLocalStorage } from "@/shared/lib/storage";
-import { Authenticate } from "@/shared/constants/auth";
 import { authApi } from "@/shared/api/authApi";
-import type {
-  AxiosResponse,
-  AxiosError,
-  InternalAxiosRequestConfig,
-} from "axios";
+import { logout } from "@/shared/utils/logout";
 
 export const keyHeader = {
   AUTHORIZATION: "Authorization",
-  REFRESH_TOKEN: "X-Refresh-Token",
 };
 
 export const keyStorage = {
-  ACCESS_TOKEN: "access_token",
-  REFRESH_TOKEN: "refresh_token",
+  ACCESS_TOKEN: "accessToken",
+  REFRESH_TOKEN: "refreshToken",
 };
 
+axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.withCredentials = true;
 
-type LogoutHandler = () => void;
-
-
-const onRequestSuccess = (
-  config: InternalAxiosRequestConfig
-): InternalAxiosRequestConfig => {
-  const auth = getCookie(Authenticate.AUTH);
+const onRequestSuccess = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
   config.timeout = 10000;
-  config.headers = config.headers ?? {};
 
-  if (auth) {
-    config.headers.Authorization = `Bearer ${auth}`;
-    config.headers["x-api-key"] = keyHeader.AUTHORIZATION;
+  const headers = (config.headers || {}) as AxiosRequestHeaders;
+  const token = localStorage.getItem(keyStorage.ACCESS_TOKEN);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
+  config.headers = headers;
 
   if (config.params) {
     config.paramsSerializer = {
-      serialize: (params: Record<string, unknown>) =>
-        queryString.stringify(params),
+      serialize: (params: Record<string, unknown>) => queryString.stringify(params),
     };
   }
 
   return config;
 };
 
+const onResponseSuccess = (response: AxiosResponse) => {
+  return response?.data ?? response;
+};
 
-const onResponseSuccess = (response: AxiosResponse) => response.data;
+let isRefreshing = false;
+interface FailedRequest {
+  resolve: (token: string) => void;
+  reject: (err: unknown) => void;
+}
+let failedQueue: FailedRequest[] = [];
 
-const refreshToken = async (
-  error: AxiosError,
-  logout: LogoutHandler
-): Promise<AxiosResponse | void> => {
-  const refreshTokenValue = getLocalStorage<string>(Authenticate.REFRESH_TOKEN_ETC);
+const processQueue = (error: unknown, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) prom.reject(error);
+    else if (token) prom.resolve(token);
+  });
+  failedQueue = [];
+};
 
-  if (!refreshTokenValue) {
+const onResponseError = async (error: AxiosError) => {
+  const originalRequest = error.config;
+  if (!error.response || !originalRequest) return Promise.reject(error);
+
+  if (originalRequest.url?.includes("/auth/refresh")) {
     logout();
-    return;
+    return Promise.reject(error);
   }
 
-  try {
-    const { data }: AxiosResponse<{
-      username: string;
-      accessToken: string;
-      refreshToken: string;
-    }> = await authApi.refreshToken({ refreshToken: refreshTokenValue });
+  if (error.response.status === 401 && !(originalRequest as any)._retry) {
+    (originalRequest as any)._retry = true;
 
-    setLocalStorage({
-      key: Authenticate.REFRESH_TOKEN_ETC,
-      value: data.refreshToken,
-    });
-    setCookie(
-      Authenticate.AUTH,
-      JSON.stringify({
-        username: data.username,
-        accessToken: data.accessToken,
-      }),
-      0.02
-    );
-
-    if (error.config) {
-      error.config.headers = error.config.headers ?? {};
-      error.config.headers.Authorization = `Bearer ${data.accessToken}`;
-      return axios.request(error.config);
+    if (isRefreshing) {
+      return new Promise((resolve, reject) => {
+        failedQueue.push({
+          resolve: (token: string) => {
+            const headers = (originalRequest.headers || {}) as AxiosRequestHeaders;
+            headers.Authorization = `Bearer ${token}`;
+            originalRequest.headers = headers;
+            resolve(axios(originalRequest));
+          },
+          reject,
+        });
+      });
     }
-  } catch {
-    logout();
+
+    isRefreshing = true;
+
+    try {
+      const refreshToken = localStorage.getItem(keyStorage.REFRESH_TOKEN);
+      if (!refreshToken) throw new Error("Missing refresh token");
+      const res = await authApi.refreshToken({ refreshToken });
+
+      localStorage.setItem(keyStorage.ACCESS_TOKEN, res.accessToken);
+      localStorage.setItem(keyStorage.REFRESH_TOKEN, res.refreshToken);
+
+      processQueue(null, res.accessToken);
+
+      const headers = (originalRequest.headers || {}) as AxiosRequestHeaders;
+      headers.Authorization = `Bearer ${res.accessToken}`;
+      originalRequest.headers = headers;
+
+      return axios(originalRequest);
+    } catch (err: unknown) {
+      processQueue(err, null);
+      logout();
+      return Promise.reject(err);
+    } finally {
+      isRefreshing = false;
+    }
   }
+
+  return Promise.reject(error);
 };
 
-
-
-const onResponseError = (
-  error: AxiosError,
-  onUnauthenticated: LogoutHandler
-): Promise<AxiosResponse | unknown> => {
-  if (
-    error.response?.status !== 401 ||
-    error.config?.url?.includes("/auth")
-  ) {
-    const errMessage =
-      error.response?.data ?? error?.response ?? error;
-    return Promise.reject(errMessage);
-  }
-
-
-  return refreshToken(error, onUnauthenticated) as Promise<AxiosResponse>;
-};
-
-
-export default function AxiosInterceptor(
-  onUnauthenticated: LogoutHandler
-): void {
+export default function AxiosInterceptor(): void {
   axios.interceptors.request.use(onRequestSuccess);
-  axios.interceptors.response.use(
-    onResponseSuccess,
-    (error) => onResponseError(error, onUnauthenticated)
-  );
+  axios.interceptors.response.use(onResponseSuccess, onResponseError);
 }

@@ -1,143 +1,95 @@
+import { cn } from "@/shared/lib/utils"
+import { Button } from "@/shared/ui/button/button"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import axios from "axios"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/shared/ui/card"
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+} from "@/shared/ui/field"
+import { Input } from "@/shared/ui/input"
 
-import { Input } from "@/shared/ui/input";
-import { Button } from "@/shared/ui/button/button";
-import { Label } from "@/shared/ui/label";
-import styled from "styled-components";
-import { useState } from "react";
-import axios from "axios";
-import { useEffect } from "react";
 
-const Email = styled.div`
-    margin-bottom: 25px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    font-size: 18px;
-    gap: 10px;
-    input{
-        background-color: #373636ff;}
-`;
+export function LoginForm({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
 
-const Password = styled.div`
-    margin-bottom: 25px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
-    font-size: 18px;
-    gap: 10px;
-    div {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-            }
-    a {;
-    color: #ebeaeaff;
-        text-decoration: none;
-        font-size: 14px;
-        &:hover {
-            text-decoration: underline;
-        }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); 
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("/auth/login", { email, password }) as any;
+
+      localStorage.setItem("accessToken", res.accessToken);
+      localStorage.setItem("refreshToken", res.refreshToken);
+
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("Login failed:", err);
+      alert("Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu!");
     }
-        input{
-        background-color: #373636ff;}
-`;
-
-const LoginButton = styled(Button)`
-    width: 100%;
-    padding: 10px;
-    background-color: #f6f4f4ff;
-    color: black;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-bottom: 15px;
-    &:hover {
-        background-color: #d6d3d3ff;
-    }
-`;
-export default function LoginForm(){
-    const [email, setEmail] = useState("");
-        const [password, setPassword] = useState("");
-        // const [accessToken, setAccessToken] = useState("");
-
-        async function submit(){
-
-            setEmail("this is email");
-            setPassword("this is password");
-            console.log(email, password);
-            const url = "http://localhost:8080/api/auth/login";
-            // const config = {
-            //     method: "POST",
-            //     headers: {
-            //         "Content-Type": "application/json",
-            //     },
-            //     body: JSON.stringify({
-            //         email: email,
-            //         password: password,
-            //     }),
-    
-            // }
-            
-
-            // )
-            try{
-                // const response = await fetch(url, config);
-                const response = await axios.post(url, {
-                    email: email,
-                    password: password,
-                });
-                // const data = await response.json();
-                // console.log(data);
-                const [accessToken, refreshToken] = response.data.tokens;
-                localStorage.setItem("accessToken", JSON.stringify(accessToken));
-                localStorage.setItem("refreshToken", JSON.stringify(refreshToken));
-                console.log(response.data);
-            }catch{
-                console.log("Error");
-            }
-            // fetch(url, config).then(res => res.json().then(data => {
-            //     console.log(data);
-            // }))
-        }
-        // async function getUserInfo(){
-        //     try{
-        //     const response = await axios.get("http://localhost:8080/api/users/me", {
-        //     headers: {
-        //         Authorization: `Bearer ${JSON.parse(localStorage.getItem("accessToken"))}`,
-        //     },
-        //     });
-
-        //     console.log(response.data);
-        // }   catch{
-        //     console.log("Error");
-        // }   
-        // }
-
-        function callBackExample(){
-            console.log("Call back example");
-        }
-        useEffect(() => {
-            callBackExample();
-        }, []);
-    
-    return<> <Email>
-               <Label htmlFor="email">Email</Label>
+  };
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Login to your account</CardTitle>
+          <CardDescription>
+            Enter your email below to login to your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin}>
+            <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
                 <Input
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
+                  value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  required
                 />
-            </Email>
-            <Password>
-                <div>
-                    <Label>Password</Label>
-                    <a href="#">Forgot your password?</a>
+              </Field>
+              <Field>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
+                  <a
+                    href="#"
+                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
                 </div>
-                <Input type="password"></Input>
-            </Password>
-            <LoginButton onClick={submit}>Login</LoginButton>
-            </>
+                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}required />
+              </Field>
+              <Field>
+                <Button type="submit">Login</Button>
+                <Button variant="outline" type="button">
+                  Login with Google
+                </Button>
+                <FieldDescription className="text-center">
+                  Don&apos;t have an account? <a href="#">Sign up</a>
+                </FieldDescription>
+              </Field>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }

@@ -32,3 +32,7 @@ export const storage = {
     localStorage.removeItem(key);
   },
 };
+
+export const removeLocalStorage = (key: string): void => {
+  localStorage.removeItem(key);
+};
