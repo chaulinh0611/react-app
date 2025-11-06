@@ -1,4 +1,3 @@
-import React from "react"
 import { Kanban, Plus, Users } from "lucide-react"
 
 interface Board {
