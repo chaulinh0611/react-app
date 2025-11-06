@@ -42,6 +42,14 @@ export function LoginForm({
       alert("Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu!");
     }
   };
+  const handleLoginWithGoogle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try{
+      window.location.href = "http://localhost:3000/auth/google";
+    } catch (err) {
+      console.error("Login with Google failed:", err);
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -79,7 +87,7 @@ export function LoginForm({
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
-                <Button variant="outline" type="button">
+                <Button variant="outline" type="button" onSubmit={handleLoginWithGoogle}>
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
