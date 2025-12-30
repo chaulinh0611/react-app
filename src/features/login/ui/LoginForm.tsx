@@ -1,37 +1,35 @@
-import { cn } from "@/shared/lib/utils"
-import { Button } from "@/shared/ui/button/button"
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import { cn } from "@/shared/lib/utils";
+import { Button } from "@/shared/ui/button/button";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/shared/ui/card"
+} from "@/shared/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/shared/ui/field"
-import { Input } from "@/shared/ui/input"
-
+} from "@/shared/ui/field";
+import { Input } from "@/shared/ui/input";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/auth/login", { email, password }) as any;
+      const res = (await axios.post("/auth/login", { email, password })) as any;
 
       localStorage.setItem("accessToken", res.accessToken);
       localStorage.setItem("refreshToken", res.refreshToken);
@@ -44,7 +42,7 @@ export function LoginForm({
   };
   const handleLoginWithGoogle = async (e: React.FormEvent) => {
     e.preventDefault();
-    try{
+    try {
       window.location.href = "http://localhost:3000/auth/google";
     } catch (err) {
       console.error("Login with Google failed:", err);
@@ -83,11 +81,21 @@ export function LoginForm({
                     Forgot your password?
                   </a>
                 </div>
-                <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)}required />
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
               </Field>
               <Field>
                 <Button type="submit">Login</Button>
-                <Button variant="outline" type="button" onSubmit={handleLoginWithGoogle}>
+                <Button
+                  variant="outline"
+                  type="button"
+                  onSubmit={handleLoginWithGoogle}
+                >
                   Login with Google
                 </Button>
                 <FieldDescription className="text-center">
@@ -99,5 +107,5 @@ export function LoginForm({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

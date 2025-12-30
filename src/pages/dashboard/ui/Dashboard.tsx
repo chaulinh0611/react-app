@@ -1,60 +1,56 @@
-import Sidebar from "../../../components/Sidebar"
-import WorkspaceSection from "./WorkspaceSection"
-import { useEffect, useState } from "react"
-import { getUser } from "@/features/dashboard/model/getUser"
-import { getWorkspaces } from "@/features/dashboard/model/getWorkspaces"
-
+import Sidebar from "../../../components/Sidebar";
+import WorkspaceSection from "./WorkspaceSection";
+import { useEffect, useState } from "react";
+import { getUser } from "@/features/dashboard/model/getUser";
+import { getWorkspaces } from "@/features/dashboard/model/getWorkspaces";
 
 interface Board {
-  id: string
-  title: string
-  description: string
+  id: string;
+  title: string;
+  description: string;
 }
 
 interface Workspace {
-  id: string
-  name: string
-  description: string
-  boards?: Board[]
+  id: string;
+  name: string;
+  description: string;
+  boards?: Board[];
 }
 
 export default function DashboardPage() {
-    const [user, setUser] = useState<any>(null)
-    const [workspaces, setWorkspaces] = useState<Workspace[]>([])
-    const [loading, setLoading] = useState(true)
+  const [user, setUser] = useState<any>(null);
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [loading, setLoading] = useState(true);
 
-   useEffect(() => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        const userRes = await getUser()
-        setUser(userRes)
+        const userRes = await getUser();
+        setUser(userRes);
 
-        const wsRes = await getWorkspaces()
+        const wsRes = await getWorkspaces();
 
         if (Array.isArray(wsRes)) {
-          setWorkspaces(wsRes)
+          setWorkspaces(wsRes);
         } else if (wsRes?.data && Array.isArray(wsRes.data)) {
-          setWorkspaces(wsRes.data)
+          setWorkspaces(wsRes.data);
         } else {
-          console.warn("getWorkspaces() returned unexpected:", wsRes)
-          setWorkspaces([])
+          console.warn("getWorkspaces() returned unexpected:", wsRes);
+          setWorkspaces([]);
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
-    fetchData()
-  }, [])
+    };
+    fetchData();
+  }, []);
 
-  if (loading) return <div className="p-8 text-gray-500">Loading...</div>
-  if (!user) return <div className="p-8 text-red-500">Please log in</div>
 
   return (
     <div className="flex min-h-screen bg-white">
-  
-      <Sidebar/>
+      <Sidebar />
 
       <div className="flex flex-col flex-1">
         <header className="h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-10">
@@ -63,9 +59,7 @@ export default function DashboardPage() {
           </div>
         </header>
 
-
         <main className="flex-1 p-8 space-y-6">
-      
           <div className="flex justify-between items-start mb-8">
             <div>
               <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
@@ -80,22 +74,22 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-10">
-                {workspaces.map((ws) => (
-                    <WorkspaceSection
-            key={ws.id}
-            title={ws.name}
-            subtitle={ws.description}
-            boards={(ws.boards ?? []).map((b) => ({
-                name: b.title,
-                desc: b.description || "No description",
-                lists: 0,
-                members: 0,
-            }))}
-            />
-        ))}
-        </div>
+            {workspaces.map((ws) => (
+              <WorkspaceSection
+                key={ws.id}
+                title={ws.name}
+                subtitle={ws.description}
+                boards={(ws.boards ?? []).map((b) => ({
+                  name: b.title,
+                  desc: b.description || "No description",
+                  lists: 0,
+                  members: 0,
+                }))}
+              />
+            ))}
+          </div>
         </main>
       </div>
     </div>
-  )
+  );
 }

@@ -16,23 +16,16 @@ export default function AppRoutes() {
     <BrowserRouter basename="/react-app">
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
-          <Route
+          {/* <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
+              //   <ProtectedRoute>
+              <Dashboard />
+              //   </ProtectedRoute>
             }
-          />
-          <Route path="/" element={<LoginPage />} />
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
+          /> */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </Suspense>
     </BrowserRouter>
