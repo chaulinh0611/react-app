@@ -1,52 +1,6 @@
-import Sidebar from "../../../components/Sidebar";
-import WorkspaceSection from "./WorkspaceSection";
-import { useEffect, useState } from "react";
-import { getUser } from "@/features/dashboard/model/getUser";
-import { getWorkspaces } from "@/features/dashboard/model/getWorkspaces";
-
-interface Board {
-  id: string;
-  title: string;
-  description: string;
-}
-
-interface Workspace {
-  id: string;
-  name: string;
-  description: string;
-  boards?: Board[];
-}
+import Sidebar from "../../../features/dashboard/ui/Sidebar";
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<any>(null);
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const userRes = await getUser();
-        setUser(userRes);
-
-        const wsRes = await getWorkspaces();
-
-        if (Array.isArray(wsRes)) {
-          setWorkspaces(wsRes);
-        } else if (wsRes?.data && Array.isArray(wsRes.data)) {
-          setWorkspaces(wsRes.data);
-        } else {
-          console.warn("getWorkspaces() returned unexpected:", wsRes);
-          setWorkspaces([]);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
 
   return (
     <div className="flex min-h-screen bg-white">
@@ -74,19 +28,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-10">
-            {workspaces.map((ws) => (
-              <WorkspaceSection
-                key={ws.id}
-                title={ws.name}
-                subtitle={ws.description}
-                boards={(ws.boards ?? []).map((b) => ({
-                  name: b.title,
-                  desc: b.description || "No description",
-                  lists: 0,
-                  members: 0,
-                }))}
-              />
-            ))}
+
           </div>
         </main>
       </div>

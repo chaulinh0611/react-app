@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import type { AxiosResponse, InternalAxiosRequestConfig, AxiosRequestHeaders } from 'axios';
 import queryString from 'query-string';
-import { authApi } from '@/shared/api/authApi';
+import { authApi } from '@/entities/auth/api/auth.api';
 import { logout } from '@/shared/utils/logout';
 
 export const keyHeader = {
@@ -36,7 +36,7 @@ const onRequestSuccess = (config: InternalAxiosRequestConfig): InternalAxiosRequ
 };
 
 const onResponseSuccess = (response: AxiosResponse) => {
-    return response?.data ?? response;
+    return response;
 };
 
 let isRefreshing = false;
