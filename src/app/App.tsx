@@ -1,12 +1,29 @@
-// import LoginPage from "../pages/login/ui/LoginPage"
-import Path from "./PATH"
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import LoadingSpinner from "@/shared/ui/LoadingSpinner";
+import { lazy, Suspense, useEffect } from "react";
+import AxiosInterceptor from "@/shared/config/axiosInterceptor";
 
-function App() {
-  console.log("app render")
+const LoginPage = lazy(() => import("@/pages/login/ui/LoginPage"));
+const RegisterPage = lazy(() => import("@/pages/login/ui/RegisterPage"));
+const Dashboard = lazy(() => import("@/pages/dashboard/ui/Dashboard"));
+
+export default function AppRoutes() {
+  useEffect(() => {
+    AxiosInterceptor();
+  }, []);
+
   return (
-    <>
-     <Path></Path>
-     </>
-  )
+    <BrowserRouter basename="/react-app">
+      <Suspense fallback={<LoadingSpinner />}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} /> {/* Thêm dòng này */}
+          
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
 }
-export default App
