@@ -1,26 +1,39 @@
 import { useNavigate } from "react-router-dom";
 import { authApi } from "@/entities/auth/api/auth.api";
+import type { RegisterPayload } from "@/entities/auth/model/auth.type";
+
 export const useLogin = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-    const login = async (email: string, password: string) => {
-        try {
-            const response = await authApi.login({ email, password });
-            console.log(response.data)
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await authApi.login({ email, password });
+      console.log(response.data);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+      throw error; 
+    }
+  };
 
-            navigate("/dashboard");
-        } catch (error) {
-            console.error("Login failed:", error);
-            throw error;
-        }
-    };
+  const register = async (payload: RegisterPayload) => {
+    try {
+      await authApi.register(payload);
+      // Đăng ký xong chuyển về trang login
+      navigate("/login");
+    } catch (error) {
+      console.error("Register failed:", error);
+      throw error;
+    }
+  };
 
-    const loginWithGoogle = () => {
-        window.location.href = "http://localhost:3000/auth/google";
-    };
+  const loginWithGoogle = () => {
+    window.location.href = "http://localhost:3000/api/auth/google"; 
+  };
 
-    return {
-        login,
-        loginWithGoogle,
-    };
-}
+  return {
+    login,
+    register, // Export ra để dùng
+    loginWithGoogle,
+  };
+};
