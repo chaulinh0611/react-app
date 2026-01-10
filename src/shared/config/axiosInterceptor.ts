@@ -3,6 +3,7 @@ import type { AxiosResponse, InternalAxiosRequestConfig, AxiosRequestHeaders } f
 import queryString from 'query-string';
 import { authApi } from '@/entities/auth/api/auth.api';
 import { logout } from '@/shared/utils/logout';
+import type { ApiResponse } from '../models/response';
 
 export const keyHeader = {
     AUTHORIZATION: 'Authorization',
@@ -10,7 +11,6 @@ export const keyHeader = {
 
 export const keyStorage = {
     ACCESS_TOKEN: 'accessToken',
-    REFRESH_TOKEN: 'refreshToken',
 };
 
 axios.defaults.baseURL = 'http://localhost:3000/api';
@@ -36,7 +36,7 @@ const onRequestSuccess = (config: InternalAxiosRequestConfig): InternalAxiosRequ
 };
 
 const onResponseSuccess = (response: AxiosResponse) => {
-    return response;
+    return response.data ;
 };
 
 let isRefreshing = false;
@@ -85,10 +85,9 @@ const onResponseError = async (error: AxiosError) => {
         try {
             const refreshToken = localStorage.getItem(keyStorage.REFRESH_TOKEN);
             if (!refreshToken) throw new Error('Missing refresh token');
-            const res = await authApi.refreshToken({ refreshToken });
+            const res = await authApi.refreshToken();
 
             localStorage.setItem(keyStorage.ACCESS_TOKEN, res.accessToken);
-            localStorage.setItem(keyStorage.REFRESH_TOKEN, res.refreshToken);
 
             processQueue(null, res.accessToken);
 

@@ -18,7 +18,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<"div"
   const [error, setError] = useState<string | null>(null);
 
   const {
-    register, // Hàm đăng ký field của hook-form
+    register,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormValues>({

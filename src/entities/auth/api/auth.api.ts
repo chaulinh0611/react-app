@@ -1,7 +1,7 @@
-import axios from 'axios';
 import type * as AuthType from '../model/auth.type';
 import type { ApiResponse } from '@/shared/models/response';
 import type * as UserType from '@/entities/users/model/user.type';
+import axios from 'axios';
 
 export const authApi = {
     login: (payload: AuthType.LoginPayload): Promise<ApiResponse<AuthType.LoginResponse>> => {
