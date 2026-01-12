@@ -9,12 +9,14 @@ const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
-
+const OAuthHandler = lazy(() => import('@/features/login/ui/OAuth'));
 export default function AppRoutes() {
     return (
+
         <BrowserRouter basename="/react-app">
             <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
+                    <Route path="/oauth2" element={<OAuthHandler />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />

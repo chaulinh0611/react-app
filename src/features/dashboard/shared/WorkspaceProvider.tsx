@@ -5,6 +5,7 @@ import { createContext } from 'react';
 
 interface WorkspacesContextValue {
     workspaces: Workspace[];
+    loadBoardsForWorkspaces: () => Promise<void>;
 }
 
 const WorkspacesContext = createContext<WorkspacesContextValue | null>(null);
@@ -14,20 +15,30 @@ interface WorkspaceProviderProps {
 }
 
 export const WorkspaceProvider = ({ children }: WorkspaceProviderProps) => {
-    const { getAllWorkspacesOfUser } = useWorkspace();
+    const { getAllWorkspacesOfUser, getBoardsInWorkspace } = useWorkspace();
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
 
     useEffect(() => {
         const fetchWorkspaces = async () => {
-            const data = await getAllWorkspacesOfUser();
-            setWorkspaces(data);
-        };
+            const datas = await getAllWorkspacesOfUser()
 
+            setWorkspaces(datas);
+        };
         fetchWorkspaces();
     }, []);
 
+    const loadBoardsForWorkspaces = async () => {
+        const updatedWorkspaces = await Promise.all(
+            workspaces.map(async (workspace) => {
+                const boards = await getBoardsInWorkspace(workspace.id);
+                return { ...workspace, boards };
+            }
+        ));
+        setWorkspaces(updatedWorkspaces);
+    }
+
     return (
-        <WorkspacesContext.Provider value={{ workspaces }}>{children}</WorkspacesContext.Provider>
+        <WorkspacesContext.Provider value={{ workspaces, loadBoardsForWorkspaces }}>{children}</WorkspacesContext.Provider>
     );
 };
 

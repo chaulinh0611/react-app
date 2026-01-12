@@ -39,6 +39,10 @@ export const WorkspaceApi = {
 
     unarchiveWorkspace: (id: string): Promise<ApiResponse<void>> => {
         return axios.post(`/workspaces/${id}/unarchive`);
+    },
+
+    getBoardsInWorkspace: (workspaceId: string): Promise<ApiResponse<any>> => {
+        return axios.get(`/workspaces/${workspaceId}/boards`);
     }
 
 }

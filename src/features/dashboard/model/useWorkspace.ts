@@ -5,5 +5,10 @@ export const useWorkspace = () => {
         const workspaces = await WorkspaceApi.getWorkspaces();
         return workspaces.data;
     }
-    return { getAllWorkspacesOfUser };
+
+    const getBoardsInWorkspace = async (workspaceId : string) =>{
+        const boards = await WorkspaceApi.getBoardsInWorkspace(workspaceId);
+        return boards.data;
+    }
+    return { getAllWorkspacesOfUser, getBoardsInWorkspace };
 }

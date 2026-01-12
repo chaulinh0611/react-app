@@ -1,4 +1,4 @@
-import { WorkspaceProvider } from '../shared/WorkspaceProvider';
+import  { WorkspaceList } from "../shared/components/WorkspaceList";
 
 export const Dashboard = () => {
     return (
@@ -24,7 +24,9 @@ export const Dashboard = () => {
                         </button>
                     </div>
 
-                    <div className="space-y-10"></div>
+                    <div className="space-y-10">
+                        <WorkspaceList/>
+                    </div>
                 </main>
             </div>
         </div>
