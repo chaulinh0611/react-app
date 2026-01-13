@@ -2,15 +2,10 @@ import { Kanban } from 'lucide-react';
 import { useWorkspaceContext } from '../WorkspaceProvider';
 import { BoardCard } from './BoardCard';
 import { Button } from '@/shared/ui/button';
-import { useEffect } from 'react';
 
 export const WorkspaceList = () => {
-    const { workspaces, loadBoardsForWorkspaces } = useWorkspaceContext();
-
-    useEffect(() => {
-        loadBoardsForWorkspaces();
-    }, []);
-
+    const { workspaces } = useWorkspaceContext();
+    console.log('Workspaces:', workspaces);
     return (
         <div>
             {workspaces.map((workspace: any) => (
@@ -28,7 +23,7 @@ export const WorkspaceList = () => {
                     <div>
                         {workspace.boards && workspace.boards.length > 0 ? (
                             <div className="flex flex-wrap gap-4">
-                                {workspace.boards.map((board: any) => (
+                                {workspace.boards?.map((board: any) => (
                                     <BoardCard key={board.id} board={board} />
                                 ))}
                             </div>

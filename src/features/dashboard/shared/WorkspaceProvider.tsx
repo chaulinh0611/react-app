@@ -1,51 +1,85 @@
-import { type ReactNode, useContext, useEffect, useState } from 'react';
+import {
+    type ReactNode,
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useCallback,
+    useMemo,
+} from 'react';
 import { useWorkspace } from '../model/useWorkspace';
-import type { Workspace } from '@/entities/workspace/model/workspace.type';
-import { createContext } from 'react';
 
 interface WorkspacesContextValue {
     workspaces: Workspace[];
-    loadBoardsForWorkspaces: () => Promise<void>;
+    isLoading: boolean;
+    reload: () => Promise<void>;
+}
+
+interface Workspace {
+    id: string;
+    title: string;
+    description?: string;
+    createdAt: string;
+    updatedAt: string;
+    isArchived: boolean;
+    boards: Board[];
+}
+interface Board {
+    id: string;
+    title: string;
+    createdAt: string;
+    updatedAt: string;
 }
 
 const WorkspacesContext = createContext<WorkspacesContextValue | null>(null);
 
-interface WorkspaceProviderProps {
-    children: ReactNode;
-}
-
-export const WorkspaceProvider = ({ children }: WorkspaceProviderProps) => {
+export const WorkspaceProvider = ({ children }: { children: ReactNode }) => {
     const { getAllWorkspacesOfUser, getBoardsInWorkspace } = useWorkspace();
+
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadWorkspaces = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const ws = await getAllWorkspacesOfUser();
+
+            const withBoards = await Promise.all(
+                ws.map(async (workspace: Workspace) => ({
+                    ...workspace,
+                    boards: (await getBoardsInWorkspace(workspace.id)) ?? [],
+                })),
+            );
+
+            setWorkspaces(withBoards);
+        } catch (error) {
+            console.error('Failed to load workspaces', error);
+            setWorkspaces([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [getAllWorkspacesOfUser, getBoardsInWorkspace]);
 
     useEffect(() => {
-        const fetchWorkspaces = async () => {
-            const datas = await getAllWorkspacesOfUser()
+        loadWorkspaces();
+    }, [loadWorkspaces]);
 
-            setWorkspaces(datas);
-        };
-        fetchWorkspaces();
-    }, []);
-
-    const loadBoardsForWorkspaces = async () => {
-        const updatedWorkspaces = await Promise.all(
-            workspaces.map(async (workspace) => {
-                const boards = await getBoardsInWorkspace(workspace.id);
-                return { ...workspace, boards };
-            }
-        ));
-        setWorkspaces(updatedWorkspaces);
-    }
-
-    return (
-        <WorkspacesContext.Provider value={{ workspaces, loadBoardsForWorkspaces }}>{children}</WorkspacesContext.Provider>
+    const value = useMemo(
+        () => ({
+            workspaces,
+            isLoading,
+            reload: loadWorkspaces,
+        }),
+        [workspaces, isLoading, loadWorkspaces],
     );
+
+    return <WorkspacesContext.Provider value={value}>{children}</WorkspacesContext.Provider>;
 };
 
 export const useWorkspaceContext = () => {
-    const ctx = useContext(WorkspacesContext);
-    if (!ctx) {
-        throw new Error('useWorkspaceContext must be used inside WorkspaceProvider');
+    const context = useContext(WorkspacesContext);
+    if (!context) {
+        throw new Error('useWorkspaceContext must be used within a WorkspaceProvider');
     }
-    return ctx;
-};
+    return context;
+}
