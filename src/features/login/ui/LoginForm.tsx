@@ -1,87 +1,110 @@
-import { cn } from '@/shared/lib/utils'
-import { Button } from '@/shared/ui/button/button'
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { authApi } from '@/shared/api/authApi'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card'
-import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/shared/ui/field'
-import { Input } from '@/shared/ui/input'
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { cn } from '@/shared/lib/utils';
+import { Button } from '@/shared/ui/button/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
+import { Input } from '@/shared/ui/input';
+import { useLogin } from '../model/useLogin';
+import { LoginSchema, type LoginFormValues } from '@/shared/lib/utils';
+import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/shared/ui/form';
+import { OAuthButton } from './oauth-login';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const navigate = useNavigate()
+    const { login } = useLogin();
+    const [error, setError] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = async (e: React.FormEvent) => {
-        e.preventDefault()
+    const form = useForm<LoginFormValues>({
+        resolver: zodResolver(LoginSchema),
+        defaultValues: {
+            email: '',
+            password: '',
+        },
+    });
 
+    const onSubmit = async (data: LoginFormValues) => {
+        setIsLoading(true);
+        setError(null);
         try {
-            const res = await authApi.login({ email, password })
-
-            localStorage.setItem('accessToken', res.data.data.accessToken)
-            localStorage.setItem('refreshToken', res.data.data.refreshToken)
-            navigate('/dashboard')
-        } catch (err) {
-            console.error('Login failed:', err)
-            alert('Đăng nhập thất bại. Vui lòng kiểm tra email hoặc mật khẩu!')
+            await login(data.email, data.password);
+        } catch (err: any) {
+            alert(err.response.data.message || 'Login failed. Please try again.');
+            setError(err.response.data.message|| 'Login failed. Please try again.');
+        } finally {
+            setIsLoading(false);
         }
-    }
+    };
 
-    const handleLoginWithGoogle = () => {
-        window.location.href = 'http://localhost:3000/api/auth/google'
-    }
     return (
         <div className={cn('flex flex-col gap-6', className)} {...props}>
             <Card>
                 <CardHeader>
-                    <CardTitle>Login to your account</CardTitle>
-                    <CardDescription>Enter your email below to login to your account</CardDescription>
+                    <CardTitle className="text-center">Welcome back</CardTitle>
+                    <CardDescription className="text-center">
+                        Login for connect to your account
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleLogin}>
-                        <FieldGroup>
-                            <Field>
-                                <FieldLabel htmlFor='email'>Email</FieldLabel>
-                                <Input
-                                    id='email'
-                                    type='email'
-                                    placeholder='m@example.com'
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                            </Field>
-                            <Field>
-                                <div className='flex items-center'>
-                                    <FieldLabel htmlFor='password'>Password</FieldLabel>
-                                    <a
-                                        href='#'
-                                        className='ml-auto inline-block text-sm underline-offset-4 hover:underline'
-                                    >
-                                        Forgot your password?
-                                    </a>
-                                </div>
-                                <Input
-                                    id='password'
-                                    type='password'
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </Field>
-                            <Field>
-                                <Button type='submit'>Login</Button>
-                                <Button variant='outline' type='button' onClick={handleLoginWithGoogle}>
-                                    Login with Google
-                                </Button>
-                                <FieldDescription className='text-center'>
-                                    Don&apos;t have an account? <a href='#'>Sign up</a>
-                                </FieldDescription>
-                            </Field>
-                        </FieldGroup>
-                    </form>
+                    <Form {...form}>
+                        <form
+                            onSubmit={form.handleSubmit(onSubmit)}
+                            className="flex flex-col gap-4"
+                        >
+                            <FormField
+                                control={form.control}
+                                name="email"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className="rounded-[3px]!"
+                                                placeholder="Enter your email"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input
+                                                className="rounded-[3px]!"
+                                                type="password"
+                                                placeholder="Enter your password"
+                                                {...field}
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <Button
+                                type="submit"
+                                className="w-full bg-blue-500! hover:bg-blue-700! cursor-pointer rounded-[3px]! mt-2"
+                            >
+                                Continue
+                            </Button>
+                        </form>
+                    </Form>
+
+                    <CardContent className="p-0! flex flex-col mt-4">
+                        <div>
+                            <p className="text-center my-4 text-[14px] font-semibold  text-gray-500">
+                                Or continue with:
+                            </p>
+                        </div>
+                        <OAuthButton />
+                    </CardContent>
                 </CardContent>
             </Card>
         </div>
-    )
+    );
 }
