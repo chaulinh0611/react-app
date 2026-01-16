@@ -20,7 +20,7 @@ interface ForgotPasswordPayload {
 
 interface ResetPasswordPayload {
     email: string;
-    token: string;
+    otp: string;
     newPassword: string;
 }
 

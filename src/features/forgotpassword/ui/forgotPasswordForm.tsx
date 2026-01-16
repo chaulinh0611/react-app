@@ -21,56 +21,79 @@ export function ForgotPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-    const [email, setEmail] = useState("");
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        try {
-            setLoading(true);
-            await authApi.forgotPassword(email);
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-            alert("OTP đã được gửi về email");
-            navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-        } catch{
-            alert("Không thể gửi OTP");
-        } finally {
-            setLoading(false);
-        }
-    };
+  const navigate = useNavigate();
 
-    return (
-        <div className={cn("flex flex-col gap-6", className)} {...props}>
-        <Card>
-            <CardHeader>
-            <CardTitle>Forgot password</CardTitle>
-            <CardDescription>
-                Enter your email to receive reset password link
-            </CardDescription>
-            </CardHeader>
-            <CardContent>
-            <form onSubmit={handleSubmit}>
-                <FieldGroup>
-                <Field>
-                    <FieldLabel>Email</FieldLabel>
-                    <Input
-                    type="email"
-                    placeholder="m@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    />
-                </Field>
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
-                <Field>
-                    <Button type="submit" disabled={loading}>
-                    {loading ? "Sending..." : "Send reset email"}
-                    </Button>
-                </Field>
-                </FieldGroup>
-            </form>
-            </CardContent>
-        </Card>
-        </div>
-    );
+    try {
+      setLoading(true);
+      await authApi.forgotPassword(email);
+
+      setSuccess("OTP đã được gửi về email.");
+      setTimeout(() => {
+        navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+      }, 1000);
+    } catch (err: any) {
+      setError("Không thể gửi OTP. Vui lòng kiểm tra email.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Forgot password</CardTitle>
+          <CardDescription>
+            Enter your email to receive reset password link
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
+            <FieldGroup>
+              <Field>
+                <FieldLabel>Email</FieldLabel>
+                <Input
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </Field>
+
+              {/* ERROR MESSAGE */}
+              {error && (
+                <p className="text-sm text-red-500">
+                  {error}
+                </p>
+              )}
+
+              {/* SUCCESS MESSAGE */}
+              {success && (
+                <p className="text-sm text-green-600">
+                  {success}
+                </p>
+              )}
+
+              <Field>
+                <Button type="submit" disabled={loading} className="w-full">
+                  {loading ? "Sending..." : "Send reset email"}
+                </Button>
+              </Field>
+            </FieldGroup>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }

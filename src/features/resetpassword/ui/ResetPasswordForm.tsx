@@ -21,10 +21,11 @@ export function ResetPasswordForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [token, setToken] = useState("");
+  const [otp, setOTP] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -33,19 +34,20 @@ export function ResetPasswordForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
     if (!email) {
-      alert("Email không hợp lệ!");
+      setError("Email không hợp lệ!");
       return;
     }
 
-    if (token.length !== 6) {
-      alert("OTP phải gồm 6 chữ số!");
+    if (otp.length !== 6) {
+      setError("OTP phải gồm 6 chữ số!");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      setError("Mật khẩu xác nhận không khớp!");
       return;
     }
 
@@ -53,15 +55,19 @@ export function ResetPasswordForm({
       setLoading(true);
       await authApi.resetPassword({
         email,
-        token,
+        otp,
         newPassword: password,
       });
 
-      alert("Đặt lại mật khẩu thành công!");
       navigate("/login");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      alert("OTP không đúng hoặc đã hết hạn!");
+
+      const message =
+        err?.response?.data?.message ||
+        "OTP không đúng hoặc đã hết hạn!";
+
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -76,6 +82,7 @@ export function ResetPasswordForm({
             Enter OTP and your new password
           </CardDescription>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit}>
             <FieldGroup>
@@ -86,10 +93,11 @@ export function ResetPasswordForm({
                 <Input
                   type="text"
                   maxLength={6}
-                  value={token}
-                  onChange={(e) =>
-                    setToken(e.target.value.replace(/\D/g, ""))
-                  }
+                  value={otp}
+                  onChange={(e) => {
+                    setOTP(e.target.value.replace(/\D/g, ""));
+                    setError(null);
+                  }}
                   placeholder="Enter OTP"
                   required
                 />
@@ -101,7 +109,10 @@ export function ResetPasswordForm({
                 <Input
                   type="password"
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    setError(null);
+                  }}
                   required
                 />
               </Field>
@@ -112,14 +123,33 @@ export function ResetPasswordForm({
                 <Input
                   type="password"
                   value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onChange={(e) => {
+                    setConfirmPassword(e.target.value);
+                    setError(null);
+                  }}
                   required
                 />
               </Field>
 
-              <Field>
+              {/* Error message */}
+              {error && (
+                <div className="text-sm text-red-500">
+                  {error}
+                </div>
+              )}
+
+              {/* Buttons */}
+              <Field className="flex flex-col gap-2">
                 <Button type="submit" disabled={loading}>
                   {loading ? "Resetting..." : "Reset password"}
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => navigate("/forgot-password")}
+                >
+                  Back to forgot password
                 </Button>
               </Field>
 
