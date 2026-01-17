@@ -1,11 +1,10 @@
 import { Kanban } from 'lucide-react';
-import { useWorkspaceContext } from '../WorkspaceProvider';
 import { BoardCard } from './BoardCard';
 import { Button } from '@/shared/ui/button';
+import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
 
 export const WorkspaceList = () => {
-    const { workspaces } = useWorkspaceContext();
-    console.log('Workspaces:', workspaces);
+    const workspaces = useWorkspaces()
     return (
         <div>
             {workspaces.map((workspace: any) => (
