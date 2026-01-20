@@ -24,6 +24,7 @@ interface WorkspaceState {
 }
 
 interface WorkspaceAction {
-    getWorkspaces: () => Promise<void>
+    getWorkspaces: () => Promise<void>;
+
 }
 export type { Workspace, WorkspaceMember, WorkspaceState, WorkspaceAction };
