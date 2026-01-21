@@ -7,6 +7,8 @@ import { MainLayout } from './main-layout';
 const LoginPage = lazy(() => import('@/pages/login/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
+// THÊM: Import ProfilePage
+const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
@@ -22,10 +24,15 @@ export default function AppRoutes() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
                             <Route path="/dashboard" element={<Dashboard />} />
+
+                            {/* THÊM: Route cho Profile */}
+                            <Route path="/profile" element={<ProfilePage />} />
+
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
                         </Route>
