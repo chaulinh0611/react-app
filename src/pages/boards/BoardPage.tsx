@@ -14,7 +14,7 @@ export default function BoardPage() {
                     </div>
                 </header>
 
-                <main className="flex-1 p-8 space-y-6">
+                <main className="flex-1 p-8 space-y-6 bg-[#F1F5F9]">
                     <div className="flex justify-between items-start mb-8">
                         <BoardLayout boardId={boardId as string} />
                     </div>

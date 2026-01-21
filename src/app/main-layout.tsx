@@ -8,7 +8,7 @@ export function MainLayout() {
             <div className="flex min-h-screen bg-white w-full">
                 <Sidebar />
                 <SidebarInset>
-                    <main className="w-full">
+                    <main className="w-full " >
                         <Outlet />
                     </main>
                 </SidebarInset>

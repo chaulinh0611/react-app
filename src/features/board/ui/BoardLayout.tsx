@@ -1,4 +1,4 @@
-import { DragDropContext, Droppable } from '@hello-pangea/dnd';
+import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import BoardList from './BoardList';
 import { useEffect } from 'react';
 import { useListsByBoard } from '@/entities/list/models/list.selector';
@@ -6,6 +6,7 @@ import { useListStore } from '@/entities/list/models/list.store';
 import type { ReorderListsPayload } from '@/entities/list/models/list.type';
 import type { ReorderCardPayload } from '@/entities/card/models/card.type';
 import { useCardStore } from '@/entities/card/models/card.store';
+import { de } from 'zod/v4/locales';
 
 export default function BoardLayout({ boardId }: { boardId: string }) {
     const onDragEnd = (result: any) => {
@@ -30,7 +31,7 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                 boardId,
                 beforeId: beforeId || null,
                 afterId: afterId || null,
-                listId: draggableId
+                listId: draggableId,
             };
 
             useListStore.getState().reorderLists(payload);
@@ -46,13 +47,28 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
 
                 const beforeId = cardList[destination.index - 1];
                 const afterId = cardList[destination.index + 1];
-                const payload : ReorderCardPayload = {
+                const payload: ReorderCardPayload = {
                     listId,
                     beforeId: beforeId || null,
                     afterId: afterId || null,
-                    cardId: draggableId
+                    cardId: draggableId,
                 };
                 useCardStore.getState().reorderCards(payload);
+            }
+            else {
+                console.log(destination, source);
+                // Move to another list
+                const destListId = destination.droppableId;
+                const destCardList = useCardStore.getState().listCards[destListId] || [];
+                const beforeId = destCardList[destination.index - 1];
+                const afterId = destCardList[destination.index];
+                const payload: ReorderCardPayload = {
+                    listId: destListId,
+                    beforeId: beforeId || null,
+                    afterId: afterId || null,
+                    cardId: draggableId,
+                };
+                useCardStore.getState().moveCardToAnotherList(payload);
             }
         }
     };
@@ -64,22 +80,44 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
     }, [boardId, getListsByBoardId]);
     return (
         <div>
-            <DragDropContext onDragEnd={onDragEnd}>
-                <Droppable droppableId="board" direction="horizontal" type="LIST">
-                    {(provided) => (
-                        <div
-                            {...provided.droppableProps}
-                            ref={provided.innerRef}
-                            className="flex items-start gap-4 p-4 overflow-x-auto"
-                        >
-                            {lists.map((list, index) => (
-                                <BoardList key={list.id} list={list} index={index} />
-                            ))}
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
+            <div className="h-full overflow-hidden">
+                <DragDropContext onDragEnd={onDragEnd}>
+                    <Droppable droppableId="board" direction="horizontal" type="LIST">
+                        {(provided) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className="flex gap-4 p-4 h-full overflow-x-auto"
+                            >
+                                {lists.map((list, index) => (
+                                    <Draggable key={list.id} draggableId={list.id} index={index}>
+                                        {(provided, snapshot) => (
+                                            <div
+                                                ref={provided.innerRef}
+                                                {...provided.draggableProps}
+                                                className={`shrink-0 ${
+                                                    snapshot.isDragging ? 'rotate-2' : ''
+                                                }`}
+                                            >
+                                                <BoardList
+                                                    list={list}
+                                                    dragHandleProps={provided.dragHandleProps}
+                                                    isDragging={snapshot.isDragging}
+                                                />
+                                            </div>
+                                        )}
+                                    </Draggable>
+                                ))}
+                                {provided.placeholder}
+
+                                <div className="shrink-0">
+                                    {/* <CreateListButton boardId={boardId} /> */}
+                                </div>
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+            </div>
         </div>
     );
 }
