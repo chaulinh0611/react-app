@@ -1,8 +1,8 @@
 import { create } from 'zustand';
-import type { Workspace, WorkspaceAction, WorkspaceState } from './workspace.type';
+import type { Workspace, WorkspaceState, WorkspaceAction } from './workspace.type';
 import { WorkspaceApi } from '../api/workspace.api';
 
-const initState = {
+const initialState: WorkspaceState = {
     workspaces: {},
     workspaceIds: [],
     isLoading: false,
@@ -10,30 +10,33 @@ const initState = {
 };
 
 export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set) => ({
-    ...initState,
+    ...initialState,
 
     getWorkspaces: async () => {
-        set({ isLoading: true, error: null });
-        const response = await WorkspaceApi.getWorkspaces();
-        const workspaces: Workspace[] = response.data;
         try {
-            set((state) => {
-                const workspaceMap: Record<string, Workspace> = {};
-                const ids: string[] = [];
+            set({ isLoading: true, error: null });
 
-                workspaces.forEach((w) => {
-                    workspaceMap[w.id] = w;
-                    ids.push(w.id);
-                });
-                return {
-                    ...state,
-                    workspaces: workspaceMap,
-                    workspaceIds: ids,
-                    isLoading: false
-                };
+            const response = await WorkspaceApi.getWorkspaces();
+            const workspaces: Workspace[] = response.data;
+
+            const workspaceMap: Record<string, Workspace> = {};
+            const ids: string[] = [];
+
+            workspaces.forEach((w) => {
+                workspaceMap[w.id] = w;
+                ids.push(w.id);
+            });
+
+            set({
+                workspaces: workspaceMap,
+                workspaceIds: ids,
+                isLoading: false,
             });
         } catch (err) {
-            set({ isLoading: false, error: (err as Error).message });
+            set({
+                isLoading: false,
+                error: (err as Error).message,
+            });
         }
     },
 }));

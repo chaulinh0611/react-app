@@ -9,6 +9,7 @@ const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
+const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'))
 const OAuthHandler = lazy(() => import('@/features/login/ui/OAuth'));
 export default function AppRoutes() {
     return (
@@ -21,6 +22,7 @@ export default function AppRoutes() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/workspace/:workspaceId" element={<Workspace />} />
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/dashboard" element={<Dashboard />} />
