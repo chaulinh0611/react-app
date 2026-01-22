@@ -39,7 +39,7 @@ interface ListState {
 interface ListAction {
     getListsByBoardId: (boardId: string) => Promise<List[]>;
 
-    // createList: (data: CreateList) => Promise<List>;
+    createList: (data: CreateList) => Promise<List | null>;
     // updateList: (listId: string, data: UpdateList) => Promise<List>;
     // deleteList: (listId: string) => Promise<void>;
 

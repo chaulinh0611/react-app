@@ -13,7 +13,6 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useListStore } from '@/entities/list/model/list.store';
 import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
 
 import { BoardCard } from '@/features/dashboard/shared/components/BoardCard';
@@ -26,7 +25,7 @@ export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
     const { boards, fetchBoards } = useBoardStore();
-    const fetchLists = useListStore((s) => s.fetchLists);
+
     const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
 
     const [searchQuery, setSearchQuery] = useState('');
@@ -37,10 +36,6 @@ export default function WorkspacePage() {
     useEffect(() => {
         fetchBoards();
     }, [fetchBoards]);
-
-    useEffect(() => {
-        fetchLists();
-    }, [fetchLists]);
 
     useEffect(() => {
         boards.forEach((b) => fetchMembersByBoardId(b.id));

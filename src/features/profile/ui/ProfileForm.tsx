@@ -9,9 +9,7 @@ import { Button } from "@/shared/ui/button/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Card, CardContent } from "@/shared/ui/card";
-import { cn } from "@/shared/lib/utils";
 
-// Schema validate cho Profile (Khai báo trực tiếp hoặc đưa vào shared/lib/utils)
 const ProfileSchema = z.object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
     jobTitle: z.string().optional(),

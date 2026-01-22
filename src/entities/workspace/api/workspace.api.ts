@@ -2,7 +2,7 @@ import type { ApiResponse } from "@/shared/models/response";
 import axios from "axios";
 
 const getConfig = () => {
-    const token = localStorage.getItem('accessToken'); 
+    const token = localStorage.getItem('accessToken');
     return {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -19,7 +19,7 @@ export const WorkspaceApi = {
     createWorkspace: (payload: { title: string; description?: string }): Promise<ApiResponse<any>> => {
         return axios.post('/workspaces', payload, getConfig());
     },
-    updateWorkspace: (id: string, payload: { name?: string; description?: string; isArchived?: boolean }): Promise<ApiResponse<any>> => {
+    updateWorkspace: (id: string, payload: { title?: string; description?: string; isArchived?: boolean }): Promise<ApiResponse<any>> => {
         return axios.put(`/workspaces/${id}`, payload, getConfig());
     },
 

@@ -7,8 +7,8 @@ export interface BoardMember {
 
   user: {
     id: string
-    name: string
+    username: string
     email: string
-    avatar?: string
+    avatar: string | null
   }
 }

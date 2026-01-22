@@ -44,26 +44,49 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set, 
         set({ isLoading: true, error: null });
         try {
             await WorkspaceApi.createWorkspace(payload);
-
             await get().getWorkspaces();
-
             set({ isLoading: false });
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             throw err;
         }
     },
-    reateWorkspace: async (payload: { title: string; description?: string }) => {
+
+    updateWorkspace: async (id: string, payload: { title?: string; description?: string }) => {
         set({ isLoading: true, error: null });
         try {
-            await WorkspaceApi.createWorkspace(payload);
+            // Filter out empty values and format payload properly
+            const updatePayload: { title?: string; description?: string } = {};
+            if (payload.title && payload.title.trim()) {
+                updatePayload.title = payload.title.trim();
+            }
+            if (payload.description !== undefined) {
+                updatePayload.description = payload.description.trim();
+            }
 
+            // Ensure we have at least one field to update
+            if (Object.keys(updatePayload).length === 0) {
+                throw new Error('No valid fields to update');
+            }
+
+            await WorkspaceApi.updateWorkspace(id, updatePayload);
             await get().getWorkspaces();
-
             set({ isLoading: false });
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             throw err;
         }
-    }
+    },
+
+    deleteWorkspace: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            await WorkspaceApi.deleteWorkspace(id);
+            await get().getWorkspaces();
+            set({ isLoading: false });
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            throw err;
+        }
+    },
 }));

@@ -1,5 +1,6 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import BoardList from './BoardList';
+import { CreateListButton } from './CreateListButton';
 import { useEffect } from 'react';
 import { useListsByBoard } from '@/entities/list/models/list.selector';
 import { useListStore } from '@/entities/list/models/list.store';
@@ -110,7 +111,7 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                                 {provided.placeholder}
 
                                 <div className="shrink-0">
-                                    {/* <CreateListButton boardId={boardId} /> */}
+                                    <CreateListButton boardId={boardId} />
                                 </div>
                             </div>
                         )}

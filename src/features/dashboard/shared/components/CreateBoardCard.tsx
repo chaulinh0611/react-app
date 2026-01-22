@@ -19,8 +19,8 @@ export function CreateBoardCard({ viewMode, onClick }: Props) {
       >
         <CardContent className="flex items-center gap-6 px-6 py-5 p-4 pt-4">
           {/* Icon */}
-          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed group-hover:border-primary"> 
-            <Plus className="h-6 w-6" /> 
+          <div className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed group-hover:border-primary">
+            <Plus className="h-6 w-6" />
           </div>
 
           {/* Text */}
@@ -41,33 +41,31 @@ export function CreateBoardCard({ viewMode, onClick }: Props) {
     <Card
       onClick={onClick}
       className="
-        group relative h-[300px]
+        group relative h-[200px]
         cursor-pointer
         rounded-xl
-        border-2 border-dashed border-muted
-        bg-card
+        border-2 border-dashed border-gray-300
+        bg-gray-50/50
         transition-all
         hover:-translate-y-1 hover:shadow-lg
-        hover:border-primary
+        hover:border-blue-400 hover:bg-blue-50/50
       "
     >
-      {/* Hover overlay */}
-      <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition" />
-
-      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-4 text-muted-foreground group-hover:text-primary">
+      <div className="relative z-10 flex h-full flex-col items-center justify-center gap-3 text-gray-500 group-hover:text-blue-600">
         {/* Icon */}
-        <div className="flex h-12 w-12 items-center justify-center rounded-full border border-dashed group-hover:border-primary"> 
-          <Plus className="h-6 w-6" /> 
+        <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-400">
+          <Plus className="h-5 w-5" />
         </div>
 
         {/* Text */}
-        <h3 className="text-base font-semibold">
-          Create new board
-        </h3>
-
-        <p className="text-sm text-center text-muted-foreground px-6">
-          Add a board to organize your work
-        </p>
+        <div className="text-center">
+          <h3 className="text-sm font-semibold mb-1">
+            Create new board
+          </h3>
+          <p className="text-xs text-gray-400 px-4">
+            Add a board to organize your work
+          </p>
+        </div>
       </div>
     </Card>
   )

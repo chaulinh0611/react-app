@@ -13,6 +13,31 @@ import type { ListState, ListAction, List, ReorderListsPayload } from './list.ty
 export const useListStore = create<ListState & ListAction>((set) => ({
     ...initState,
 
+    createList: async (data: { title: string; boardId: string }) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await ListApi.createList({ boardId: data.boardId, title: data.title });
+            const newList = response.data;
+
+            set((state) => ({
+                ...state,
+                lists: {
+                    ...state.lists,
+                    [newList.id]: newList,
+                },
+                boardsLists: {
+                    ...state.boardsLists,
+                    [data.boardId]: [...(state.boardsLists[data.boardId] || []), newList.id],
+                },
+                isLoading: false,
+            }));
+            return newList;
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return null;
+        }
+    },
+
     getListsByBoardId: async (boardId: string) => {
         set({ isLoading: true, error: null });
         try {
@@ -43,7 +68,7 @@ export const useListStore = create<ListState & ListAction>((set) => ({
         }
     },
 
-    reorderLists: async ( data : ReorderListsPayload ) => {
+    reorderLists: async (data: ReorderListsPayload) => {
         const { boardId, beforeId, afterId, listId } = data;
         const prevBoardLists = [...(useListStore.getState().boardsLists[boardId] || [])];
         set({ isLoading: true, error: null });
@@ -70,7 +95,7 @@ export const useListStore = create<ListState & ListAction>((set) => ({
         });
 
         try {
-            await ListApi.reorderLists(listId,{boardId, beforeId, afterId});
+            await ListApi.reorderLists(listId, { boardId, beforeId, afterId });
             set({ isLoading: false });
             return true;
         } catch (err) {
@@ -85,5 +110,4 @@ export const useListStore = create<ListState & ListAction>((set) => ({
             return false;
         }
     },
-
 }));

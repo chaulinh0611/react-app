@@ -1,38 +1,30 @@
 import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
 import { useShallow } from 'zustand/react/shallow';
 
-export const useWorkspaces = () => {
+const useWorkspaces = () => {
     return useWorkspaceStore(
-        useShallow((state) =>
-            state.workspaceIds.map((id) => state.workspaces[id])
-        )
+        useShallow((state) => state.workspaceIds.map((id) => state.workspaces[id])),
     );
 };
 
-export const useWorkspaceLoading = () => (
-    useWorkspaceStore((state) => state.isLoading)
-);
+const useWorkspaceLoading = () => useWorkspaceStore((state) => state.isLoading);
 
 const useWorkspaceActions = () => {
     return useWorkspaceStore(
-        useShallow(state => ({
+        useShallow((state) => ({
             getWorkspaces: state.getWorkspaces,
             createWorkspace: state.createWorkspace,
-        }))
+        })),
     );
 };
 
 const useWorkspaceStatus = () => {
     return useWorkspaceStore(
-        useShallow(state => ({
+        useShallow((state) => ({
             isLoading: state.isLoading,
-            error: state.error
-        }))
+            error: state.error,
+        })),
     );
 };
 
-export {
-    useWorkspaces,
-    useWorkspaceActions,
-    useWorkspaceStatus
-}
+export { useWorkspaceActions, useWorkspaceStatus, useWorkspaces, useWorkspaceLoading };

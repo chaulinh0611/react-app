@@ -24,6 +24,7 @@ interface BoardActions {
     }) => Promise<Board>;
 
     fetchBoards: () => Promise<void>;
+    fetchBoardById: (id: string) => Promise<void>;
 }
 
 export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
@@ -69,5 +70,21 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
         const res = await BoardApi.getBoards();
         console.log('API boards:', res.data);
         set({ boards: res.data });
+    },
+
+    fetchBoardById: async (id: string) => {
+        try {
+            const res = await BoardApi.getDetailBoard(id);
+            const board = res.data;
+
+            set((state) => ({
+                boards: [
+                    ...state.boards.filter(b => b.id !== id),
+                    board
+                ]
+            }));
+        } catch (error) {
+            console.error('Failed to fetch board:', error);
+        }
     },
 }));
