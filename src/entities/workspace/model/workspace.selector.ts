@@ -1,7 +1,7 @@
 import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
 import { useShallow } from 'zustand/react/shallow';
 
-export const useWorkspaces = () => {
+const useWorkspaces = () => {
     return useWorkspaceStore(
         useShallow((state) =>
             state.workspaceIds.map((id) => state.workspaces[id])
