@@ -5,7 +5,7 @@ export interface User {
     fullName?: string;
     bio?: string;
     avatarUrl?: string;
-    jobTitle?: string;
+    jobTitle?: string; 
     location?: string;
     createdAt?: Date;
     updatedAt?: Date;

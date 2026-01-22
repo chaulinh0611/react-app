@@ -9,11 +9,12 @@ import { Button } from "@/shared/ui/button/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { useLogin } from "../model/useLogin";
+import { useRegister } from "../model/useRegister"; 
 import { RegisterSchema, type RegisterFormValues } from "@/shared/lib/utils";
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<"div">) {
-  const { register: registerAction } = useLogin();
+  const { register: registerAction } = useRegister();
+  
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

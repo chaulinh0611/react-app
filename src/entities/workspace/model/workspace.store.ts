@@ -9,7 +9,7 @@ const initialState: WorkspaceState = {
     error: null,
 };
 
-export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set) => ({
+export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set, get) => ({
     ...initialState,
 
     getWorkspaces: async () => {
@@ -39,4 +39,31 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set) 
             });
         }
     },
+
+    createWorkspace: async (payload: { title: string; description?: string }) => {
+        set({ isLoading: true, error: null });
+        try {
+            await WorkspaceApi.createWorkspace(payload);
+
+            await get().getWorkspaces();
+
+            set({ isLoading: false });
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            throw err;
+        }
+    },
+    reateWorkspace: async (payload: { title: string; description?: string }) => {
+        set({ isLoading: true, error: null });
+        try {
+            await WorkspaceApi.createWorkspace(payload);
+
+            await get().getWorkspaces();
+
+            set({ isLoading: false });
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            throw err;
+        }
+    }
 }));

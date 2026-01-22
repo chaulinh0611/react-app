@@ -1,6 +1,35 @@
-import  { WorkspaceList } from "../shared/components/WorkspaceList";
+import { useState, useEffect } from "react";
+import { WorkspaceList } from "../shared/components/WorkspaceList";
+import { CreateWorkspaceModal } from "../shared/components/CreateWorkspaceModal";
+import {
+    useWorkspaces,
+    useWorkspaceActions,
+    useWorkspaceStatus
+} from "@/entities/workspace/model/workspace.selector";
 
 export const Dashboard = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const { createWorkspace, getWorkspaces } = useWorkspaceActions();
+    const { isLoading } = useWorkspaceStatus();
+
+    useEffect(() => {
+        getWorkspaces();
+    }, []);
+
+    const handleCreateWorkspace = async (name: string) => {
+        try {
+            console.log("Creating workspace:", name);
+
+            await createWorkspace({ title: name });
+
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error("Lỗi:", error);
+            alert("Tạo thất bại!");
+        }
+    };
+
     return (
         <div className="flex min-h-screen bg-white">
             <div className="flex flex-col flex-1">
@@ -19,16 +48,26 @@ export const Dashboard = () => {
                             </p>
                         </div>
 
-                        <button className="bg-black text-white px-4 py-2 rounded-md text-sm hover:opacity-90 flex items-center gap-2">
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="bg-black text-white px-4 py-2 rounded-md text-sm hover:opacity-90 flex items-center gap-2"
+                            disabled={isLoading}
+                        >
                             <span className="text-lg font-semibold">＋</span> New Workspace
                         </button>
                     </div>
 
                     <div className="space-y-10">
-                        <WorkspaceList/>
+                        <WorkspaceList />
                     </div>
                 </main>
             </div>
+
+            <CreateWorkspaceModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleCreateWorkspace}
+            />
         </div>
     );
 };
