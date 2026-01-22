@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
+import Sidebar from "./Sidebar"; 
 import { WorkspaceList } from "../shared/components/WorkspaceList";
 import { CreateWorkspaceModal } from "../shared/components/CreateWorkspaceModal";
 import {
-    useWorkspaces,
     useWorkspaceActions,
     useWorkspaceStatus
 } from "@/entities/workspace/model/workspace.selector";
@@ -20,9 +20,7 @@ export const Dashboard = () => {
     const handleCreateWorkspace = async (name: string) => {
         try {
             console.log("Creating workspace:", name);
-
             await createWorkspace({ title: name });
-
             setIsModalOpen(false);
         } catch (error) {
             console.error("Lỗi:", error);
@@ -32,7 +30,11 @@ export const Dashboard = () => {
 
     return (
         <div className="flex min-h-screen bg-white">
-            <div className="flex flex-col flex-1">
+            {/* 2. Hiển thị Sidebar cố định */}
+            <Sidebar />
+
+            {/* 3. Thêm class 'ml-64' để đẩy nội dung sang phải (tránh bị Sidebar đè) */}
+            <div className="flex flex-col flex-1 ml-64 transition-all duration-300">
                 <header className="h-16 border-b bg-white flex items-center justify-between px-6 sticky top-0 z-10">
                     <div className="flex items-center gap-4">
                         <h1 className="text-lg font-semibold text-gray-900">Dashboard</h1>
