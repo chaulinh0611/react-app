@@ -1,9 +1,11 @@
 
 interface Board {
     id: string;
-    name: string;
+    title: string;
     description?: string;
-    workspaceId: string;
+    workspace: {
+        id: string;
+    };
     updatedAt: string;
     createdAt: string;
     isArchived: boolean;

@@ -6,7 +6,6 @@ import { useListStore } from '@/entities/list/models/list.store';
 import type { ReorderListsPayload } from '@/entities/list/models/list.type';
 import type { ReorderCardPayload } from '@/entities/card/models/card.type';
 import { useCardStore } from '@/entities/card/models/card.store';
-import { de } from 'zod/v4/locales';
 
 export default function BoardLayout({ boardId }: { boardId: string }) {
     const onDragEnd = (result: any) => {

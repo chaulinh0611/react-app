@@ -70,7 +70,7 @@ export const useListStore = create<ListState & ListAction>((set) => ({
         });
 
         try {
-            await ListApi.reorderLists(boardId, beforeId, afterId, listId);
+            await ListApi.reorderLists(listId,{boardId, beforeId, afterId});
             set({ isLoading: false });
             return true;
         } catch (err) {
