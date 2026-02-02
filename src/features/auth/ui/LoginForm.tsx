@@ -6,9 +6,10 @@ import { Button } from '@/shared/ui/button/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import { useLogin } from '../model/useLogin';
-import { LoginSchema, type LoginFormValues } from '@/shared/lib/utils';
+import { LoginSchema } from '../model';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/shared/ui/form';
-import { OAuthButton } from './oauth-login';
+// import { OAuthButton } from './oauth-login';
+import { Link } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
     const { login } = useLogin();
@@ -30,7 +31,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
             await login(data.email, data.password);
         } catch (err: any) {
             alert(err.response.data.message || 'Login failed. Please try again.');
-            setError(err.response.data.message|| 'Login failed. Please try again.');
+            setError(err.response.data.message || 'Login failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
@@ -73,7 +74,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                 name="password"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Password</FormLabel>
+                                        <div className="flex justify-between items-center">
+                                            <FormLabel>Password</FormLabel>
+                                            <Link
+                                                to="/forgot-password"
+                                                className="text-blue-500 hover:underline text-sm block"
+                                            >
+                                                Forgot password?
+                                            </Link>
+                                        </div>
                                         <FormControl>
                                             <Input
                                                 className="rounded-[3px]!"
@@ -94,6 +103,15 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             </Button>
                         </form>
                     </Form>
+
+                    <CardContent className="p-0!">
+                        <p className="text-center my-4 text-sm">
+                            Don't have an account?
+                            <Link to="/register" className="text-blue-500 hover:underline ml-1">
+                                Sign up
+                            </Link>
+                        </p>
+                    </CardContent>
 
                     <CardContent className="p-0! flex flex-col mt-4">
                         <div>

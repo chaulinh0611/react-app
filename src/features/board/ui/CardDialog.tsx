@@ -123,7 +123,13 @@ export function CardDialog({ card, open, onOpenChange }: CardDialogProps) {
 
     const handleDelete = async () => {
         try {
+            console.log('Attempting to delete card:', card.id);
+            if (!card.id) {
+                console.error('Card ID is undefined or null');
+                return;
+            }
             await deleteCard(card.id);
+            console.log('Card deleted successfully');
             onOpenChange(false);
         } catch (err) {
             console.error('Failed to delete card:', err);

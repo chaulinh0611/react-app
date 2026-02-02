@@ -3,7 +3,6 @@ import type { AxiosResponse, InternalAxiosRequestConfig, AxiosRequestHeaders } f
 import queryString from 'query-string';
 import { authApi } from '@/entities/auth/api/auth.api';
 import { logout } from '@/shared/utils/logout';
-import type { ApiResponse } from '../models/response';
 
 export const keyHeader = {
     AUTHORIZATION: 'Authorization',
@@ -13,7 +12,7 @@ export const keyStorage = {
     ACCESS_TOKEN: 'accessToken',
 };
 
-axios.defaults.baseURL = 'http://localhost:3000/api';
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 axios.defaults.withCredentials = true;
 
 const onRequestSuccess = (config: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
@@ -36,7 +35,7 @@ const onRequestSuccess = (config: InternalAxiosRequestConfig): InternalAxiosRequ
 };
 
 const onResponseSuccess = (response: AxiosResponse) => {
-    return response.data ;
+    return response.data;
 };
 
 let isRefreshing = false;

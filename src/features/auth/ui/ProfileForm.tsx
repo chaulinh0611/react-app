@@ -60,7 +60,7 @@ export function ProfileForm() {
         <div className="max-w-4xl mx-auto space-y-6">
             {/* Header Card */}
             <Card className="border-none shadow-sm bg-white rounded-2xl">
-                <CardContent className="p-6 flex flex-col sm:flex-row items-center gap-6">
+                <CardContent className="p-6! flex flex-col sm:flex-row items-center gap-6">
                     <div className="relative">
                         <div className="w-24 h-24 rounded-full bg-[#EBC8A8] flex items-center justify-center border-4 border-white shadow-sm overflow-hidden">
                             <img src={user?.avatarUrl || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Avatar" className="w-full h-full object-cover" />
@@ -86,22 +86,19 @@ export function ProfileForm() {
 
             {/* Form Card */}
             <Card className="shadow-sm rounded-2xl">
-                <CardContent className="p-8">
+                <CardContent className="p-8!">
                     <div className="mb-6">
                         <h3 className="text-lg font-bold">Profile Information</h3>
                         <p className="text-sm text-gray-500">Update your personal details.</p>
                     </div>
                     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className=" md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label>Full Name</Label>
                                 <Input {...register("fullName")} />
                                 {errors.fullName && <p className="text-red-500 text-xs">{errors.fullName.message}</p>}
                             </div>
-                            <div className="space-y-2">
-                                <Label>Job Title</Label>
-                                <Input {...register("jobTitle")} />
-                            </div>
+
                         </div>
                         <div className="space-y-2">
                             <Label>Email Address</Label>

@@ -56,16 +56,18 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                 useCardStore.getState().reorderCards(payload);
             }
             else {
-                console.log(destination, source);
+                console.log('Moving to another list:', { destination, source });
                 // Move to another list
                 const destListId = destination.droppableId;
-                const destCardList = useCardStore.getState().listCards[destListId] || [];
-                const beforeId = destCardList[destination.index - 1];
-                const afterId = destCardList[destination.index];
+                const destCardList = [...(useCardStore.getState().listCards[destListId] || [])];
+
+                const beforeId = destination.index > 0 ? destCardList[destination.index - 1] : null;
+                const afterId = destination.index < destCardList.length ? destCardList[destination.index] : null;
+
                 const payload: ReorderCardPayload = {
                     listId: destListId,
-                    beforeId: beforeId || null,
-                    afterId: afterId || null,
+                    beforeId,
+                    afterId,
                     cardId: draggableId,
                 };
                 useCardStore.getState().moveCardToAnotherList(payload);

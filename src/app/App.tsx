@@ -7,19 +7,16 @@ import { MainLayout } from './main-layout';
 const LoginPage = lazy(() => import('@/pages/login/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
-// THÊM: Import ProfilePage
 const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
-const OAuthHandler = lazy(() => import('@/features/login/ui/OAuth'));
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
 export default function AppRoutes() {
     return (
         <BrowserRouter basename="/react-app">
             <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
-                    <Route path="/oauth2" element={<OAuthHandler />} />
                     <Route path="/login" element={<LoginPage />} />
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -30,7 +27,6 @@ export default function AppRoutes() {
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
                             <Route path="/dashboard" element={<Dashboard />} />
 
-                            {/* THÊM: Route cho Profile */}
                             <Route path="/profile" element={<ProfilePage />} />
 
                             <Route index element={<Navigate to="/dashboard" replace />} />

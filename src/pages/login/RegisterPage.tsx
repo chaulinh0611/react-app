@@ -1,11 +1,11 @@
-import { RegisterForm } from "@/features/login/ui/RegisterForm";
+import { RegisterForm } from '@/features/auth/ui/RegisterForm';
 
 export default function RegisterPage() {
-  return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gray-50">
-      <div className="w-full max-w-sm">
-        <RegisterForm />
-      </div>
-    </div>
-  );
+    return (
+        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gray-50">
+            <div className="w-full max-w-sm">
+                <RegisterForm />
+            </div>
+        </div>
+    );
 }
