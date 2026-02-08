@@ -9,7 +9,7 @@ interface Board {
     updatedAt: string;
     createdAt: string;
     isArchived: boolean;
-    backgroundUrl?: string;
+    backgroundPath?: string;
     backgroundPublicId?: string;
     permissionLevel: 'private' | 'workspace' | 'public';
     boardMembers?: BoardMember[];
@@ -32,26 +32,26 @@ interface CreateBoardPayload {
 }
 
 interface UpdateBoardPayload {
-    title : string;
-    description : string | null;
-    permissionLevel? :  'private' | 'workspace' | 'public';
+    title: string;
+    description: string | null;
+    permissionLevel?: 'private' | 'workspace' | 'public';
 
 }
 
 // STORE INTERFACE
 interface BoardState {
-    boards : Record<string, Board>;
-    workspaceBoards : Record<string, string[]>
+    boards: Record<string, Board>;
+    workspaceBoards: Record<string, string[]>
     isLoading: boolean
     error: string | null
 }
 
 interface BoardAction {
-    getBoardsByWorkspace : (workspaceId: string) => Promise<any>;
+    getBoardsByWorkspace: (workspaceId: string) => Promise<any>;
     getBoardById: (id: string) => Promise<any>;
 
     createBoard: (data: CreateBoardPayload) => Promise<any>;
-    updateBoard: (data : UpdateBoardPayload) => Promise<any>;
+    updateBoard: (data: UpdateBoardPayload) => Promise<any>;
 }
 
 export type { Board, BoardMember, CreateBoardPayload, BoardState, BoardAction };

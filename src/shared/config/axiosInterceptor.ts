@@ -2,7 +2,7 @@ import axios, { AxiosError } from 'axios';
 import type { AxiosResponse, InternalAxiosRequestConfig, AxiosRequestHeaders } from 'axios';
 import queryString from 'query-string';
 import { authApi } from '@/entities/auth/api/auth.api';
-import { logout } from '@/shared/utils/logout';
+import { logout } from '@/shared/lib/utils/logout';
 
 export const keyHeader = {
     AUTHORIZATION: 'Authorization',

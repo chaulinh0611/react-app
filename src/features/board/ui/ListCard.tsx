@@ -1,18 +1,17 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/shared/ui/card';
-import type { Card as CardType } from '@/entities/card/models/card.type';
+import type { Card as CardType } from '@/entities/card/model/card.type';
 // import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 // import { useBoardStore } from '@/shared/stores/useBoardStore';
-import { CardDialog } from './CardDialog.tsx';
+import { CardDialog } from './components/CardDialog.tsx';
 // import type { Card as CardType } from '@/shared/lib/types';
 
-
-interface BoardCardProps {
+interface ListCardProps {
     card: CardType;
     isDragging?: boolean;
 }
 
-export default function BoardCard({ card, isDragging }: BoardCardProps) {
+export default function ListCard({ card, isDragging }: ListCardProps) {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     return (
         <>
@@ -22,16 +21,16 @@ export default function BoardCard({ card, isDragging }: BoardCardProps) {
                 }`}
                 onClick={() => setIsDialogOpen(true)}
             >
-                <CardContent className="p-3!">
-                    {
-                        card.backgroundUrl && (
-                            <div
-                                className="w-full h-24 mb-2 rounded-md bg-cover bg-center"
-                                style={{ backgroundImage: `url(${card.backgroundUrl})` }}
-                            />
-                        )
-                    }
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">{card.title}</h4>
+                <CardContent>
+                    {card.backgroundUrl && (
+                        <div
+                            className="w-full h-24 mb-2 rounded-md bg-cover bg-center"
+                            style={{ backgroundImage: `url(${card.backgroundUrl})` }}
+                        />
+                    )}
+                    <h4 className="text-sm font-medium text-gray-900 mb-2 overflow-hidden text-ellipsis ">
+                        {card.title}
+                    </h4>
 
                     {card.description && (
                         <p className="text-xs text-gray-600 mb-3 line-clamp-2">

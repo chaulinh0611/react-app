@@ -1,19 +1,15 @@
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import ListCard from './ListCard';
-import { useCardsByListId } from '@/entities/card/models/card.selector';
-import { useCardStore } from '@/entities/card/models/card.store';
 import { useEffect, useState } from 'react';
+import { Plus } from 'lucide-react';
+import { useCardsByListId } from '@/entities/card/model/card.selector';
+import { useCardStore } from '@/entities/card/model/card.store';
+import type { List } from '@/entities/list/model/list.type';
 import { Button } from '@/shared/ui/button';
-import type { List } from '@/entities/list/models/list.type';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-    DropdownMenuItem,
-} from '@/shared/ui/dropdown-menu';
-import { Card, CardHeader, CardContent } from '@/shared/ui/card';
+import { Card, CardContent, CardHeader } from '@/shared/ui/card';
+
 import { Input } from '@/shared/ui/input';
-import { Edit, MoreVertical, Trash2, Plus } from 'lucide-react';
+import ListCard from './ListCard';
+import { ListDropdown } from './components/ListDropdown';
 
 interface BoardListProps {
     list: List;
@@ -28,7 +24,11 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
     const [tempTitle, setTempTitle] = useState(list.title);
     const [isAddingCard, setIsAddingCard] = useState(false);
     const [newCardTitle, setNewCardTitle] = useState('');
-    console.log(cards);
+
+    useEffect(() => {
+        getAllListCards(list.id);
+    }, [list.id, getAllListCards]);
+
     const handleAddCard = () => {
         if (newCardTitle.trim()) {
             createCard({ listId: list.id, title: newCardTitle.trim() });
@@ -37,52 +37,37 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
         }
     };
 
-    useEffect(() => {
-        getAllListCards(list.id);
-    }, [list.id, getAllListCards]);
-
+    const handleCancelAddCard = () => {
+        setNewCardTitle('');
+        setIsAddingCard(false);
+    };
 
     return (
-        <Card className={`w-96 rounded-[5px]! bg-[#E9EEF4]! ${isDragging ? 'shadow-lg' : ''}`}>
-            <CardHeader className="pb-2" {...dragHandleProps}>
+        <Card className={`w-80 bg-gray-50 ${isDragging ? 'shadow-lg' : ''}`}>
+            <CardHeader className="px-4!" {...dragHandleProps}>
                 <div className="flex items-center justify-between">
                     {isEditing ? (
                         <Input
                             value={tempTitle}
                             onChange={(e) => setTempTitle(e.target.value)}
+                            onBlur={() => setIsEditing(false)}
+                            onKeyDown={(e) => e.key === 'Enter' && setIsEditing(false)}
                             className="text-sm font-semibold bg-white"
                             autoFocus
                         />
                     ) : (
                         <h3
-                            className="text-sm font-semibold cursor-pointer hover:bg-gray-200 rounded px-2 py-1 -mx-2 -my-1"
+                            className="text-sm font-semibold cursor-pointer hover:bg-gray-200 rounded  py-1"
                             onClick={() => setIsEditing(true)}
                         >
                             {list.title}
                         </h3>
                     )}
-
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-                                <MoreVertical className="w-4 h-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setIsEditing(true)}>
-                                <Edit className="w-4 h-4 mr-2" />
-                                Rename
-                            </DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-600 focus:text-red-600">
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                Delete
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    <ListDropdown setIsEditing={setIsEditing} listId={list.id} />
                 </div>
             </CardHeader>
 
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 px-4!">
                 <Droppable droppableId={list.id} type="CARD">
                     {(provided, snapshot) => (
                         <div
@@ -117,23 +102,19 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
                                         onChange={(e) => setNewCardTitle(e.target.value)}
                                         onKeyDown={(e) => {
                                             if (e.key === 'Enter') handleAddCard();
-                                            if (e.key === 'Escape') {
-                                                setNewCardTitle('');
-                                                setIsAddingCard(false);
-                                            }
+                                            if (e.key === 'Escape') handleCancelAddCard();
                                         }}
                                         placeholder="Enter card title..."
                                         autoFocus
                                     />
                                     <div className="flex gap-2">
-                                        <Button size="sm">Add Card</Button>
+                                        <Button size="sm" onClick={handleAddCard}>
+                                            Add Card
+                                        </Button>
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            onClick={() => {
-                                                setNewCardTitle('');
-                                                setIsAddingCard(false);
-                                            }}
+                                            onClick={handleCancelAddCard}
                                         >
                                             Cancel
                                         </Button>

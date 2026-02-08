@@ -14,10 +14,10 @@ import { Label } from '@/shared/ui/label';
 // import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Separator } from '@/shared/ui/separator';
 // import { Badge } from '@/shared/ui/badge';
-import type { Card as CardType } from '@/entities/card/models/card.type';
-import { useCardStore } from '@/entities/card/models/card.store';
+import type { Card as CardType } from '@/entities/card/model/card.type';
+import { useCardStore } from '@/entities/card/model/card.store';
 import { useEffect, useState, useMemo } from 'react';
-import { useListStore } from '@/entities/list/models/list.store';
+import { useListStore } from '@/entities/list/model/list.store';
 import { useChecklistStore } from '@/entities/checklist/model/checklist.store';
 
 interface CardDialogProps {
@@ -134,7 +134,7 @@ export function CardDialog({ card, open, onOpenChange }: CardDialogProps) {
         } catch (err) {
             console.error('Failed to delete card:', err);
         }
-    }
+    };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>

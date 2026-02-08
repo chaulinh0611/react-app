@@ -10,7 +10,7 @@ export const ListApi = {
 
     getListDetails: (id: string) => axios.get<ApiResponse<List>>(`/lists/${id}`),
 
-    updateList: (id: string, payload: { name?: string; position?: number }) =>
+    updateList: (id: string, payload: { title?: string }) =>
         axios.patch<ApiResponse<List>>(`/lists/${id}`, payload),
 
     deleteList: (id: string) => axios.delete<ApiResponse<void>>(`/lists/${id}`),

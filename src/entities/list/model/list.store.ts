@@ -6,17 +6,19 @@ const initState = {
     boardsLists: {},
     isLoading: false,
     error: null,
+    isEditDialogOpen: false,
 };
 
-import type { ListState, ListAction, List, ReorderListsPayload } from './list.type';
+import type { ListState, ListAction, List, ReorderListsPayload, CreateList, UpdateList } from './list.type';
 
 export const useListStore = create<ListState & ListAction>((set) => ({
     ...initState,
+    setIsEditDialogOpen: (open: boolean) => set({ isEditDialogOpen: open }),
 
-    createList: async (data: { title: string; boardId: string }) => {
+    createList: async ({ title, boardId }: CreateList) => {
         set({ isLoading: true, error: null });
         try {
-            const response = await ListApi.createList({ boardId: data.boardId, title: data.title });
+            const response = await ListApi.createList({ boardId, title });
             const newList = response.data;
 
             set((state) => ({
@@ -27,11 +29,32 @@ export const useListStore = create<ListState & ListAction>((set) => ({
                 },
                 boardsLists: {
                     ...state.boardsLists,
-                    [data.boardId]: [...(state.boardsLists[data.boardId] || []), newList.id],
+                    [boardId]: [...(state.boardsLists[boardId] || []), newList.id],
                 },
                 isLoading: false,
             }));
             return newList;
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return null;
+        }
+    },
+
+    updateList: async (listId: string, data: UpdateList) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await ListApi.updateList(listId, data);
+            const updatedList = response.data;
+
+            set((state) => ({
+                ...state,
+                lists: {
+                    ...state.lists,
+                    [updatedList.id]: updatedList,
+                },
+                isLoading: false,
+            }));
+            return updatedList;
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             return null;
@@ -110,4 +133,34 @@ export const useListStore = create<ListState & ListAction>((set) => ({
             return false;
         }
     },
+
+    deleteList: async (listId: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            await ListApi.deleteList(listId);
+            set((state) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { [listId]: _, ...remainingLists } = state.lists;
+
+                // Remove the list ID from all boardsLists arrays
+                const updatedBoardsLists: Record<string, string[]> = {};
+                Object.keys(state.boardsLists).forEach((boardId) => {
+                    updatedBoardsLists[boardId] = state.boardsLists[boardId].filter(
+                        (id) => id !== listId
+                    );
+                });
+
+                return {
+                    ...state,
+                    lists: remainingLists,
+                    boardsLists: updatedBoardsLists,
+                    isLoading: false,
+                };
+            });
+            return true;
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return false;
+        }
+    }
 }));

@@ -33,17 +33,19 @@ interface ListState {
     boardsLists: Record<string, string[]>;
 
     isLoading: boolean;
+    isEditDialogOpen: boolean;
     error: string | null;
 }
 
 interface ListAction {
+    setIsEditDialogOpen: (open: boolean) => void;
     getListsByBoardId: (boardId: string) => Promise<List[]>;
 
     createList: (data: CreateList) => Promise<List | null>;
     // updateList: (listId: string, data: UpdateList) => Promise<List>;
-    // deleteList: (listId: string) => Promise<void>;
+    deleteList: (listId: string) => Promise<boolean>;
 
-    reorderLists: ( data : ReorderListsPayload ) => Promise<boolean>;
+    reorderLists: (data: ReorderListsPayload) => Promise<boolean>;
 }
 
 export type { List, CreateList, UpdateList, ListState, ListAction, ReorderListsPayload };

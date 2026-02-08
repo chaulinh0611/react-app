@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
-import { useListStore } from '@/entities/list/models/list.store';
+import { useListStore } from '@/entities/list/model/list.store';
 
 interface CreateListButtonProps {
     boardId: string;

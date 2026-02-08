@@ -2,7 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, ArrowUpAZ, ArrowDownAZ, Clock, Calendar } from 'lucide-react';
 
-
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import {
@@ -14,10 +13,9 @@ import {
 
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
-
-import { BoardCard } from '@/features/dashboard/shared/components/BoardCard';
-import { CreateBoardCard } from '@/features/dashboard/shared/components/CreateBoardCard';
-import { CreateBoardDialog } from '@/features/dashboard/ui/CreateBoardDialog';
+import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
+import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
+import { CreateBoardDialog } from '@/features/dashboard/ui/components/CreateBoardDialog';
 type SortOption = 'az' | 'za' | 'recent' | 'oldest';
 type ViewMode = 'grid' | 'list';
 
@@ -77,12 +75,8 @@ export default function WorkspacePage() {
 
     return (
         <div>
-            <header className="sticky top-0 z-10 h-16 border-b bg-white px-6 flex items-center">
-                <h1 className="text-lg font-semibold">Dashboard</h1>
-            </header>
-
             <div className="space-y-15 p-8 pt-8">
-                <div className="space-y-3">
+                <div>
                     <h1 className="text-3xl font-bold">{workspaceTitle}</h1>
                     <p className="text-muted-foreground">{workspaceDescription}</p>
                     <p className="text-sm text-muted-foreground">
@@ -90,6 +84,7 @@ export default function WorkspacePage() {
                         {workspaceBoards.length !== 1 && 's'}
                     </p>
                 </div>
+                <hr />
 
                 <div className="flex items-center justify-between gap-8">
                     <div className="flex flex-1 items-center gap-4">
@@ -154,7 +149,7 @@ export default function WorkspacePage() {
                     }
                 >
                     {filteredBoards.map((board) => (
-                        <BoardCard key={board.id} board={board} viewMode={viewMode} />
+                        <WorkspaceBoards key={board.id} board={board} viewMode={viewMode} />
                     ))}
 
                     <CreateBoardCard

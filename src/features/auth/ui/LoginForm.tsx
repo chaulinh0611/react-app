@@ -8,7 +8,7 @@ import { Input } from '@/shared/ui/input';
 import { useLogin } from '../model/useLogin';
 import { LoginSchema } from '../model';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/shared/ui/form';
-// import { OAuthButton } from './oauth-login';
+import { OAuthButton } from './OAuthButton';
 import { Link } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
@@ -78,7 +78,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                                             <FormLabel>Password</FormLabel>
                                             <Link
                                                 to="/forgot-password"
-                                                className="text-blue-500 hover:underline text-sm block"
+                                                className="font-semibold hover:underline text-sm block"
                                             >
                                                 Forgot password?
                                             </Link>
@@ -97,7 +97,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             />
                             <Button
                                 type="submit"
-                                className="w-full bg-blue-500! hover:bg-blue-700! cursor-pointer rounded-[3px]! mt-2"
+                                className="w-full cursor-pointer rounded-[3px]! mt-2"
                             >
                                 Continue
                             </Button>
@@ -107,18 +107,13 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                     <CardContent className="p-0!">
                         <p className="text-center my-4 text-sm">
                             Don't have an account?
-                            <Link to="/register" className="text-blue-500 hover:underline ml-1">
+                            <Link to="/register" className=" font-semibold hover:underline ml-1">
                                 Sign up
                             </Link>
                         </p>
                     </CardContent>
 
                     <CardContent className="p-0! flex flex-col mt-4">
-                        <div>
-                            <p className="text-center my-4 text-[14px] font-semibold  text-gray-500">
-                                Or continue with:
-                            </p>
-                        </div>
                         <OAuthButton />
                     </CardContent>
                 </CardContent>

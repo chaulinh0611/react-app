@@ -1,7 +1,6 @@
 import type { Board } from '@/entities/board/model/board.type';
 import { Link } from 'react-router-dom';
 import { Kanban, Users, Edit, MoreHorizontal, Trash } from 'lucide-react';
-import { useContext } from 'react';
 
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
@@ -14,19 +13,18 @@ import {
 
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { useMemberCountByBoardId } from '@/entities/board-member/model/board-member.selector';
-import { SetIsEditDialogOpenContext } from '../context';
-import { useListStore } from '@/entities/list/models/list.store';
+import { useListStore } from '@/entities/list/model/list.store';
 
 type Props = {
     board: Board;
     viewMode: 'grid' | 'list';
 };
 
-export function BoardCard({ board, viewMode }: Props) {
+export function WorkspaceBoards({ board, viewMode }: Props) {
     const { deleteBoard } = useBoardStore();
     const memberCount = useMemberCountByBoardId(board.id);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
-    const setIsEditDialogOpen = useContext(SetIsEditDialogOpenContext);
+    const setIsEditDialogOpen = useListStore((state) => state.setIsEditDialogOpen);
     const handleDelete = () => {
         if (confirm(`Delete "${board.title}"?`)) {
             deleteBoard(board.id);
@@ -45,12 +43,6 @@ export function BoardCard({ board, viewMode }: Props) {
 
                         <div className="flex-1 space-y-1.5">
                             <h3 className="font-semibold leading-tight">{board.title}</h3>
-
-                            {board.description && (
-                                <p className="text-sm text-muted-foreground line-clamp-1">
-                                    {board.description}
-                                </p>
-                            )}
 
                             <div className="mt-1 flex flex-wrap gap-6 text-sm text-muted-foreground">
                                 <span>{listCount} lists</span>
@@ -104,11 +96,12 @@ export function BoardCard({ board, viewMode }: Props) {
     return (
         <Card
             className="
-        group relative h-[200px]
-        rounded-xl border bg-card
-        transition-all
-        hover:-translate-y-1 hover:shadow-lg
-      "
+                group relative
+                rounded-xl border bg-card
+                transition-all
+                hover:-translate-y-1 hover:shadow-lg
+                px-6
+            "
         >
             {/* Actions */}
             <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition">
@@ -132,20 +125,15 @@ export function BoardCard({ board, viewMode }: Props) {
                 </DropdownMenu>
             </div>
 
-            <Link to={`/board/${board.id}`} className="block h-full p-6!">
-                <CardContent className="flex h-full flex-col gap-2 p-3">
+            <Link to={`/board/${board.id}`} className="block h-full">
+                <CardContent className="flex p-2! h-full justify-between flex-col gap-2">
                     <div className="flex items-start gap-2">
-                        <Kanban className="h-5 w-5 mt-0.5 text-blue-600 flex-shrink-0" />
-                        <h3 className="text-base font-semibold line-clamp-2 leading-tight">{board.title}</h3>
+                        <h3 className="text-base font-semibold overflow-hidden text-ellipsis line-clamp-2 leading-tight">
+                            {board.title}
+                        </h3>
                     </div>
 
-                    {board.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-2 flex-1">
-                            {board.description}
-                        </p>
-                    )}
-
-                    <div className="mt-auto pt-2 border-t border-gray-100">
+                    <div className="pt-2 border-t border-gray-100">
                         <div className="flex items-center justify-between text-xs text-muted-foreground">
                             <span>{listCount} lists</span>
                             <div className="flex items-center gap-1">

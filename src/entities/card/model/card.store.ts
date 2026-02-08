@@ -12,8 +12,7 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
     ...initState,
     getAllListCards: async (listId: string) => {
         try {
-            const { data : cards } = await CardApi.getCardsOnList({ listId });
-            console.log('Fetched Cards:', cards);
+            const { data: cards } = await CardApi.getCardsOnList({ listId });
             set((state) => {
                 const cardsMap: Record<string, Card> = { ...state.cards };
                 const listCards: string[] = [];
@@ -86,18 +85,14 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
         const { listId: targetListId, beforeId, afterId, cardId } = payload;
         console.log(useCardStore.getState().cards[cardId])
 
-        // Get source list ID before making any changes
         const sourceListId = useCardStore.getState().cards[cardId].list.id;
         const prevCardListSource = [...(useCardStore.getState().listCards[sourceListId] || [])];
         const prevCardListTarget = [...(useCardStore.getState().listCards[targetListId] || [])];
 
         set({ isLoading: true, error: null });
 
-        // Optimistically update UI
         set((state) => {
-            // Remove from source list
             const updatedSourceList = (state.listCards[sourceListId] || []).filter((id) => id !== cardId);
-            // Add to target list
             const targetList = [...(state.listCards[targetListId] || [])];
             let insertIndex = targetList.length;
             if (beforeId) {
@@ -244,6 +239,6 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
 
     // Card Members
 
-    addMember: async (cardId, memberId) => {},
-    removeMember: async (cardId, memberId) => {},
+    addMember: async (cardId, memberId) => { },
+    removeMember: async (cardId, memberId) => { },
 }));

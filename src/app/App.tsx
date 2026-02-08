@@ -12,6 +12,8 @@ const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
+const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
+
 export default function AppRoutes() {
     return (
         <BrowserRouter basename="/react-app">
@@ -33,6 +35,7 @@ export default function AppRoutes() {
                             <Route path="/board/:boardId" element={<BoardPage />} />
                         </Route>
                     </Route>
+                    <Route path="*" element={<NotFoundPage />} />
                 </Routes>
             </Suspense>
         </BrowserRouter>

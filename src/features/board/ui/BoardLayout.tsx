@@ -1,12 +1,12 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import BoardList from './BoardList';
-import { CreateListButton } from './CreateListButton';
+import { CreateListButton } from './components/CreateListButton';
 import { useEffect } from 'react';
-import { useListsByBoard } from '@/entities/list/models/list.selector';
-import { useListStore } from '@/entities/list/models/list.store';
-import type { ReorderListsPayload } from '@/entities/list/models/list.type';
-import type { ReorderCardPayload } from '@/entities/card/models/card.type';
-import { useCardStore } from '@/entities/card/models/card.store';
+import { useListsByBoard } from '@/entities/list/model/list.selector';
+import { useListStore } from '@/entities/list/model/list.store';
+import type { ReorderListsPayload } from '@/entities/list/model/list.type';
+import type { ReorderCardPayload } from '@/entities/card/model/card.type';
+import { useCardStore } from '@/entities/card/model/card.store';
 
 export default function BoardLayout({ boardId }: { boardId: string }) {
     const onDragEnd = (result: any) => {
@@ -54,15 +54,17 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                     cardId: draggableId,
                 };
                 useCardStore.getState().reorderCards(payload);
-            }
-            else {
+            } else {
                 console.log('Moving to another list:', { destination, source });
                 // Move to another list
                 const destListId = destination.droppableId;
                 const destCardList = [...(useCardStore.getState().listCards[destListId] || [])];
 
                 const beforeId = destination.index > 0 ? destCardList[destination.index - 1] : null;
-                const afterId = destination.index < destCardList.length ? destCardList[destination.index] : null;
+                const afterId =
+                    destination.index < destCardList.length
+                        ? destCardList[destination.index]
+                        : null;
 
                 const payload: ReorderCardPayload = {
                     listId: destListId,
