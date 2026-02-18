@@ -23,7 +23,7 @@ export const Header = () => {
     };
 
     return (
-        <header className="w-full h-16 border-b bg-white flex items-center justify-between sticky top-0 left-0 z-40">
+        <header className="sticky top-0 w-full z-40 h-16 border-b bg-white flex items-center justify-between ">
             <div className="flex items-center gap-2 px-4 py-2 justify-between w-full">
                 <span className="text-2xl font-bold text-gray-900">{getTitle()}</span>
                 <div className="flex items-center gap-2">

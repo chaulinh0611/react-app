@@ -8,10 +8,9 @@ export function MainLayout() {
             <div className="flex h-screen w-full bg-white">
                 <AppSidebar />
 
-                <SidebarInset className="flex flex-col flex-1">
+                <SidebarInset className="flex flex-col flex-1 overflow-hidden">
                     <Header />
-
-                    <main className="w-4/5 mx-auto">
+                    <main className="flex-1 overflow-auto">
                         <Outlet />
                     </main>
                 </SidebarInset>
