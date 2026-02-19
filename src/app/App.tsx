@@ -4,6 +4,7 @@ import { lazy, Suspense } from 'react';
 import { ProtectedRoute } from '@/shared/routes/ProtectedRoute';
 import { MainLayout } from './main-layout';
 
+const VerifyEmailPage = lazy(() => import("@/pages/verify-email/VerifyEmailPage"));
 const LoginPage = lazy(() => import('@/pages/login/LoginPage'));
 const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
@@ -23,14 +24,13 @@ export default function AppRoutes() {
                     <Route path="/register" element={<RegisterPage />} />
                     <Route path="/forgot-password" element={<ForgotPassword />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify-email" element={<VerifyEmailPage />} />
 
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
                             <Route path="/dashboard" element={<Dashboard />} />
-
                             <Route path="/profile" element={<ProfilePage />} />
-
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
                         </Route>

@@ -11,6 +11,7 @@ interface UserState {
 interface UserAction {
     fetchUser: () => Promise<void>;
     updateUser: (data: Partial<User>) => Promise<void>;
+    uploadAvatar: (file: File) => Promise<void>;
 }
 
 export const useUserStore = create<UserState & UserAction>((set) => ({
@@ -21,10 +22,24 @@ export const useUserStore = create<UserState & UserAction>((set) => ({
     fetchUser: async () => {
         set({ isLoading: true, error: null });
         try {
-            const res = await UserApi.getMe();
+            const res = await UserApi.getMe(); 
             set({ user: res.data, isLoading: false });
         } catch (error: any) {
             set({ isLoading: false, error: error.message });
+        }
+    },
+
+    uploadAvatar: async (file: File) => {
+        set({ isLoading: true });
+        try {
+            const res = await UserApi.uploadAvatar(file);
+            set((state) => ({ 
+                user: state.user ? { ...state.user, avatarUrl: res.data.avatarUrl } : null,
+                isLoading: false 
+            }));
+        } catch (error: any) {
+            set({ isLoading: false, error: error.message });
+            throw error;
         }
     },
 

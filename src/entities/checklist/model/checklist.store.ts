@@ -16,19 +16,17 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         set({ isLoading: true, error: null });
         try {
             const response = await CheckListApi.getChecklists({ cardId });
-            const checklists: any[] = response.data;
+            const checklists: any[] = response.data.data || response.data;
             set((state) => {
                 const checklistsMap: Record<string, Checklist> = { ...state.checklists };
                 const itemsMap: Record<string, ChecklistItem> = { ...state.checklistItems };
                 const cardChecklists: string[] = [];
 
                 checklists.forEach((checklist: any) => {
-                    // Store checklist items if they exist
                     if (checklist.items && Array.isArray(checklist.items)) {
                         checklist.items.forEach((item: ChecklistItem) => {
                             itemsMap[item.id] = item;
                         });
-                        // Convert items array to just IDs
                         checklistsMap[checklist.id] = {
                             ...checklist,
                             items: checklist.items.map((item: ChecklistItem) => item.id),
@@ -60,7 +58,7 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         set({ isLoading: true, error: null });
         try {
             const response = await CheckListApi.getChecklistItems(checklistId);
-            const items: ChecklistItem[] = response.data;
+            const items: ChecklistItem[] = response.data.data || response.data;
             set((state) => {
                 const checklist = state.checklists[checklistId];
                 if (!checklist) {
@@ -94,7 +92,12 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         set({ isLoading: true, error: null });
         try {
             const response = await CheckListApi.createChecklist({ title, cardId });
-            const newChecklist: Checklist = response.data;
+            const newChecklist: Checklist = response.data.data || response.data;
+            
+            if (!newChecklist.cardId && !newChecklist.card) {
+                (newChecklist as any).cardId = cardId;
+            }
+
             set((state) => ({
                 ...state,
                 checklists: {
@@ -119,18 +122,29 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         try {
             await CheckListApi.deleteChecklist(checklistId);
             set((state) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const checklistToDelete = state.checklists[checklistId];
+                
+                const cardId = checklistToDelete?.card?.id || (checklistToDelete as any)?.cardId;
+
                 const { [checklistId]: _, ...restChecklists } = state.checklists;
-                const cardId = state.checklists[checklistId]?.card.id;
-                const updatedCardChecklists = (state.cardChecklists[cardId] || []).filter(
-                    (id) => id !== checklistId,
-                );
+                
+                let updatedCardChecklistsForCard = state.cardChecklists[cardId] || [];
+                if (cardId) {
+                    updatedCardChecklistsForCard = updatedCardChecklistsForCard.filter(
+                        (id) => id !== checklistId,
+                    );
+                } else {
+                    Object.keys(state.cardChecklists).forEach(key => {
+                        state.cardChecklists[key] = state.cardChecklists[key].filter(id => id !== checklistId);
+                    });
+                }
+
                 return {
                     ...state,
                     checklists: restChecklists,
                     cardChecklists: {
                         ...state.cardChecklists,
-                        [cardId]: updatedCardChecklists,
+                        ...(cardId ? { [cardId]: updatedCardChecklistsForCard } : {}),
                     },
                     isLoading: false,
                 };
@@ -146,7 +160,7 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         set({ isLoading: true, error: null });
         try {
             const response = await CheckListApi.addChecklistItem({ checklistId, content });
-            const newItem: ChecklistItem = response.data;
+            const newItem: ChecklistItem = response.data.data || response.data;
             set((state) => {
                 const checklist = state.checklists[checklistId];
                 if (!checklist) {
@@ -176,7 +190,6 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         }
     },
     updateChecklistItems: async (itemId: string, content: string, isChecked: boolean) => {
-        set({ isLoading: true, error: null });
         try {
             await CheckListApi.updateChecklistItems({ itemId, content, isChecked });
             set((state) => ({
@@ -189,11 +202,10 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
                         isChecked,
                     },
                 },
-                isLoading: false,
             }));
             return;
         } catch (err) {
-            set({ isLoading: false, error: (err as Error).message });
+            console.error(err);
             return;
         }
     },
@@ -202,9 +214,7 @@ export const useChecklistStore = create<ChecklistState & ChecklistAction>((set) 
         try {
             await CheckListApi.deleteChecklistItem(itemId);
             set((state) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { [itemId]: _, ...restItems } = state.checklistItems;
-                // Also remove from checklist items array
                 const updatedChecklists = { ...state.checklists };
                 Object.keys(updatedChecklists).forEach((checklistId) => {
                     if (updatedChecklists[checklistId].items?.includes(itemId)) {

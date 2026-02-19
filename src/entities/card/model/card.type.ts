@@ -1,79 +1,86 @@
-import { Card } from '@/shared/ui/card';
-interface Card {
-    id: string;
-    title: string;
-    description?: string;
-    list?: {
-        id: string;
-    };
-    listId?: string;
-    position: number;
-    createdAt: Date;
-    updatedAt: Date;
-    isArchived: boolean;
-    dueDate: Date | null;
-    priority: "low" | "medium" | "high" | null;
-    backgroundUrl: string | null;
-    backgroundPublicId: string | null;
-
-    cardMembers?: CardMember[];
-}
-
-interface CardMember {
+export interface CardMember {
     id: string;
     name: string;
     avatar: string | null;
 }
 
-// Payload interface
-interface ReorderCardPayload {
+export interface Card {
+    id: string;
+    title: string;
+    description?: string;
+    list?: { id: string; };
+    listId?: string;
+    position: number;
+    createdAt: Date;
+    updatedAt: Date;
+    isArchived: boolean;
+    dueDate: Date | string | null; 
+    labels?: string[]; 
+    priority: "low" | "medium" | "high" | null;
+    backgroundUrl: string | null;
+    backgroundPublicId: string | null;
+    cardMembers?: CardMember[];
+}
+
+export interface ReorderCardPayload {
     listId: string;
     afterId: string | null;
     beforeId: string | null;
     cardId: string;
 }
 
-interface CreateCardPayload {
+export interface CreateCardPayload {
     title: string;
     description?: string;
     listId: string;
 }
 
-interface UpdateCardPayload {
+export interface UpdateCardPayload {
     title?: string;
     description?: string;
+    dueDate?: Date | string | null;
+    labels?: string[];
+    priority?: string | null;
+    cardMembers?: CardMember[];
+    isArchived?: boolean;
 }
 
-// States interface
-interface CardState {
+export interface CardFilters {
+    keyword?: string;
+    memberIds?: string[];
+    labelIds?: string[];
+    dueFrom?: string;
+    dueTo?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+}
+
+export interface AssignedCardsQuery {
+    boardId?: string;
+    status?: string;
+    page?: number;
+    limit?: number;
+}
+
+export interface CardState {
     cards: Record<string, Card>;
-    listCards: Record<string, string[]>;
+    listCards: Record<string, string[]>; // Map listId -> cardIds
     isLoading: boolean;
     error: string | null;
 }
 
-// Action interface
-interface CardAction {
+export interface CardAction {
     getAllListCards: (listId: string) => Promise<Card[]>;
     reorderCards: (payload: ReorderCardPayload) => Promise<void>;
     moveCardToAnotherList: (payload: ReorderCardPayload) => Promise<void>;
-
-    // CRUD
     createCard: (payload: CreateCardPayload) => Promise<Card>;
     updateCard: (cardId: string, payload: UpdateCardPayload) => Promise<Card>;
     deleteCard: (cardId: string) => Promise<void>;
-
-    // MEMBERS
     addMember: (cardId: string, memberId: string) => Promise<void>;
     removeMember: (cardId: string, memberId: string) => Promise<void>;
+    getCardsInBoard: (boardId: string, filters: CardFilters) => Promise<Card[]>;
+    getAssignedCards: (query: AssignedCardsQuery) => Promise<Card[]>;
+    getCardsDueSoon: () => Promise<Card[]>;
+    globalSearch: (keyword: string) => Promise<Card[]>;
 }
-
-export type {
-    Card,
-    CardMember,
-    CardState,
-    CardAction,
-    ReorderCardPayload,
-    CreateCardPayload,
-    UpdateCardPayload
-};

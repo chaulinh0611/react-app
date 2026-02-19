@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { CardApi } from '../api/card.api';
 import type { CardState, CardAction, Card, ReorderCardPayload } from './card.type';
+
 const initState = {
     cards: {},
     listCards: {},
@@ -8,15 +9,17 @@ const initState = {
     error: null,
 };
 
-export const useCardStore = create<CardState & CardAction>((set) => ({
+export const useCardStore = create<CardState & CardAction>((set, get) => ({
     ...initState,
+
     getAllListCards: async (listId: string) => {
+        set({ isLoading: true });
         try {
             const { data: cards } = await CardApi.getCardsOnList({ listId });
             set((state) => {
                 const cardsMap: Record<string, Card> = { ...state.cards };
                 const listCards: string[] = [];
-                cards.forEach(async (card: Card) => {
+                cards.forEach((card: Card) => {
                     cardsMap[card.id] = card;
                     listCards.push(card.id);
                 });
@@ -39,7 +42,7 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
 
     reorderCards: async (payload: ReorderCardPayload) => {
         const { listId, beforeId, afterId, cardId } = payload;
-        const prevCardList = [...(useCardStore.getState().listCards[listId] || [])];
+        const prevCardList = [...(get().listCards[listId] || [])];
         set({ isLoading: true, error: null });
 
         set((state) => {
@@ -67,7 +70,6 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
         try {
             await CardApi.reorderCards({ listId, beforeId, afterId, cardId });
             set({ isLoading: false });
-            return;
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             set((state) => ({
@@ -77,17 +79,17 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
                     [listId]: prevCardList,
                 },
             }));
-            return;
         }
     },
 
     moveCardToAnotherList: async (payload: ReorderCardPayload) => {
         const { listId: targetListId, beforeId, afterId, cardId } = payload;
-        console.log(useCardStore.getState().cards[cardId])
+        const sourceListId = get().cards[cardId]?.list?.id || get().cards[cardId]?.listId;
+        
+        if (!sourceListId) return;
 
-        const sourceListId = useCardStore.getState().cards[cardId].list.id;
-        const prevCardListSource = [...(useCardStore.getState().listCards[sourceListId] || [])];
-        const prevCardListTarget = [...(useCardStore.getState().listCards[targetListId] || [])];
+        const prevCardListSource = [...(get().listCards[sourceListId] || [])];
+        const prevCardListTarget = [...(get().listCards[targetListId] || [])];
 
         set({ isLoading: true, error: null });
 
@@ -102,18 +104,12 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
             }
             targetList.splice(insertIndex, 0, cardId);
 
-            // Update card's list reference
-            const updatedCard = { ...state.cards[cardId] };
-            if (updatedCard.list) {
-                updatedCard.list.id = targetListId;
-            }
+            const updatedCard = { ...state.cards[cardId], listId: targetListId };
+            if (updatedCard.list) updatedCard.list.id = targetListId;
 
             return {
                 ...state,
-                cards: {
-                    ...state.cards,
-                    [cardId]: updatedCard,
-                },
+                cards: { ...state.cards, [cardId]: updatedCard },
                 listCards: {
                     ...state.listCards,
                     [sourceListId]: updatedSourceList,
@@ -124,33 +120,15 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
         });
 
         try {
-            // Note: Backend expects 'listId' field, not 'targetListId'
-            const apiPayload = {
-                listId: targetListId,
-                beforeId,
-                afterId,
-                cardId
-            };
-            console.log('API call moveCardToAnotherList:', apiPayload);
-            await CardApi.moveCardToAnotherList(apiPayload);
-            console.log('API call successful');
+            await CardApi.moveCardToAnotherList({ listId: targetListId, beforeId, afterId, cardId });
             set({ isLoading: false });
-            return;
         } catch (err) {
-            console.error('API call failed:', err);
             set({ isLoading: false, error: (err as Error).message });
-            // Restore previous state using captured sourceListId
             set((state) => ({
                 ...state,
                 cards: {
                     ...state.cards,
-                    [cardId]: {
-                        ...state.cards[cardId],
-                        list: {
-                            ...state.cards[cardId].list,
-                            id: sourceListId,
-                        },
-                    },
+                    [cardId]: { ...state.cards[cardId], listId: sourceListId },
                 },
                 listCards: {
                     ...state.listCards,
@@ -158,24 +136,20 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
                     [targetListId]: prevCardListTarget,
                 },
             }));
-            return;
         }
     },
 
     createCard: async (payload) => {
         set({ isLoading: true, error: null });
         try {
-            const { data: newCard } = await CardApi.createCard(payload);
-            console.log('Created Card:', newCard);
+            const { data: newCardRes } = await CardApi.createCard(payload);
+            const newCard = newCardRes.data || newCardRes;
             set((state) => ({
                 ...state,
-                cards: {
-                    ...state.cards,
-                    [newCard.id]: newCard,
-                },
+                cards: { ...state.cards, [newCard.id]: newCard },
                 listCards: {
                     ...state.listCards,
-                    [newCard.list.id]: [...(state.listCards[newCard.list.id] || []), newCard.id],
+                    [newCard.listId || newCard.list.id]: [...(state.listCards[newCard.listId || newCard.list.id] || []), newCard.id],
                 },
                 isLoading: false,
             }));
@@ -185,60 +159,112 @@ export const useCardStore = create<CardState & CardAction>((set) => ({
             return null;
         }
     },
+
     updateCard: async (cardId, payload) => {
-        set({ isLoading: true, error: null });
         try {
             const response = await CardApi.updateCard(cardId, payload);
-            const updatedCard = response.data;
+            const updatedCard = response.data.data || response.data;
+            
             set((state) => ({
                 ...state,
-                cards: {
-                    ...state.cards,
-                    [updatedCard.id]: updatedCard,
-                },
-                isLoading: false,
+                cards: { ...state.cards, [updatedCard.id]: updatedCard },
             }));
             return updatedCard;
         } catch (err) {
-            set({ isLoading: false, error: (err as Error).message });
+            console.error(err);
             return null;
         }
     },
+
     deleteCard: async (cardId) => {
-        console.log('Frontend deleteCard called with:', cardId);
         set({ isLoading: true, error: null });
         try {
-            console.log('Calling API to delete card...');
+            const listId = get().cards[cardId]?.list?.id || get().cards[cardId]?.listId;
             await CardApi.deleteCard(cardId);
-            console.log('API call successful, updating local state...');
             set((state) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 const { [cardId]: _, ...restCards } = state.cards;
-                const listId = state.cards[cardId]?.list.id;
-                const updatedListCards = (state.listCards[listId] || []).filter(
-                    (id) => id !== cardId,
-                );
+                const updatedListCards = (state.listCards[listId] || []).filter((id) => id !== cardId);
                 return {
                     ...state,
                     cards: restCards,
-                    listCards: {
-                        ...state.listCards,
-                        [listId]: updatedListCards,
-                    },
+                    listCards: { ...state.listCards, [listId]: updatedListCards },
                     isLoading: false,
                 };
             });
-            return;
         } catch (err) {
-            console.error('Delete card API error:', err);
             set({ isLoading: false, error: (err as Error).message });
-            return;
         }
     },
 
+    getCardsInBoard: async (boardId, filters) => {
+        set({ isLoading: true });
+        try {
+            const res = await CardApi.getCardsInBoard(boardId, filters);
+            const cards = res.data.data || res.data; 
+            
+            const cardsMap = { ...get().cards };
+            if(Array.isArray(cards)){
+                cards.forEach((card: Card) => {
+                    cardsMap[card.id] = card;
+                });
+            }
 
-    // Card Members
+            set({ cards: cardsMap, isLoading: false });
+            return Array.isArray(cards) ? cards : [];
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return [];
+        }
+    },
 
-    addMember: async (cardId, memberId) => { },
-    removeMember: async (cardId, memberId) => { },
+    getAssignedCards: async (query) => {
+        set({ isLoading: true });
+        try {
+            const res = await CardApi.getAssignedCards(query);
+            set({ isLoading: false });
+            return res.data.data || []; 
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return [];
+        }
+    },
+
+    getCardsDueSoon: async () => {
+        set({ isLoading: true });
+        try {
+            const res = await CardApi.getCardsDueSoon();
+            set({ isLoading: false });
+            return res.data.data || []; 
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return [];
+        }
+    },
+
+    globalSearch: async (keyword) => {
+        set({ isLoading: true });
+        try {
+            const res = await CardApi.globalSearch(keyword);
+            set({ isLoading: false });
+            return res.data.data || []; 
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            return [];
+        }
+    },
+
+    addMember: async (cardId, memberId) => {
+        try {
+            await CardApi.addMember(cardId, memberId);
+            const currentListId = get().cards[cardId]?.listId;
+            if (currentListId) {
+                get().getAllListCards(currentListId);
+            }
+        } catch (err) {
+            console.error(err);
+            throw err;
+        }
+    },
+    
+    removeMember: async (cardId, memberId) => { /* Chờ bổ sung sau */ },
 }));

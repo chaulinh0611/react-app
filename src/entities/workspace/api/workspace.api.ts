@@ -13,11 +13,11 @@ const getConfig = () => {
 
 export const WorkspaceApi = {
     getWorkspaces: (): Promise<ApiResponse<any>> => {
-        return axios.get('/workspaces', getConfig());
+        return axios.get('/workspaces');
     },
 
     createWorkspace: (payload: { title: string; description?: string }): Promise<ApiResponse<any>> => {
-        return axios.post('/workspaces', payload, getConfig());
+        return axios.post('/workspaces', payload); 
     },
     updateWorkspace: (id: string, payload: { title?: string; description?: string; isArchived?: boolean }): Promise<ApiResponse<any>> => {
         return axios.put(`/workspaces/${id}`, payload, getConfig());

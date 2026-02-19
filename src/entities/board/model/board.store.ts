@@ -4,6 +4,8 @@ import { BoardApi } from '../api/board.api';
 
 interface BoardState {
     boards: Board[];
+    templateBoards: Board[];
+    isLoading: boolean; 
     isEditDialogOpen: boolean;
     currentWorkspace: string | null;
 }
@@ -13,22 +15,22 @@ interface BoardActions {
     addBoard: (board: Board) => void;
     deleteBoard: (id: string) => void;
     getBoardById: (id: string) => Board | undefined;
-
     setIsEditDialogOpen: (open: boolean) => void;
     setCurrentWorkspace: (id: string | null) => void;
-
     createBoard: (payload: {
         workspaceId: string;
         title: string;
         description?: string;
     }) => Promise<Board>;
-
     fetchBoards: () => Promise<void>;
     fetchBoardById: (id: string) => Promise<void>;
+    fetchTemplates: () => Promise<void>;
 }
 
 export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
     boards: [],
+    templateBoards: [],
+    isLoading: false,
     isEditDialogOpen: false,
     currentWorkspace: null,
 
@@ -56,27 +58,38 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
             title,
             description,
         });
-
         const board = res.data;
-
         set((state) => ({
             boards: [...state.boards, board],
         }));
-
         return board;
     },
 
     fetchBoards: async () => {
-        const res = await BoardApi.getBoards();
-        console.log('API boards:', res.data);
-        set({ boards: res.data });
+        set({ isLoading: true });
+        try {
+            const res = await BoardApi.getBoards();
+            set({ boards: res.data, isLoading: false });
+        } catch (error) {
+            set({ isLoading: false });
+        }
+    },
+
+    fetchTemplates: async () => {
+        set({ isLoading: true });
+        try {
+            const res = await BoardApi.getTemplateBoards();
+            set({ templateBoards: res.data, isLoading: false });
+        } catch (error) {
+            console.error('Failed to fetch templates:', error);
+            set({ isLoading: false });
+        }
     },
 
     fetchBoardById: async (id: string) => {
         try {
             const res = await BoardApi.getDetailBoard(id);
             const board = res.data;
-
             set((state) => ({
                 boards: [
                     ...state.boards.filter(b => b.id !== id),
