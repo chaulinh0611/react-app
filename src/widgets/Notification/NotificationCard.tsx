@@ -3,8 +3,6 @@ import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar';
 import { Card } from '@/shared/ui/card';
 import { Dot } from 'lucide-react';
-import { useCardById } from '@/entities/card/model/card.selector';
-import { useCardStore } from '@/entities/card/model/card.store';
 import { useBoardById } from '@/entities/board/model/board.selector';
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { useEffect } from 'react';
@@ -21,18 +19,10 @@ export default function NotificationCard({ notification }: NotificationCardProps
     const isCardType = notification.entityType === 'card';
     const isBoardType = notification.entityType === 'board';
 
-    const card = useCardById(isCardType ? notification.entityId : '');
     const board = useBoardById(isBoardType ? notification.entityId : '');
 
-    const getCardByIdApi = useCardStore((state) => state.getCardByIdApi);
     const fetchBoardById = useBoardStore((state) => state.fetchBoardById);
     const markAsRead = useNotificationStore((state) => state.markAsReadApi);
-
-    useEffect(() => {
-        if (isCardType && notification.entityId && !card) {
-            getCardByIdApi(notification.entityId);
-        }
-    }, [isCardType, notification.entityId, card, getCardByIdApi]);
 
     useEffect(() => {
         if (isBoardType && notification.entityId && !board) {
@@ -72,14 +62,14 @@ export default function NotificationCard({ notification }: NotificationCardProps
                     <span className="text-gray-700">{notification.message}</span>
                 </div>
 
-                {isCardType && card && (
+                {isCardType && (
                     <div className="text-[12px] font-medium text-blue-600 bg-blue-50 w-fit px-1.5 py-0.5 rounded mt-0.5">
-                        Thẻ: {card.title}
+                        Thẻ:
                     </div>
                 )}
 
                 {isBoardType && board && (
-                    <div className="text-[12px] font-medium text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded mt-0.5">
+                    <div className="text-[12    px] font-medium text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded mt-0.5">
                         Bảng: {board.title}
                     </div>
                 )}

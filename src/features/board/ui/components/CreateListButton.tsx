@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
-import { useListStore } from '@/entities/list/model/list.store';
+import { useCreateList } from '@/entities/list/model/useList';
 
 interface CreateListButtonProps {
     boardId: string;
@@ -12,7 +12,7 @@ interface CreateListButtonProps {
 export function CreateListButton({ boardId }: CreateListButtonProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [title, setTitle] = useState('');
-    const { createList } = useListStore();
+    const { mutateAsync: createList, isPending } = useCreateList(boardId);
 
     const handleCreate = async () => {
         if (title.trim()) {
@@ -47,9 +47,10 @@ export function CreateListButton({ boardId }: CreateListButtonProps) {
                             <Button
                                 size="sm"
                                 onClick={handleCreate}
+                                disabled={isPending}
                                 className="bg-blue-600 hover:bg-blue-700 text-white"
                             >
-                                Add List
+                                {isPending ? 'Adding...' : 'Add List'}
                             </Button>
                             <Button
                                 size="sm"

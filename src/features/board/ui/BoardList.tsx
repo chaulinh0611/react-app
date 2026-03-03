@@ -1,15 +1,13 @@
 import { Draggable, Droppable } from '@hello-pangea/dnd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useCardsByListId } from '@/entities/card/model/card.selector';
-import { useCardStore } from '@/entities/card/model/card.store';
 import type { List } from '@/entities/list/model/list.type';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardHeader } from '@/shared/ui/card';
-
 import { Input } from '@/shared/ui/input';
 import ListCard from './ListCard';
 import { ListDropdown } from './components/ListDropdown';
+import { useCardsOnList, useCreateCard } from '@/entities/card/model/useCard';
 
 interface BoardListProps {
     list: List;
@@ -18,22 +16,27 @@ interface BoardListProps {
 }
 
 export default function BoardList({ list, dragHandleProps, isDragging }: BoardListProps) {
-    const cards = useCardsByListId(list.id);
-    const { getAllListCards, createCard } = useCardStore();
     const [isEditing, setIsEditing] = useState(false);
     const [tempTitle, setTempTitle] = useState(list.title);
     const [isAddingCard, setIsAddingCard] = useState(false);
     const [newCardTitle, setNewCardTitle] = useState('');
 
-    useEffect(() => {
-        getAllListCards(list.id);
-    }, [list.id, getAllListCards]);
+    const { data: cardsResponse } = useCardsOnList(list.id);
+    const cards = cardsResponse ?? [];
+
+    const { mutate: createCard, isPending: isCreating } = useCreateCard();
 
     const handleAddCard = () => {
         if (newCardTitle.trim()) {
-            createCard({ listId: list.id, title: newCardTitle.trim() });
-            setNewCardTitle('');
-            setIsAddingCard(false);
+            createCard(
+                { listId: list.id, title: newCardTitle.trim() },
+                {
+                    onSuccess: () => {
+                        setNewCardTitle('');
+                        setIsAddingCard(false);
+                    },
+                },
+            );
         }
     };
 
@@ -63,7 +66,11 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
                             {list.title}
                         </h3>
                     )}
-                    <ListDropdown setIsEditing={setIsEditing} listId={list.id} />
+                    <ListDropdown
+                        setIsEditing={setIsEditing}
+                        listId={list.id}
+                        boardId={list.boardId}
+                    />
                 </div>
             </CardHeader>
 
@@ -77,7 +84,7 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
                                 snapshot.isDraggingOver ? 'bg-blue-50' : ''
                             }`}
                         >
-                            {cards.map((card, index) => (
+                            {cards.map((card: any, index: number) => (
                                 <Draggable key={card.id} draggableId={card.id} index={index}>
                                     {(provided, snapshot) => (
                                         <div
@@ -108,8 +115,12 @@ export default function BoardList({ list, dragHandleProps, isDragging }: BoardLi
                                         autoFocus
                                     />
                                     <div className="flex gap-2">
-                                        <Button size="sm" onClick={handleAddCard}>
-                                            Add Card
+                                        <Button
+                                            size="sm"
+                                            onClick={handleAddCard}
+                                            disabled={isCreating}
+                                        >
+                                            {isCreating ? 'Adding...' : 'Add Card'}
                                         </Button>
                                         <Button
                                             size="sm"

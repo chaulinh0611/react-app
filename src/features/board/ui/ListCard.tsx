@@ -1,10 +1,6 @@
-import { useState } from 'react';
 import { Card, CardContent } from '@/shared/ui/card';
-import type { Card as CardType } from '@/entities/card/model/card.type';
+import type { Card as CardType } from '@/entities/card/model/type';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
-// import { useBoardStore } from '@/shared/stores/useBoardStore';
-import { CardDialog } from './components/CardDialog.tsx';
-// import type { Card as CardType } from '@/shared/lib/types';
 
 interface ListCardProps {
     card: CardType;
@@ -12,14 +8,12 @@ interface ListCardProps {
 }
 
 export default function ListCard({ card, isDragging }: ListCardProps) {
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
     return (
         <>
             <Card
                 className={`cursor-pointer hover:shadow-md transition-shadow ${
                     isDragging ? 'shadow-lg rotate-1' : ''
                 }`}
-                onClick={() => setIsDialogOpen(true)}
             >
                 <CardContent>
                     {card.backgroundUrl && (
@@ -28,7 +22,7 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                             style={{ backgroundImage: `url(${card.backgroundUrl})` }}
                         />
                     )}
-                    <h4 className="text-sm font-medium text-gray-900 mb-2 overflow-hidden text-ellipsis ">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2 overflow-hidden text-ellipsis">
                         {card.title}
                     </h4>
 
@@ -63,7 +57,7 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                 </CardContent>
             </Card>
 
-            <CardDialog card={card} open={isDialogOpen} onOpenChange={setIsDialogOpen} />
+            {/* TODO: Thêm CardDialog khi có component */}
         </>
     );
 }

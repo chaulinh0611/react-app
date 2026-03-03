@@ -1,87 +1,61 @@
 import { DragDropContext, Draggable, Droppable } from '@hello-pangea/dnd';
 import BoardList from './BoardList';
 import { CreateListButton } from './components/CreateListButton';
-import { useEffect } from 'react';
-import { useListsByBoard } from '@/entities/list/model/list.selector';
-import { useListStore } from '@/entities/list/model/list.store';
+import { useListsByBoardId, useReorderLists } from '@/entities/list/model/useList';
+import { useQueryClient } from '@tanstack/react-query';
 import type { ReorderListsPayload } from '@/entities/list/model/list.type';
-import type { ReorderCardPayload } from '@/entities/card/model/card.type';
-import { useCardStore } from '@/entities/card/model/card.store';
+import type { List } from '@/entities/list/model/list.type';
 
 export default function BoardLayout({ boardId }: { boardId: string }) {
+    const { data: lists = [], isLoading } = useListsByBoardId(boardId);
+    const { mutate: reorderLists } = useReorderLists(boardId);
+    const queryClient = useQueryClient();
+
     const onDragEnd = (result: any) => {
         const { destination, source, draggableId, type } = result;
-        if (!destination) {
+        if (!destination) return;
+        if (destination.droppableId === source.droppableId && destination.index === source.index)
             return;
-        }
-
-        if (destination.droppableId === source.droppableId && destination.index === source.index) {
-            return;
-        }
 
         if (type === 'LIST') {
-            const newLists = useListStore.getState().boardsLists[boardId];
-            const [removed] = newLists.splice(source.index, 1);
-            newLists.splice(destination.index, 0, removed);
+            // Optimistic update
+            const currentLists = queryClient.getQueryData<any>(['lists', boardId]);
+            const updatedLists: List[] = [...(currentLists?.data ?? lists)];
+            const [removed] = updatedLists.splice(source.index, 1);
+            updatedLists.splice(destination.index, 0, removed);
 
-            const beforeId = newLists[destination.index - 1];
-            const afterId = newLists[destination.index + 1];
+            queryClient.setQueryData(['lists', boardId], (old: any) => ({
+                ...old,
+                data: updatedLists,
+            }));
+
+            const beforeId = updatedLists[destination.index - 1]?.id ?? null;
+            const afterId = updatedLists[destination.index + 1]?.id ?? null;
 
             const payload: ReorderListsPayload = {
                 boardId,
-                beforeId: beforeId || null,
-                afterId: afterId || null,
+                beforeId,
+                afterId,
                 listId: draggableId,
             };
 
-            useListStore.getState().reorderLists(payload);
-        }
-
-        if (type === 'CARD') {
-            // Reorder in same list
-            if (source.droppableId === destination.droppableId) {
-                const listId = source.droppableId;
-                const cardList = useCardStore.getState().listCards[listId] || [];
-                const [removed] = cardList.splice(source.index, 1);
-                cardList.splice(destination.index, 0, removed);
-
-                const beforeId = cardList[destination.index - 1];
-                const afterId = cardList[destination.index + 1];
-                const payload: ReorderCardPayload = {
-                    listId,
-                    beforeId: beforeId || null,
-                    afterId: afterId || null,
-                    cardId: draggableId,
-                };
-                useCardStore.getState().reorderCards(payload);
-            } else {
-                console.log('Moving to another list:', { destination, source });
-                // Move to another list
-                const destListId = destination.droppableId;
-                const destCardList = [...(useCardStore.getState().listCards[destListId] || [])];
-
-                const beforeId = destination.index > 0 ? destCardList[destination.index - 1] : null;
-                const afterId =
-                    destination.index < destCardList.length
-                        ? destCardList[destination.index]
-                        : null;
-
-                const payload: ReorderCardPayload = {
-                    listId: destListId,
-                    beforeId,
-                    afterId,
-                    cardId: draggableId,
-                };
-                useCardStore.getState().moveCardToAnotherList(payload);
-            }
+            reorderLists(payload, {
+                onError: () => {
+                    // Roll back on error
+                    queryClient.setQueryData(['lists', boardId], currentLists);
+                },
+            });
         }
     };
-    const lists = useListsByBoard(boardId);
-    const { getListsByBoardId } = useListStore();
 
-    useEffect(() => {
-        getListsByBoardId(boardId);
-    }, [boardId, getListsByBoardId]);
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-full">
+                <p className="text-white/70 text-sm">Đang tải...</p>
+            </div>
+        );
+    }
+
     return (
         <div>
             <div className="h-full overflow-hidden">
@@ -93,7 +67,7 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                                 {...provided.droppableProps}
                                 className="flex gap-4 p-4 h-full overflow-x-auto"
                             >
-                                {lists.map((list, index) => (
+                                {lists.map((list: List, index: number) => (
                                     <Draggable key={list.id} draggableId={list.id} index={index}>
                                         {(provided, snapshot) => (
                                             <div

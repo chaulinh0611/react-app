@@ -7,15 +7,16 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { MoreVertical, Edit, Trash2, Archive } from 'lucide-react';
-import { useListStore } from '@/entities/list/model/list.store';
+import { useDeleteList } from '@/entities/list/model/useList';
 
 interface ListDropdownProps {
     setIsEditing: (value: boolean) => void;
     listId: string;
+    boardId: string;
 }
 
-export const ListDropdown = ({ setIsEditing, listId }: ListDropdownProps) => {
-    const { deleteList } = useListStore();
+export const ListDropdown = ({ setIsEditing, listId, boardId }: ListDropdownProps) => {
+    const { mutate: deleteList } = useDeleteList(boardId);
 
     const handleDelete = () => {
         deleteList(listId);

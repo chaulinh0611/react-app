@@ -1,26 +1,33 @@
-export interface Card {
-    id: string;
-    title: string;
-    description: string;
-    position: number;
-    listId: string;
-    boardId: string;
-    members: CardMember[];
-    labels: CardLabel[];
-    attachments: CardAttachment[];
-    checklists: CardChecklist[];
-    comments: CardComment[];
-    createdAt: string;
-    updatedAt: string;
-}
 
 export interface CardMember {
     id: string;
-    userId: string;
-    user: User;
+    user: {
+        id: string;
+        username: string;
+        email: string;
+        avatarUrl: string | null;
+        fullName?: string;
+    };
+}
+
+export interface Card {
+    id: string;
+    title: string;
+    description?: string | null;
+    position: number;
+    backgroundUrl?: string | null;
+    backgroundPublicId?: string | null;
+    priority?: string;
+    dueDate?: string | null;
+    isArchived?: boolean;
+    listId: string;
+    cardMembers?: CardMember[];
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface CardLabel {
+
     id: string;
     name: string;
     color: string;
@@ -44,33 +51,20 @@ export interface CardChecklistItem {
     isCompleted: boolean;
 }
 
-export interface CardComment {
-    id: string;
-    content: string;
-    user: User;
-    createdAt: string;
-}
-
 export interface CreateCardPayload {
     title: string;
     description?: string;
-    position?: number;
     listId: string;
-    boardId: string;
 }
 
 export interface UpdateCardPayload {
-    id: string;
     title?: string;
     description?: string;
-    position?: number;
-    listId?: string;
-    boardId?: string;
 }
 
 export interface ReorderCardPayload {
-    id: string;
-    position: number;
     listId: string;
-    boardId: string;
+    afterId: string | null;
+    beforeId: string | null;
+    cardId: string;
 }
