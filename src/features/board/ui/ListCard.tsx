@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent } from '@/shared/ui/card';
 import type { Card as CardType } from '@/entities/card/model/card.type';
-// import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 // import { useBoardStore } from '@/shared/stores/useBoardStore';
 import { CardDialog } from './components/CardDialog.tsx';
 // import type { Card as CardType } from '@/shared/lib/types';
@@ -38,25 +38,28 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                         </p>
                     )}
 
-                    {/* {assignedUsers.length > 0 && (
+                    {(card.cardMembers?.length || 0) > 0 && (
                         <div className="flex items-center justify-between">
-                            <div className="flex items-center -space-x-1">
-                                {assignedUsers.slice(0, 3).map((user) => (
-                                    <Avatar key={user.id} className="w-5 h-5 border border-white">
-                                        <AvatarImage src={user.avatar} alt={user.name} />
-                                        <AvatarFallback className="text-xs">
-                                            {user.name.charAt(0).toUpperCase()}
+                            <div className="flex items-center -space-x-2">
+                                {card.cardMembers?.slice(0, 3).map((member) => (
+                                    <Avatar
+                                        key={member.id}
+                                        className="w-6 h-6 border-2 border-white ring-1 ring-gray-100"
+                                    >
+                                        <AvatarImage src={member.user.avatarUrl || undefined} />
+                                        <AvatarFallback className="text-[10px]">
+                                            {member.user.username.charAt(0).toUpperCase()}
                                         </AvatarFallback>
                                     </Avatar>
                                 ))}
-                                {assignedUsers.length > 3 && (
-                                    <div className="w-5 h-5 rounded-full bg-gray-200 border border-white flex items-center justify-center text-xs font-medium text-gray-600">
-                                        +{assignedUsers.length - 3}
+                                {(card.cardMembers?.length || 0) > 3 && (
+                                    <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-gray-600 ring-1 ring-gray-100">
+                                        +{(card.cardMembers?.length || 0) - 3}
                                     </div>
                                 )}
                             </div>
                         </div>
-                    )} */}
+                    )}
                 </CardContent>
             </Card>
 

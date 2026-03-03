@@ -12,7 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
+import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
 import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
 import { CreateBoardDialog } from '@/features/dashboard/ui/components/CreateBoardDialog';
@@ -23,8 +23,7 @@ export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
     const { boards, fetchBoards } = useBoardStore();
-
-    const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
+    const { fetchMembersByBoardId } = useBoardMembersStore();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');

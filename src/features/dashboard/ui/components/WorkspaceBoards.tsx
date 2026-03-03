@@ -12,7 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useMemberCountByBoardId } from '@/entities/board-member/model/board-member.selector';
+import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
 import { useListStore } from '@/entities/list/model/list.store';
 
 type Props = {
@@ -22,7 +22,6 @@ type Props = {
 
 export function WorkspaceBoards({ board, viewMode }: Props) {
     const { deleteBoard } = useBoardStore();
-    const memberCount = useMemberCountByBoardId(board.id);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
     const setIsEditDialogOpen = useListStore((state) => state.setIsEditDialogOpen);
     const handleDelete = () => {
@@ -30,6 +29,12 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
             deleteBoard(board.id);
         }
     };
+
+    const useMemberCountByBoardId = (boardId: string) => {
+        return useBoardMembersStore((state) => state.BoardMembers[boardId]?.length || 0);
+    };
+
+    const memberCount = useMemberCountByBoardId(board.id);
 
     /* ================= LIST MODE ================= */
     if (viewMode === 'list') {

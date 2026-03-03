@@ -1,7 +1,10 @@
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
-import { Bell, Plus, SearchIcon } from 'lucide-react';
+import { Bell, SearchIcon } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
+import { NotificationPopover } from '../Notification/NotificationContent';
+import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
+import { InviteButton } from './InviteButton';
 
 export const Header = () => {
     const { pathname } = useLocation();
@@ -27,16 +30,29 @@ export const Header = () => {
             <div className="flex items-center gap-2 px-4 py-2 justify-between w-full">
                 <span className="text-2xl font-bold text-gray-900">{getTitle()}</span>
                 <div className="flex items-center gap-2">
+                    {/* Search component */}
                     <div className="relative w-full max-w-sm">
                         <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                         <Input className="pl-10" placeholder="Search..." type="search" />
                     </div>
-                    <Button variant="outline">
-                        <Bell className="h-5 w-5" />
-                    </Button>
-                    <Button>
-                        <Plus /> Create
-                    </Button>
+
+                    {/* Notification component */}
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="outline">
+                                <Bell className="h-5 w-5" />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent align="end" className="rounded-[5px] w-[500px] px-4 py-6">
+                            <NotificationPopover />
+                        </PopoverContent>
+                    </Popover>
+                    {currentPath === 'board' && (
+                        <div>
+                            <InviteButton />
+                        </div>
+                    )}
+                    {/* Create button */}
                 </div>
             </div>
         </header>

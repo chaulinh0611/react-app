@@ -11,7 +11,7 @@ export const BoardApi = {
         return axios.post('/boards', payload);
     },
 
-    updateBoard: (id: string, payload: Partial<CreateBoardPayload> ): Promise<ApiResponse<Board>> => {
+    updateBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<ApiResponse<Board>> => {
         return axios.put(`/boards/${id}`, payload);
     },
 
@@ -27,12 +27,12 @@ export const BoardApi = {
         return axios.get(`/boards/${boardId}/members`);
     },
 
-    inviteMemberViaEmail: (boardId: string, email: string, role: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/members/invite/email`, { email, role });
+    inviteMemberViaEmail: (boardId: string, email: string): Promise<ApiResponse<void>> => {
+        return axios.post(`/boards/${boardId}/members/invite/email`, { email });
     },
 
-    inviteMemberViaLink: (boardId: string, role: string): Promise<ApiResponse<string>> => {
-        return axios.post(`/boards/${boardId}/members/invite/link`, { role });
+    createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {
+        return axios.post(`/boards/${boardId}/members/invite/link`);
     },
 
     joinBoard: (boardId: string, token: string): Promise<ApiResponse<void>> => {
