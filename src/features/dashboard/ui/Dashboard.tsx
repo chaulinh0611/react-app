@@ -3,7 +3,7 @@ import { CreateWorkspaceDialog } from './components/CreateWorkspaceDialog';
 
 export const Dashboard = () => {
     return (
-        <div className="flex min-h-screen bg-white">
+        <div className="flex min-h-full bg-white overflow-auto">
             <div className="flex flex-col flex-1 transition-all duration-300">
                 <main className="flex-1 p-8 space-y-6">
                     <div className="flex justify-between items-start mb-8">

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CardApi } from "../api/card.api";
-import type { CreateCardPayload, ReorderCardPayload, UpdateCardPayload } from "./type";
+import type { CreateCardPayload, ReorderCardPayload, UpdateCardPayload, MoveCardToAnotherListPayload } from "./type";
 
 export const useCard = (cardId: string) => {
     return useQuery({
@@ -60,7 +60,7 @@ export const useReorderCard = () => {
 export const useMoveCardToAnotherList = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (payload: ReorderCardPayload) => CardApi.moveCardToAnotherList(payload).then((res) => res.data),
+        mutationFn: (payload: MoveCardToAnotherListPayload) => CardApi.moveCardToAnotherList(payload).then((res) => res.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["cards"] });
         },
@@ -78,8 +78,9 @@ export const useAddMemberToCard = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ cardId, memberId }: { cardId: string; memberId: string }) => CardApi.addMemberToCard(cardId, memberId).then((res) => res.data),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: ["card-members"] });
+            queryClient.invalidateQueries({ queryKey: ["unassigned-members", variables.cardId] });
         },
     });
 };
@@ -88,7 +89,8 @@ export const useRemoveMemberFromCard = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: ({ cardId, memberId }: { cardId: string; memberId: string }) => CardApi.removeMemberFromCard(cardId, memberId).then((res) => res.data),
-        onSuccess: () => {
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["unassigned-members", variables.cardId] });
             queryClient.invalidateQueries({ queryKey: ["card-members"] });
         },
     });
@@ -98,6 +100,16 @@ export const useGetUnassignedMembers = (cardId: string) => {
     return useQuery({
         queryKey: ["unassigned-members", cardId],
         queryFn: () => CardApi.getUnassignedMembers(cardId).then((res) => res.data),
+    });
+};
+
+export const useDuplicateCard = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ cardId, listId, title }: { cardId: string; listId: string; title: string }) => CardApi.duplicateCard(cardId, listId, title).then((res) => res.data),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ["cards", variables.listId] });
+        },
     });
 };
 

@@ -1,13 +1,10 @@
 
 export interface CardMember {
-    id: string;
-    user: {
-        id: string;
-        username: string;
-        email: string;
-        avatarUrl: string | null;
-        fullName?: string;
-    };
+    userId: string;
+    username: string;
+    email: string;
+    avatarUrl: string | null;
+    fullName: string;
 }
 
 export interface Card {
@@ -27,7 +24,6 @@ export interface Card {
 }
 
 export interface CardLabel {
-
     id: string;
     name: string;
     color: string;
@@ -64,6 +60,13 @@ export interface UpdateCardPayload {
 
 export interface ReorderCardPayload {
     listId: string;
+    afterId: string | null;
+    beforeId: string | null;
+    cardId: string;
+}
+
+export interface MoveCardToAnotherListPayload {
+    targetListId: string;
     afterId: string | null;
     beforeId: string | null;
     cardId: string;

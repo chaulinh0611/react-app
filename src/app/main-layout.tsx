@@ -10,7 +10,7 @@ export function MainLayout() {
 
                 <SidebarInset className="flex flex-col flex-1 overflow-hidden">
                     <Header />
-                    <main className="flex-1 overflow-auto">
+                    <main className="flex-1 overflow-hidden">
                         <Outlet />
                     </main>
                 </SidebarInset>

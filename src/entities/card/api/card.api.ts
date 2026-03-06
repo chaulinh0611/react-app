@@ -2,6 +2,7 @@ import type {
     CreateCardPayload,
     ReorderCardPayload,
     UpdateCardPayload,
+    MoveCardToAnotherListPayload
 } from '../model/type';
 import axios from 'axios';
 
@@ -38,7 +39,7 @@ export const CardApi = {
         return axios.delete(`/cards/${cardId}/members`, { data: { memberId } });
     },
 
-    moveCardToAnotherList: (payload: ReorderCardPayload) => {
+    moveCardToAnotherList: (payload: MoveCardToAnotherListPayload) => {
         return axios.post(`/cards/${payload.cardId}/reorder-list`, payload);
     },
 
@@ -48,5 +49,9 @@ export const CardApi = {
 
     getUnassignedMembers: (cardId: string) => {
         return axios.get(`/cards/${cardId}/unassigned-members`);
+    },
+
+    duplicateCard: (cardId: string, listId: string, title: string) => {
+        return axios.post(`/cards/${cardId}/duplicate`, { targetListId: listId, title });
     },
 };

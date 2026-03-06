@@ -7,22 +7,25 @@ import { Card, CardContent, CardHeader } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import ListCard from './ListCard';
 import { ListDropdown } from './components/ListDropdown';
-import { useCardsOnList, useCreateCard } from '@/entities/card/model/useCard';
+import { useCreateCard } from '@/entities/card/model/useCard';
 
 interface BoardListProps {
     list: List;
     dragHandleProps?: any;
     isDragging?: boolean;
+    cards?: any[];
 }
 
-export default function BoardList({ list, dragHandleProps, isDragging }: BoardListProps) {
+export default function BoardList({
+    list,
+    dragHandleProps,
+    isDragging,
+    cards = [],
+}: BoardListProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [tempTitle, setTempTitle] = useState(list.title);
     const [isAddingCard, setIsAddingCard] = useState(false);
     const [newCardTitle, setNewCardTitle] = useState('');
-
-    const { data: cardsResponse } = useCardsOnList(list.id);
-    const cards = cardsResponse ?? [];
 
     const { mutate: createCard, isPending: isCreating } = useCreateCard();
 
