@@ -3,7 +3,11 @@ import { useShallow } from 'zustand/react/shallow';
 
 const useWorkspaces = () => {
     return useWorkspaceStore(
-        useShallow((state) => state.workspaceIds.map((id) => state.workspaces[id])),
+        useShallow((state) =>
+            state.workspaceIds
+                .map((id) => state.workspaces[id])
+                .filter((w): w is NonNullable<typeof w> => Boolean(w))
+        ),
     );
 };
 

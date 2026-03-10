@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, ArrowUpAZ, ArrowDownAZ, Clock, Calendar } from 'lucide-react';
-
+import { Outlet } from 'react-router-dom';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import {
@@ -12,7 +12,9 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
+import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
+import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
+import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
 import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
 import { CreateBoardDialog } from '@/features/dashboard/ui/components/CreateBoardDialog';
@@ -23,16 +25,39 @@ export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
     const { boards, fetchBoards } = useBoardStore();
-    const { fetchMembersByBoardId } = useBoardMembersStore();
+
+    const { currentWorkspace, fetchWorkspaceById } = useWorkspaceStore();
+    const workspaces = useWorkspaces();
+    const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+    const [editingBoard, setEditingBoard] = useState<
+        import('@/entities/board/model/board.type').Board | null
+    >(null);
 
     useEffect(() => {
         fetchBoards();
     }, [fetchBoards]);
+
+    useEffect(() => {
+        if (workspaceId) {
+            console.log('WorkspacePage requesting workspace', workspaceId);
+            fetchWorkspaceById(workspaceId)
+                .then((ws) => console.log('workspace fetched', ws))
+                .catch((err) => console.error('fetchWorkspaceById failed', err));
+        }
+    }, [workspaceId, fetchWorkspaceById]);
+
+    useEffect(() => {
+        console.log('WorkspacePage state', {
+            workspaceId,
+            currentWorkspace,
+            workspaces,
+        });
+    }, [workspaceId, currentWorkspace, workspaces]);
 
     useEffect(() => {
         boards.forEach((b) => fetchMembersByBoardId(b.id));
@@ -43,9 +68,14 @@ export default function WorkspacePage() {
         return boards.filter((b) => b.workspace?.id === workspaceId);
     }, [boards, workspaceId]);
 
-    const workspaceTitle = workspaceBoards[0]?.workspace?.title ?? 'Workspace';
-
-    const workspaceDescription = workspaceBoards[0]?.description ?? 'Workspace description';
+    const workspaceTitle =
+        currentWorkspace?.title ||
+        (workspaceId ? workspaces.find((w) => w.id === workspaceId)?.title : undefined) ||
+        'Workspace';
+    const workspaceDescription =
+        currentWorkspace?.description ||
+        (workspaceId ? workspaces.find((w) => w.id === workspaceId)?.description : undefined) ||
+        'Workspace description';
 
     const filteredBoards = useMemo(() => {
         const filtered = workspaceBoards.filter(
@@ -148,7 +178,15 @@ export default function WorkspacePage() {
                     }
                 >
                     {filteredBoards.map((board) => (
-                        <WorkspaceBoards key={board.id} board={board} viewMode={viewMode} />
+                        <WorkspaceBoards
+                            key={board.id}
+                            board={board}
+                            viewMode={viewMode}
+                            onEdit={() => {
+                                setEditingBoard(board);
+                                setIsCreateDialogOpen(true);
+                            }}
+                        />
                     ))}
 
                     <CreateBoardCard
@@ -157,11 +195,16 @@ export default function WorkspacePage() {
                     />
                     <CreateBoardDialog
                         open={isCreateDialogOpen}
-                        onOpenChange={setIsCreateDialogOpen}
+                        onOpenChange={(open) => {
+                            setIsCreateDialogOpen(open);
+                            if (!open) setEditingBoard(null);
+                        }}
                         workspaceId={workspaceId!}
+                        boardToEdit={editingBoard}
                     />
                 </div>
             </div>
+            <Outlet />
         </div>
     );
 }

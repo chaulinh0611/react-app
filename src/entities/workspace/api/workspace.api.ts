@@ -1,4 +1,6 @@
 import type { ApiResponse } from "@/shared/models/response";
+import type { Workspace } from "../model/workspace.type";
+import type { WorkspaceMember } from "../model/workspace.type";
 import axios from "axios";
 
 const getConfig = () => {
@@ -12,35 +14,57 @@ const getConfig = () => {
 };
 
 export const WorkspaceApi = {
-    getWorkspaces: (): Promise<ApiResponse<any>> => {
+    getWorkspaces: (): Promise<Workspace[]> => {
         return axios.get('/workspaces', getConfig());
     },
 
-    createWorkspace: (payload: { title: string; description?: string }): Promise<ApiResponse<any>> => {
+    createWorkspace: (payload: { title: string; description?: string }): Promise<Workspace> => {
         return axios.post('/workspaces', payload, getConfig());
     },
-    updateWorkspace: (id: string, payload: { title?: string; description?: string; isArchived?: boolean }): Promise<ApiResponse<any>> => {
-        return axios.put(`/workspaces/${id}`, payload, getConfig());
+  
+    async updateWorkspace(id: string, payload: any) {
+        const res = await axios.put(`/workspaces/${id}`, payload);
+        return res.data.data; 
     },
 
     deleteWorkspace: (id: string): Promise<ApiResponse<void>> => {
         return axios.delete(`/workspaces/${id}`, getConfig());
     },
 
-    getWorkspaceById: (id: string): Promise<ApiResponse<any>> => {
+    getWorkspaceById: (id: string): Promise<Workspace> => {
         return axios.get(`/workspaces/${id}`, getConfig());
     },
 
-    getWorkspaceMembers: (workspaceId: string): Promise<ApiResponse<any>> => {
+    getWorkspaceMembers: (workspaceId: string): Promise<WorkspaceMember[]> => {
         return axios.get(`/workspaces/${workspaceId}/members`, getConfig());
     },
 
-    addWorkspaceMember: (workspaceId: string, payload: { userId: string; role: string }): Promise<ApiResponse<void>> => {
-        return axios.post(`/workspaces/${workspaceId}/members`, payload, getConfig());
+    inviteByEmail: (workspaceId: string, email: string): Promise<ApiResponse<any>> => {
+        return axios.post(`/workspaces/${workspaceId}/invite`, { email }, getConfig());
     },
 
-    removeWorkspaceMember: (workspaceId: string, userId: string): Promise<ApiResponse<void>> => {
-        return axios.delete(`/workspaces/${workspaceId}/members/${userId}`, getConfig());
+    getAllInvitations: (): Promise<ApiResponse<any>> => {
+        return axios.get(`/workspaces/invitations`, getConfig());
+    },
+
+    respondToInvitation: (workspaceId: string, status: string): Promise<ApiResponse<any>> => {
+        return axios.post(`/workspaces/invitations/${workspaceId}`, { status }, getConfig());
+    },
+
+    createShareLink: (workspaceId: string): Promise<ApiResponse<any>> => {
+        return axios.post(`/workspaces/${workspaceId}/share-link`, {}, getConfig());
+    },
+
+    revokeShareLink: (token: string): Promise<ApiResponse<any>> => {
+        return axios.post(`/workspaces/share-link/revoke?token=${token}`, {}, getConfig());
+    },
+
+    addWorkspaceMember: (workspaceId: string, email: string): Promise<ApiResponse<void>> => {
+        return axios.post(`/workspaces/${workspaceId}/members`, { email }, getConfig());
+    },
+
+    removeWorkspaceMember: (workspaceId: string, email: string): Promise<ApiResponse<void>> => {
+        return axios.delete(`/workspaces/${workspaceId}/members`, { data: { email }, ...getConfig() });
     },
 
     archiveWorkspace: (id: string): Promise<ApiResponse<void>> => {
@@ -51,7 +75,7 @@ export const WorkspaceApi = {
         return axios.post(`/workspaces/${id}/unarchive`, {}, getConfig());
     },
 
-    getBoardsInWorkspace: (workspaceId: string): Promise<ApiResponse<any>> => {
+    getBoardsInWorkspace: (workspaceId: string): Promise<any[]> => {
         return axios.get(`/workspaces/${workspaceId}/boards`, getConfig());
     }
 }

@@ -1,34 +1,42 @@
-import type { ApiResponse } from "@/shared/models/response";
-import axios from "axios";
-import type { Board, CreateBoardPayload } from "../model/board.type";
+import type { ApiResponse } from '@/shared/models/response';
+import axios from 'axios';
+import type { Board, CreateBoardPayload } from '../model/board.type';
 
 export const BoardApi = {
     getAccessiableBoards: (): Promise<ApiResponse<any>> => {
         return axios.get(`/boards`);
     },
 
-    createBoard: (payload: CreateBoardPayload): Promise<ApiResponse<Board>> => {
+    createBoard: (payload: CreateBoardPayload): Promise<Board> => {
         return axios.post('/boards', payload);
     },
 
-    updateBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<ApiResponse<Board>> => {
-        return axios.put(`/boards/${id}`, payload);
+    updateBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<Board> => {
+        return axios.patch(`/boards/${id}`, payload);
     },
 
-    getPublicBoards: (): Promise<ApiResponse<Board[]>> => {
+    patchBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<Board> => {
+        return axios.patch(`/boards/${id}`, payload);
+    },
+
+    deleteBoard: (id: string): Promise<void> => {
+        return axios.delete(`/boards/${id}`);
+    },
+
+    getPublicBoards: (): Promise<Board[]> => {
         return axios.get('/boards/public');
     },
 
-    getDetailBoard: (id: string): Promise<ApiResponse<Board>> => {
+    getDetailBoard: (id: string): Promise<Board> => {
         return axios.get(`/boards/${id}`);
     },
 
-    getMembers: (boardId: string): Promise<ApiResponse<any>> => {
+    getMembers: (boardId: string): Promise<any> => {
         return axios.get(`/boards/${boardId}/members`);
     },
 
     inviteMemberViaEmail: (boardId: string, email: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/invite/email`, { email, role: "board_member" });
+        return axios.post(`/boards/${boardId}/invite/email`, { email, role: 'board_member' });
     },
 
     createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {
@@ -43,19 +51,21 @@ export const BoardApi = {
         return axios.delete(`/boards/${boardId}/share-link`);
     },
 
-    removeMember: (boardId: string, userId: string): Promise<ApiResponse<void>> => {
+    removeMember: (boardId: string, userId: string): Promise<void> => {
         return axios.delete(`/boards/${boardId}/members/${userId}`);
     },
 
-    archiveBoard: (id: string): Promise<ApiResponse<void>> => {
+    archiveBoard: (id: string): Promise<void> => {
         return axios.post(`/boards/${id}/archive`);
     },
 
-    reopenBoard: (id: string): Promise<ApiResponse<void>> => {
+    reopenBoard: (id: string): Promise<void> => {
         return axios.post(`/boards/${id}/reopen`);
     },
 
-    uploadBackground: (file: File): Promise<ApiResponse<{ backgroundUrl: string; backgroundPublicId: string }>> => {
+    uploadBackground: (
+        file: File,
+    ): Promise<ApiResponse<{ backgroundUrl: string; backgroundPublicId: string }>> => {
         const formData = new FormData();
         formData.append('file', file);
         return axios.post('/boards/background-upload', formData, {
@@ -73,12 +83,14 @@ export const BoardApi = {
         return axios.post(`/boards/${boardId}/template`);
     },
 
-    createBoardFromTemplate: (templateId: string, payload: CreateBoardPayload): Promise<ApiResponse<Board>> => {
+    createBoardFromTemplate: (
+        templateId: string,
+        payload: CreateBoardPayload,
+    ): Promise<ApiResponse<Board>> => {
         return axios.post(`/boards/template/${templateId}`, payload);
     },
 
     getListsOfBoard: (boardId: string): Promise<ApiResponse<any>> => {
         return axios.get(`/boards/${boardId}/lists`);
-    }
-
-}
+    },
+};
