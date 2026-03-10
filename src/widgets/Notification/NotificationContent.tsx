@@ -7,6 +7,7 @@ import { useNotificationStore } from '@/entities/notification/model/notification
 import { useEffect } from 'react';
 import { selectNotifications } from '@/entities/notification/model/notification.store';
 import NotificationCard from './NotificationCard';
+import { ScrollArea } from '@/shared/ui/scroll-area';
 
 export const NotificationPopover = () => {
     const { fetchNotifications } = useNotificationStore();
@@ -15,8 +16,8 @@ export const NotificationPopover = () => {
     }, [fetchNotifications]);
     const notifications = useNotificationStore(selectNotifications);
     return (
-        <div>
-            <PopoverHeader className="flex flex-row justify-between items-center border-b pb-4 mb-4">
+        <div className="flex flex-col flex-1 min-h-0">
+            <PopoverHeader className="flex flex-row justify-between items-center border-b pb-4 mb-4 shrink-0">
                 <PopoverTitle className="flex text-lg font-bold">Notifications</PopoverTitle>
 
                 <div className="flex items-center gap-2">
@@ -29,11 +30,11 @@ export const NotificationPopover = () => {
                     </Button>
                 </div>
             </PopoverHeader>
-            <div>
+            <ScrollArea className="overflow-y-auto flex-1 min-h-0 pr-2 pb-2">
                 {notifications.map((notification) => (
                     <NotificationCard key={notification.id} notification={notification} />
                 ))}
-            </div>
+            </ScrollArea>
         </div>
     );
 };

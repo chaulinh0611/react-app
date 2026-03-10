@@ -3,9 +3,10 @@ import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { Dot, Link } from 'lucide-react';
 import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
+import { useGetBoardMembers, useInviteMemberByEmail } from '@/entities/board/model/useBoard';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 const Role = {
     board_admin: 'Board Admin',
@@ -15,13 +16,26 @@ const Role = {
 export const InvitePopover = () => {
     // Get members data and action
     const { boardId } = useParams();
-    const { fetchMembersByBoardId } = useBoardMembersStore();
-    const BoardMembers = useBoardMembersStore((state) => state.BoardMembers[boardId as string]);
-    useEffect(() => {
-        if (boardId) {
-            fetchMembersByBoardId(boardId);
-        }
-    }, [boardId, fetchMembersByBoardId]);
+    const { data: BoardMembers } = useGetBoardMembers(boardId as string);
+    const { mutate: inviteByEmail } = useInviteMemberByEmail();
+    const [email, setEmail] = useState('');
+
+    function handleInviteEmail() {
+        inviteByEmail(
+            { boardId: boardId as string, email },
+            {
+                onError: (error) => {
+                    toast.error(error.message || 'Something went wrong', {
+                        position: 'top-center',
+                    });
+                },
+                onSuccess: () => {
+                    toast.success('Invite sent successfully', { position: 'top-center' });
+                    setEmail('');
+                },
+            },
+        );
+    }
 
     return (
         <div>
@@ -29,8 +43,12 @@ export const InvitePopover = () => {
                 <PopoverTitle className="flex font-bold">Share board</PopoverTitle>
             </PopoverHeader>
             <div className="flex flex-row items-center gap-2">
-                <Input placeholder="Email" />
-                <Button>Share</Button>
+                <Input
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <Button onClick={() => handleInviteEmail()}>Share</Button>
             </div>
             <div className="flex flex-row items-center gap-2 mt-4 text-sm">
                 <Link />
@@ -56,7 +74,7 @@ export const InvitePopover = () => {
             <div>
                 <p className="mt-4 text-sm font-bold">Board members</p>
                 <div className="mt-4 overflow-y-auto h-auto">
-                    {BoardMembers?.map((member) => (
+                    {BoardMembers?.map((member: any) => (
                         <div key={member.id} className="flex flex-row items-center gap-2 mb-2">
                             <Avatar className="w-7 h-7 border border-gray-600">
                                 <AvatarImage src={member.avatarUrl} />

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient, QueryClient } from "@tanstack/react-query";
 import { CardApi } from "../api/card.api";
 import type { CreateCardPayload, ReorderCardPayload, UpdateCardPayload, MoveCardToAnotherListPayload } from "./type";
 
@@ -112,4 +112,14 @@ export const useDuplicateCard = () => {
         },
     });
 };
+
+export const useUploadBackground = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ cardId, file }: { cardId: string, file: File }) => CardApi.uploadBackground(cardId, file).then(res => res.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["cards"] })
+        }
+    })
+}
 

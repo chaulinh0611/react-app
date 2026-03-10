@@ -28,15 +28,15 @@ export const BoardApi = {
     },
 
     inviteMemberViaEmail: (boardId: string, email: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/members/invite/email`, { email });
+        return axios.post(`/boards/${boardId}/invite/email`, { email, role: "board_member" });
     },
 
     createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {
-        return axios.post(`/boards/${boardId}/members/invite/link`);
+        return axios.post(`/boards/${boardId}/invite/link`);
     },
 
-    joinBoard: (boardId: string, token: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/join`, { token });
+    joinBoard: (token: string): Promise<ApiResponse<void>> => {
+        return axios.get(`/boards/join?token=${token}`);
     },
 
     revokeLink: (boardId: string, token: string): Promise<ApiResponse<void>> => {

@@ -72,7 +72,7 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                     </CardContent>
                 </Card>
             </DialogTrigger>
-            <DialogContent className="rounded-sm min-w-4xl p-0! max-h-[min(700px,80vh)] flex flex-col overflow-hidden">
+            <DialogContent className="rounded-sm min-w-5xl p-0! max-h-[min(700px,80vh)] flex flex-col overflow-hidden">
                 <CardDialog card={card} setOpen={setOpen} />
             </DialogContent>
         </Dialog>

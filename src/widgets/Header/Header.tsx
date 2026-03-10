@@ -43,7 +43,10 @@ export const Header = () => {
                                 <Bell className="h-5 w-5" />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="end" className="rounded-[5px] w-[500px] px-4 py-6">
+                        <PopoverContent
+                            align="end"
+                            className="rounded-[5px] w-[500px] max-h-[85vh] flex flex-col overflow-hidden px-4 py-6"
+                        >
                             <NotificationPopover />
                         </PopoverContent>
                     </Popover>

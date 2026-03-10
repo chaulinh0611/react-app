@@ -14,6 +14,7 @@ const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
 const WorkspaceMembers = lazy(() => import('@/pages/workspace/WorkspaceMembersPage'));
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
+const JoinBoardPage = lazy(() => import('@/pages/boards/JoinBoardPage'));
 
 export default function AppRoutes() {
     return (
@@ -39,6 +40,7 @@ export default function AppRoutes() {
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
                         </Route>
+                        <Route path="/join-board" element={<JoinBoardPage />} />
                     </Route>
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>

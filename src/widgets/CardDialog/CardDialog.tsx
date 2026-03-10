@@ -24,6 +24,7 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
     const [title, setTitle] = useState(card.title);
     const [description, setDescription] = useState(card.description);
     const { mutate: updateCard } = useUpdateCard();
+    const [menu, setMenu] = useState('main');
 
     // update card handle
     function handleUpdateCard() {
@@ -82,11 +83,20 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                                 >
                                     {card.title}
                                 </DialogTitle>
-                                <DropdownMenu>
+                                <DropdownMenu
+                                    onOpenChange={(e) => {
+                                        if (!e) setMenu('main');
+                                    }}
+                                >
                                     <DropdownMenuTrigger>
                                         <EllipsisVertical className="w-4 h-4" />
                                     </DropdownMenuTrigger>
-                                    <CardOption cardId={card.id} setOpen={setOpen} />
+                                    <CardOption
+                                        cardId={card.id}
+                                        menu={menu}
+                                        setOpen={setOpen}
+                                        setMenu={setMenu}
+                                    />
                                 </DropdownMenu>
                             </div>
                         )}
@@ -117,7 +127,7 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                     <CardChecklist cardId={card.id} />
                 </div>
             </div>
-            <CardComment />
+            <CardComment cardId={card.id} />
         </div>
     );
 }

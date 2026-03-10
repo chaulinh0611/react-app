@@ -54,4 +54,11 @@ export const CardApi = {
     duplicateCard: (cardId: string, listId: string, title: string) => {
         return axios.post(`/cards/${cardId}/duplicate`, { targetListId: listId, title });
     },
+
+    uploadBackground: (cardId: string, file: File) => {
+        const formData = new FormData()
+        formData.append("file", file)
+        return axios.post(`cards/${cardId}/background`, formData)
+    }
+
 };
