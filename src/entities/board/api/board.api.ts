@@ -39,8 +39,8 @@ export const BoardApi = {
         return axios.get(`/boards/join?token=${token}`);
     },
 
-    revokeLink: (boardId: string, token: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/members/invite/revoke-link`, { token });
+    revokeLink: (boardId: string): Promise<ApiResponse<void>> => {
+        return axios.delete(`/boards/${boardId}/share-link`);
     },
 
     removeMember: (boardId: string, userId: string): Promise<ApiResponse<void>> => {

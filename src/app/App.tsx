@@ -39,8 +39,8 @@ export default function AppRoutes() {
 
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
+                            <Route path="/join-board" element={<JoinBoardPage />} />
                         </Route>
-                        <Route path="/join-board" element={<JoinBoardPage />} />
                     </Route>
                     <Route path="*" element={<NotFoundPage />} />
                 </Routes>

@@ -4,9 +4,15 @@ import { Button } from '@/shared/ui/button';
 import { Dot, Link } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
-import { useGetBoardMembers, useInviteMemberByEmail } from '@/entities/board/model/useBoard';
+import {
+    useGetBoardMembers,
+    useInviteMemberByEmail,
+    useInviteMemberByLink,
+    useRevokeLink,
+} from '@/entities/board/model/useBoard';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { validateHandle } from '@/shared/lib/validate_handle';
 
 const Role = {
     board_admin: 'Board Admin',
@@ -18,6 +24,8 @@ export const InvitePopover = () => {
     const { boardId } = useParams();
     const { data: BoardMembers } = useGetBoardMembers(boardId as string);
     const { mutate: inviteByEmail } = useInviteMemberByEmail();
+    const { mutate: revokeLink } = useRevokeLink();
+    const { mutate: generateShareLink } = useInviteMemberByLink();
     const [email, setEmail] = useState('');
 
     function handleInviteEmail() {
@@ -25,13 +33,46 @@ export const InvitePopover = () => {
             { boardId: boardId as string, email },
             {
                 onError: (error) => {
-                    toast.error(error.message || 'Something went wrong', {
+                    return toast.error(validateHandle(error) || 'Something went wrong', {
                         position: 'top-center',
                     });
                 },
                 onSuccess: () => {
                     toast.success('Invite sent successfully', { position: 'top-center' });
                     setEmail('');
+                },
+            },
+        );
+    }
+
+    function handleGenerateShareLink() {
+        generateShareLink(
+            { boardId: boardId as string },
+            {
+                onError: (error) => {
+                    return toast.error(error.message || 'Something went wrong', {
+                        position: 'top-center',
+                    });
+                },
+                onSuccess: (data: any) => {
+                    toast.success('Share link generated successfully', { position: 'top-center' });
+                    navigator.clipboard.writeText(data.link);
+                },
+            },
+        );
+    }
+
+    function handleRevokeLink() {
+        revokeLink(
+            { boardId: boardId as string },
+            {
+                onError: (error) => {
+                    return toast.error(error.message || 'Something went wrong', {
+                        position: 'top-center',
+                    });
+                },
+                onSuccess: () => {
+                    toast.success('Link revoked successfully', { position: 'top-center' });
                 },
             },
         );
@@ -55,25 +96,29 @@ export const InvitePopover = () => {
                 <div>
                     <p>Everyone with the link can join as member</p>
                     <div>
-                        <a
-                            href=""
-                            className="text-blue-500 hover:text-blue-700 underline underline-offset-2 mr-2"
+                        <Button
+                            variant={'link'}
+                            size={'xs'}
+                            onClick={() => handleGenerateShareLink()}
+                            className="text-blue-500 hover:text-blue-700 underline underline-offset-2"
                         >
                             Copy link
-                        </a>
-                        <a
-                            href=""
+                        </Button>
+                        <Button
+                            variant={'link'}
+                            size={'xs'}
+                            onClick={() => handleRevokeLink()}
                             className="text-blue-500 hover:text-blue-700 underline underline-offset-2"
                         >
                             Delete link
-                        </a>
+                        </Button>
                     </div>
                 </div>
             </div>
             <hr className="my-4" />
             <div>
                 <p className="mt-4 text-sm font-bold">Board members</p>
-                <div className="mt-4 overflow-y-auto h-auto">
+                <div className="mt-4 overflow-y-auto max-h-[200px]">
                     {BoardMembers?.map((member: any) => (
                         <div key={member.id} className="flex flex-row items-center gap-2 mb-2">
                             <Avatar className="w-7 h-7 border border-gray-600">

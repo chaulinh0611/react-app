@@ -5,6 +5,7 @@ import { useLocation } from 'react-router-dom';
 import { NotificationPopover } from '../Notification/NotificationContent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { InviteButton } from './InviteButton';
+import { SettingButton } from './SettingButton';
 
 export const Header = () => {
     const { pathname } = useLocation();
@@ -51,11 +52,11 @@ export const Header = () => {
                         </PopoverContent>
                     </Popover>
                     {currentPath === 'board' && (
-                        <div>
+                        <div className="flex items-center gap-2">
                             <InviteButton />
+                            <SettingButton />
                         </div>
                     )}
-                    {/* Create button */}
                 </div>
             </div>
         </header>

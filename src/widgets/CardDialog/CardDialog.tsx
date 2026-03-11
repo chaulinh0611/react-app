@@ -12,6 +12,7 @@ import { CardChecklist } from './CardChecklist';
 import CardMember from './CardMember';
 import { DropdownMenu, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
 import CardOption from './CardOption';
+import { validateHandle } from '@/shared/lib/validate_handle';
 
 // Props
 interface CardDialogProps {
@@ -36,10 +37,10 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                 },
 
                 onError: (error) => {
-                    const fiedError = error.error;
-                    if (fiedError) {
-                        const messages = Object.values(fiedError).join('\n');
-                        toast.error(messages, { position: 'top-center' });
+                    if (error.error_code == 'VALIDATE_ERROR') {
+                        toast.error((validateHandle(error) as string) || 'Something went wrong!', {
+                            position: 'top-center',
+                        });
                         return;
                     }
                     toast.error(error.message || 'Something went wrong', {
@@ -49,6 +50,8 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
             },
         );
     }
+
+    function handleCopyLink() {}
     return (
         <div className="flex flex-row min-h-0 flex-1 min-w-0">
             <div className="flex-4 min-w-0 min-h-0 border-r border-gray-200 flex flex-col">
