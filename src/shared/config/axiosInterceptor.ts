@@ -104,7 +104,7 @@ const onResponseError = async (error: AxiosError) => {
         }
     }
 
-    return Promise.reject(error);
+    return Promise.reject(error.response?.data);
 };
 
 export default function AxiosInterceptor(): void {

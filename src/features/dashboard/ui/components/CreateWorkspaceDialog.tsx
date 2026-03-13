@@ -13,7 +13,6 @@ import { Button } from '@/shared/ui/button';
 
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
 import { useState } from 'react';
 
 export const CreateWorkspaceDialog = () => {
@@ -35,18 +34,7 @@ export const CreateWorkspaceDialog = () => {
                         <Label htmlFor="name" className="text-right">
                             Background
                         </Label>
-                        <Dropzone
-                            src={files}
-                            onDrop={(acceptedFiles) => setFiles(acceptedFiles)}
-                            accept={{
-                                'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-                            }}
-                            maxSize={5 * 1024 * 1024}
-                            className="w-full max-w-md"
-                        >
-                            <DropzoneContent />
-                            <DropzoneEmptyState />
-                        </Dropzone>
+
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
                         <Label htmlFor="name" className="text-right">

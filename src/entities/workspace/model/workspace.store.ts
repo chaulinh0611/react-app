@@ -5,6 +5,7 @@ import { WorkspaceApi } from '../api/workspace.api';
 const initialState: WorkspaceState = {
     workspaces: {},
     workspaceIds: [],
+    currentWorkspace: null,
     isLoading: false,
     error: null,
 };
@@ -84,6 +85,18 @@ export const useWorkspaceStore = create<WorkspaceState & WorkspaceAction>((set, 
             await WorkspaceApi.deleteWorkspace(id);
             await get().getWorkspaces();
             set({ isLoading: false });
+        } catch (err) {
+            set({ isLoading: false, error: (err as Error).message });
+            throw err;
+        }
+    },
+
+    getWorkspaceById: async (id: string) => {
+        set({ isLoading: true, error: null });
+        try {
+            const response = await WorkspaceApi.getWorkspaceById(id);
+            const workspace = response.data;
+            set({ currentWorkspace: workspace, isLoading: false });
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             throw err;

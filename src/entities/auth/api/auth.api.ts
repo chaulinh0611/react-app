@@ -1,6 +1,6 @@
 import type * as AuthType from '../model/auth.type';
+import type { User } from '../model/type';
 import type { ApiResponse } from '@/shared/models/response';
-import type * as UserType from '@/entities/users/model/user.type';
 import axios from 'axios';
 
 export const authApi = {
@@ -34,7 +34,16 @@ export const authApi = {
         });
     },
 
-    me: (): Promise<ApiResponse<UserType.User>> => {
-        return axios.get('/auth/me');
+    getProfile: (): Promise<ApiResponse<User>> => {
+        return axios.get('/users/profile');
+    },
+
+    updateProfile: (payload: any): Promise<ApiResponse<any>> => {
+        return axios.patch('/users', payload);
+    },
+
+    uploadAvatar: (payload: any): Promise<ApiResponse<any>> => {
+        return axios.post('/users/avatar', payload);
     }
+
 };

@@ -3,7 +3,7 @@ import axios from "axios";
 import type { Board, CreateBoardPayload } from "../model/board.type";
 
 export const BoardApi = {
-    getBoards: (): Promise<ApiResponse<any>> => {
+    getAccessiableBoards: (): Promise<ApiResponse<any>> => {
         return axios.get(`/boards`);
     },
 
@@ -11,7 +11,7 @@ export const BoardApi = {
         return axios.post('/boards', payload);
     },
 
-    updateBoard: (id: string, payload: Partial<CreateBoardPayload> ): Promise<ApiResponse<Board>> => {
+    updateBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<ApiResponse<Board>> => {
         return axios.put(`/boards/${id}`, payload);
     },
 
@@ -27,20 +27,20 @@ export const BoardApi = {
         return axios.get(`/boards/${boardId}/members`);
     },
 
-    inviteMemberViaEmail: (boardId: string, email: string, role: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/members/invite/email`, { email, role });
+    inviteMemberViaEmail: (boardId: string, email: string): Promise<ApiResponse<void>> => {
+        return axios.post(`/boards/${boardId}/invite/email`, { email, role: "board_member" });
     },
 
-    inviteMemberViaLink: (boardId: string, role: string): Promise<ApiResponse<string>> => {
-        return axios.post(`/boards/${boardId}/members/invite/link`, { role });
+    createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {
+        return axios.post(`/boards/${boardId}/invite/link`);
     },
 
-    joinBoard: (boardId: string, token: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/join`, { token });
+    joinBoard: (token: string): Promise<ApiResponse<void>> => {
+        return axios.get(`/boards/join?token=${token}`);
     },
 
-    revokeLink: (boardId: string, token: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/members/invite/revoke-link`, { token });
+    revokeLink: (boardId: string): Promise<ApiResponse<void>> => {
+        return axios.delete(`/boards/${boardId}/share-link`);
     },
 
     removeMember: (boardId: string, userId: string): Promise<ApiResponse<void>> => {

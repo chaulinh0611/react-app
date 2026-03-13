@@ -11,8 +11,10 @@ const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
 const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
+const WorkspaceMembers = lazy(() => import('@/pages/workspace/WorkspaceMembersPage'));
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
+const JoinBoardPage = lazy(() => import('@/pages/boards/JoinBoardPage'));
 
 export default function AppRoutes() {
     return (
@@ -27,12 +29,17 @@ export default function AppRoutes() {
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
+                            <Route
+                                path="/workspace/:workspaceId/members"
+                                element={<WorkspaceMembers />}
+                            />
                             <Route path="/dashboard" element={<Dashboard />} />
 
                             <Route path="/profile" element={<ProfilePage />} />
 
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
+                            <Route path="/join-board" element={<JoinBoardPage />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NotFoundPage />} />

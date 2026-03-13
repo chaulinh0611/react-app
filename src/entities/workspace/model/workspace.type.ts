@@ -19,6 +19,7 @@ interface WorkspaceMember {
 interface WorkspaceState {
     workspaces: Record<string, Workspace>;
     workspaceIds: string[];
+    currentWorkspace: Workspace | null;
     isLoading: boolean;
     error: string | null;
 }
@@ -26,6 +27,7 @@ interface WorkspaceState {
 interface WorkspaceAction {
     getWorkspaces: () => Promise<void>;
     createWorkspace: (payload: { title: string; description?: string }) => Promise<void>;
+    getWorkspaceById: (id: string) => Promise<void>;
 }
 
 export type { Workspace, WorkspaceMember, WorkspaceState, WorkspaceAction };
