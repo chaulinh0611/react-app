@@ -12,7 +12,9 @@ import { CardApi } from '@/entities/card/api/card.api';
 
 export default function BoardLayout({ boardId }: { boardId: string }) {
     // fetch list
-    const { data: lists = [], isLoading } = useListsByBoardId(boardId);
+    const { data: resList = [], isLoading } = useListsByBoardId(boardId);
+
+    const lists = resList.filter((list: List) => !list.isArchived);
 
     const cardQueries = useQueries({
         queries: lists.map((list: List) => ({
@@ -25,7 +27,6 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
             enabled: !!list.id,
         })),
     });
-
     const [boardLists, setBoardLists] = useState<any[]>([]);
 
     const { mutate: reorderLists } = useReorderLists(boardId);

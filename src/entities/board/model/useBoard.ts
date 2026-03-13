@@ -1,7 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { BoardApi } from "../api/board.api"
-import type { Board } from "../model/board.type"
-import { string } from "zod"
 
 interface InviteByEmail {
     boardId: string,
@@ -16,7 +14,13 @@ export const useGetBoardById = (boardId: string) => {
     })
 }
 
-// Board members
+export const useGetAccessibleBoards = () => {
+    return useQuery({
+        queryKey: ['accessible-boards'],
+        queryFn: () => BoardApi.getAccessiableBoards().then(res => res.data),
+    })
+}
+// Board member
 export const useGetBoardMembers = (boardId: string) => {
     return useQuery({
         queryKey: ['board-members', boardId],

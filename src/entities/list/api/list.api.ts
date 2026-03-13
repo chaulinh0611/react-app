@@ -1,6 +1,6 @@
 import type { ApiResponse } from '@/shared/models/response';
 import axios from 'axios';
-import type { List } from '../models/list.type';
+import type { List } from '../model/list.type';
 
 export const ListApi = {
     createList: (payload: { boardId: string; title: string }) =>
@@ -29,6 +29,9 @@ export const ListApi = {
     ) => axios.post<ApiResponse<void>>(`/lists/${listId}/reorder`, payload),
 
     moveList: (listId: string, boardId: string) =>
+        axios.post<ApiResponse<void>>(`/lists/${listId}/move`, { boardId }),
+
+    moveListToAnotherBoard: (listId: string, boardId: string) =>
         axios.post<ApiResponse<void>>(`/lists/${listId}/move`, { boardId }),
 
     duplicateList: (listId: string, payload: { boardId: string; title?: string }) =>

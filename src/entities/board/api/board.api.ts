@@ -3,7 +3,7 @@ import axios from "axios";
 import type { Board, CreateBoardPayload } from "../model/board.type";
 
 export const BoardApi = {
-    getBoards: (): Promise<ApiResponse<any>> => {
+    getAccessiableBoards: (): Promise<ApiResponse<any>> => {
         return axios.get(`/boards`);
     },
 

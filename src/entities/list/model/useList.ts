@@ -57,3 +57,34 @@ export const useReorderLists = (boardId: string) => {
         },
     });
 };
+
+export const useMoveListToAnotherBoard = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ listId, boardId }: { listId: string; boardId: string }) => ListApi.moveListToAnotherBoard(listId, boardId).then(res => res.data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['lists'] });
+        },
+    });
+};
+
+export const useArchiveList = (boardId: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (listId: string) => ListApi.archiveList(listId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['lists', boardId] });
+        },
+    });
+};
+
+export const useDuplicateList = (boardId: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ listId, title }: { listId: string; title?: string }) =>
+            ListApi.duplicateList(listId, { boardId, title }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['lists', boardId] });
+        },
+    });
+}

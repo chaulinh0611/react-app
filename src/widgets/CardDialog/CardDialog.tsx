@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useState } from 'react';
 import type { Card } from '@/entities/card/model/type';
 import { DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Input } from '@/shared/ui/input';
@@ -13,6 +13,8 @@ import CardMember from './CardMember';
 import { DropdownMenu, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
 import CardOption from './CardOption';
 import { validateHandle } from '@/shared/lib/validate_handle';
+import CardDescription from './CardDescription';
+import { Button } from '@/shared/ui/button';
 
 // Props
 interface CardDialogProps {
@@ -26,17 +28,19 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
     const [description, setDescription] = useState(card.description);
     const { mutate: updateCard } = useUpdateCard();
     const [menu, setMenu] = useState('main');
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
 
     // update card handle
     function handleUpdateCard() {
         updateCard(
-            { id: card.id, payload: { title, description: description || undefined } },
+            { id: card.id, payload: { title, description: JSON.stringify(description) || undefined } },
             {
                 onSuccess: () => {
                     setIsEditing(false);
+                    setIsEditingDescription(false);
                 },
 
-                onError: (error) => {
+                onError: (error: any) => {
                     if (error.error_code == 'VALIDATE_ERROR') {
                         toast.error((validateHandle(error) as string) || 'Something went wrong!', {
                             position: 'top-center',
@@ -51,7 +55,6 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
         );
     }
 
-    function handleCopyLink() {}
     return (
         <div className="flex flex-row min-h-0 flex-1 min-w-0">
             <div className="flex-4 min-w-0 min-h-0 border-r border-gray-200 flex flex-col">
@@ -106,23 +109,35 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                     </div>
                 </DialogHeader>
 
-                <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
+                <div className="flex-1 mt-2 overflow-y-auto pl-4 pb-4">
                     {/* Card Action */}
                     <CardAction cardId={card.id} />
 
-                    {/* Card Description */}
-                    <div className="flex items-center mt-3 gap-2">
-                        <TextAlignJustify className="w-4 h-4" />
-                        <Label>Description</Label>
+                    <div className="flex flex-col mt-3 gap-2 justify-between">
+                        <div className='flex justify-between items-center'>
+                            <div className="flex items-center gap-2">
+                                <TextAlignJustify className="w-4 h-4" />
+                                <Label>Description</Label>
+                            </div>
+                            {isEditingDescription || (
+                                <Button
+                                    variant={'outline'}
+                                    size={'sm'}
+                                    onClick={() => setIsEditingDescription(true)}
+                                >
+                                    Edit
+                                </Button>
+                            )}
+                        </div>
+                        <CardDescription
+                            description={description || ''}
+                            isEditingDescription={isEditingDescription}
+                            setDescription={setDescription}
+                            handleUpdateCard={handleUpdateCard}
+                            setIsEditingDescription={setIsEditingDescription}
+                        />
                     </div>
 
-                    <textarea
-                        value={description || ''}
-                        onChange={(e) => setDescription(e.target.value)}
-                        onBlur={() => handleUpdateCard()}
-                        className="mt-2 w-full p-3 border rounded-md min-h-24 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Add a description"
-                    />
                     {/* Card members */}
                     <CardMember cardId={card.id} />
 

@@ -67,7 +67,7 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
     },
 
     fetchBoards: async () => {
-        const res = await BoardApi.getBoards();
+        const res = await BoardApi.getAccessiableBoards();
         set({ boards: res.data });
     },
 

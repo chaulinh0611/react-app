@@ -7,7 +7,6 @@ export function MainLayout() {
         <SidebarProvider>
             <div className="flex h-screen w-full bg-white">
                 <AppSidebar />
-
                 <SidebarInset className="flex flex-col flex-1 overflow-hidden">
                     <Header />
                     <main className="flex-1 overflow-hidden">
