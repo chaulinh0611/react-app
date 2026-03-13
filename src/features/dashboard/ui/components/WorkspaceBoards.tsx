@@ -18,15 +18,20 @@ import { useListStore } from '@/entities/list/model/list.store';
 type Props = {
     board: Board;
     viewMode: 'grid' | 'list';
+    onEdit?: () => void;
 };
 
-export function WorkspaceBoards({ board, viewMode }: Props) {
+export function WorkspaceBoards({ board, viewMode, onEdit }: Props) {
     const { deleteBoard } = useBoardStore();
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
-    const setIsEditDialogOpen = useListStore((state) => state.setIsEditDialogOpen);
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (confirm(`Delete "${board.title}"?`)) {
-            deleteBoard(board.id);
+            try {
+                await deleteBoard(board.id);
+            } catch (err) {
+                console.error('delete failed', err);
+                alert('Could not delete board.');
+            }
         }
     };
 
@@ -71,7 +76,7 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                                     <DropdownMenuItem
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setIsEditDialogOpen(true);
+                                            onEdit?.();
                                         }}
                                     >
                                         <Edit className="mr-2 h-4 w-4" />
@@ -118,7 +123,7 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                        <DropdownMenuItem onClick={() => onEdit?.()}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                         </DropdownMenuItem>
