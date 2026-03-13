@@ -34,7 +34,7 @@ interface SendVerifyEmailPayload {
 
 interface VerifyEmailPayload {
     email: string;
-    token: string;
+    otp: string;
 }
 
 export type {

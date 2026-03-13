@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { Trash2, X, CheckSquare, UserPlus, Tag, Check, Plus, Calendar, Clock } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import {
@@ -17,6 +18,7 @@ import type { Card as CardType } from '@/entities/card/model/card.type';
 import { useCardStore } from '@/entities/card/model/card.store';
 import { useListStore } from '@/entities/list/model/list.store';
 import { useChecklistStore } from '@/entities/checklist/model/checklist.store';
+import { useUserStore } from '@/entities/users/model/user.store';
 
 interface CardDialogProps {
     card: CardType;
@@ -92,12 +94,19 @@ export function CardDialog({ card, open, onOpenChange }: CardDialogProps) {
         handleUpdateCard({ labels: newLabels });
     };
 
+    const queryClient = useQueryClient();
+
     const handleAssignMe = async () => {
         try {
             await addMember(card.id, ""); 
-        } catch (error) {
+            queryClient.invalidateQueries({ queryKey: ['assigned-cards'] });
+        } catch (error: any) {
             console.error("Lỗi khi tham gia thẻ:", error);
-            alert("Lỗi! Bạn đã là thành viên của thẻ này, hoặc chưa đăng nhập.");
+            if (error?.response?.status === 409) {
+                alert("Bạn đã là thành viên của thẻ này rồi!");
+            } else {
+                alert("Lỗi! Không thể tham gia thẻ. Hãy thử lại sau.");
+            }
         }
     };
 
@@ -168,12 +177,14 @@ export function CardDialog({ card, open, onOpenChange }: CardDialogProps) {
                     </Popover>
 
                     <Button 
-                        variant="outline" 
+                        variant={card.cardMembers?.some((m: any) => (m.user?.id || m.userId) === useUserStore.getState().user?.id) ? "secondary" : "outline"} 
                         size="sm" 
                         className="flex items-center gap-2"
                         onClick={handleAssignMe}
+                        disabled={card.cardMembers?.some((m: any) => (m.user?.id || m.userId) === useUserStore.getState().user?.id)}
                     >
-                        <UserPlus className="w-4 h-4" /> Join Card
+                        <UserPlus className="w-4 h-4" /> 
+                        {card.cardMembers?.some((m: any) => (m.user?.id || m.userId) === useUserStore.getState().user?.id) ? "Joined" : "Join Card"}
                     </Button>
 
                     <div className="relative">

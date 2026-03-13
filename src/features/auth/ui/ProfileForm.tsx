@@ -9,36 +9,14 @@ import { Button } from "@/shared/ui/button/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Card, CardContent } from "@/shared/ui/card";
+import { PasswordForm } from "./PasswordForm";
 
-const PasswordRegex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 
 const ProfileSchema = z.object({
     fullName: z.string().min(2, "Name must be at least 2 characters"),
     jobTitle: z.string().optional().or(z.literal('')),
     bio: z.string().max(500).optional().or(z.literal('')),
     email: z.string().email().optional().or(z.literal('')), 
-    
-    password: z.string()
-        .optional()
-        .or(z.literal(''))
-        .superRefine((val, ctx) => {
-            if (val && !PasswordRegex.test(val)) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Password must contain uppercase, lowercase, and number/special char",
-                });
-            }
-            if (val && val.length < 8) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    message: "Password must be at least 8 characters long",
-                });
-            }
-        }),
-    confirmPassword: z.string().optional().or(z.literal('')),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
 });
 
 type ProfileFormValues = z.infer<typeof ProfileSchema>;
@@ -68,8 +46,6 @@ export function ProfileForm() {
                 jobTitle: user.jobTitle || "",
                 email: user.email || "",
                 bio: user.bio || "",
-                password: "",
-                confirmPassword: "",
             });
         }
     }, [user, reset]);
@@ -92,7 +68,7 @@ export function ProfileForm() {
 
     const onSubmit = async (data: ProfileFormValues) => {
         try {
-            const { confirmPassword, ...payload } = data;
+            const payload = data;
             
             const finalPayload: any = {
                 fullName: payload.fullName
@@ -100,7 +76,6 @@ export function ProfileForm() {
 
             if (payload.jobTitle && payload.jobTitle.trim() !== "") finalPayload.jobTitle = payload.jobTitle;
             if (payload.bio && payload.bio.trim() !== "") finalPayload.bio = payload.bio;
-            if (payload.password && payload.password.trim() !== "") finalPayload.password = payload.password;
 
             await updateUser(finalPayload);
             alert("Profile updated successfully!");
@@ -187,23 +162,8 @@ export function ProfileForm() {
                             />
                         </div>
 
-                        <div className="pt-4 border-t">
-                            <h4 className="text-sm font-semibold mb-4 text-gray-700">Change Password</h4>
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label>New Password</Label>
-                                    <Input type="password" {...register("password")} placeholder="At least 8 characters" />
-                                    {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Confirm New Password</Label>
-                                    <Input type="password" {...register("confirmPassword")} placeholder="Confirm new password" />
-                                    {errors.confirmPassword && <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="flex justify-end pt-4">
+                        <div className="flex justify-between pt-4 items-center">
+                            <PasswordForm />
                             <Button type="submit" disabled={isSubmitting || isUploading} className="bg-black text-white px-8">
                                 {(isSubmitting) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />} 
                                 Save Changes

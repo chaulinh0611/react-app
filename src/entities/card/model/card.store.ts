@@ -85,7 +85,7 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
     moveCardToAnotherList: async (payload: ReorderCardPayload) => {
         const { listId: targetListId, beforeId, afterId, cardId } = payload;
         const sourceListId = get().cards[cardId]?.list?.id || get().cards[cardId]?.listId;
-        
+
         if (!sourceListId) return;
 
         const prevCardListSource = [...(get().listCards[sourceListId] || [])];
@@ -156,7 +156,7 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
             return newCard;
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
-            return null;
+            throw err;
         }
     },
 
@@ -164,7 +164,7 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
         try {
             const response = await CardApi.updateCard(cardId, payload);
             const updatedCard = response.data.data || response.data;
-            
+
             set((state) => ({
                 ...state,
                 cards: { ...state.cards, [updatedCard.id]: updatedCard },
@@ -183,11 +183,11 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
             await CardApi.deleteCard(cardId);
             set((state) => {
                 const { [cardId]: _, ...restCards } = state.cards;
-                const updatedListCards = (state.listCards[listId] || []).filter((id) => id !== cardId);
+                const updatedListCards = listId ? (state.listCards[listId] || []).filter((id) => id !== cardId) : [];
                 return {
                     ...state,
                     cards: restCards,
-                    listCards: { ...state.listCards, [listId]: updatedListCards },
+                    listCards: listId ? { ...state.listCards, [listId]: updatedListCards } : state.listCards,
                     isLoading: false,
                 };
             });
@@ -200,10 +200,10 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
         set({ isLoading: true });
         try {
             const res = await CardApi.getCardsInBoard(boardId, filters);
-            const cards = res.data.data || res.data; 
-            
+            const cards = res.data.data || res.data;
+
             const cardsMap = { ...get().cards };
-            if(Array.isArray(cards)){
+            if (Array.isArray(cards)) {
                 cards.forEach((card: Card) => {
                     cardsMap[card.id] = card;
                 });
@@ -220,9 +220,10 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
     getAssignedCards: async (query) => {
         set({ isLoading: true });
         try {
-            const res = await CardApi.getAssignedCards(query);
+            const res: any = await CardApi.getAssignedCards(query);
+            console.log('getAssignedCards res:', res);
             set({ isLoading: false });
-            return res.data.data || []; 
+            return res.data || [];
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             return [];
@@ -232,9 +233,10 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
     getCardsDueSoon: async () => {
         set({ isLoading: true });
         try {
-            const res = await CardApi.getCardsDueSoon();
+            const res: any = await CardApi.getCardsDueSoon();
+            console.log('getCardsDueSoon res:', res);
             set({ isLoading: false });
-            return res.data.data || []; 
+            return res.data || [];
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             return [];
@@ -244,9 +246,9 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
     globalSearch: async (keyword) => {
         set({ isLoading: true });
         try {
-            const res = await CardApi.globalSearch(keyword);
+            const res: any = await CardApi.globalSearch(keyword);
             set({ isLoading: false });
-            return res.data.data || []; 
+            return res.data || [];
         } catch (err) {
             set({ isLoading: false, error: (err as Error).message });
             return [];
@@ -265,6 +267,6 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
             throw err;
         }
     },
-    
+
     removeMember: async (cardId, memberId) => { /* Chờ bổ sung sau */ },
 }));

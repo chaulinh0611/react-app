@@ -79,6 +79,9 @@ export const BoardApi = {
 
     getListsOfBoard: (boardId: string): Promise<ApiResponse<any>> => {
         return axios.get(`/boards/${boardId}/lists`);
-    }
+    },
 
+    getArchivedBoards: (): Promise<ApiResponse<any>> => {
+        return axios.get('/boards/archived')
+    },
 }

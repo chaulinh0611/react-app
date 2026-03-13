@@ -9,7 +9,7 @@ export const DueSoonCardsWidget = () => {
 
     useEffect(() => {
         getCardsDueSoon().then(setCards);
-    }, []);
+    }, [getCardsDueSoon]);
 
     return (
         <div className="p-4 bg-destructive/5 rounded-lg border border-destructive/20">
@@ -17,12 +17,18 @@ export const DueSoonCardsWidget = () => {
                 <Clock className="w-4 h-4" /> Due Soon
             </h3>
             <div className="space-y-2">
-                {cards.map(c => (
-                    <div key={c.id} className="text-sm p-2 bg-background border rounded flex justify-between">
-                        <span>{c.title}</span>
-                        <span className="text-xs text-muted-foreground">{new Date(c.dueDate!).toLocaleDateString()}</span>
-                    </div>
-                ))}
+                {cards.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No tasks due soon.</p>
+                ) : (
+                    cards.map((c) => (
+                        <div key={c.id} className="text-sm p-2 bg-background border rounded flex justify-between items-center shadow-sm">
+                            <span className="font-medium truncate mr-2">{c.title}</span>
+                            <span className="text-xs px-2 py-1 bg-destructive text-destructive-foreground rounded flex-shrink-0">
+                                {c.dueDate ? new Date(c.dueDate).toLocaleDateString() : 'No date'}
+                            </span>
+                        </div>
+                    ))
+                )}
             </div>
         </div>
     );

@@ -13,7 +13,9 @@ const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'
 const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
+const TemplatePage = lazy(() => import('@/pages/templates/TemplatePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
+const WorkspaceSettings = lazy(() => import('@/pages/dashboard/WorkspaceSettingsPage'));
 
 export default function AppRoutes() {
     return (
@@ -29,8 +31,10 @@ export default function AppRoutes() {
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
+                            <Route path="/workspace/:workspaceId/settings" element={<WorkspaceSettings />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/templates" element={<TemplatePage />} />
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
                         </Route>

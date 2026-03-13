@@ -58,7 +58,7 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<'div'
         try {
             await authApi.verifyEmail({ 
                 email: data.email, 
-                token: data.otp
+                otp: data.otp
             });
             alert("Xác thực thành công! Đang chuyển hướng tới trang đăng nhập...");
             navigate("/login");

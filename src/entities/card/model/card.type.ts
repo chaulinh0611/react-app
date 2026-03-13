@@ -75,7 +75,7 @@ export interface CardAction {
     reorderCards: (payload: ReorderCardPayload) => Promise<void>;
     moveCardToAnotherList: (payload: ReorderCardPayload) => Promise<void>;
     createCard: (payload: CreateCardPayload) => Promise<Card>;
-    updateCard: (cardId: string, payload: UpdateCardPayload) => Promise<Card>;
+    updateCard: (cardId: string, payload: UpdateCardPayload) => Promise<Card | null>;
     deleteCard: (cardId: string) => Promise<void>;
     addMember: (cardId: string, memberId: string) => Promise<void>;
     removeMember: (cardId: string, memberId: string) => Promise<void>;

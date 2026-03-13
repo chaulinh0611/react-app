@@ -10,7 +10,7 @@ interface UserState {
 
 interface UserAction {
     fetchUser: () => Promise<void>;
-    updateUser: (data: Partial<User>) => Promise<void>;
+    updateUser: (data: Partial<User> & { password?: string }) => Promise<void>;
     uploadAvatar: (file: File) => Promise<void>;
 }
 

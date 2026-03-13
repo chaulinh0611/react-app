@@ -1,5 +1,6 @@
-import { useEffect, useState, useCallback, useMemo, memo } from 'react';
-import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
+import { useState, useCallback, useMemo, memo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { WorkspaceApi } from '@/entities/workspace/api/workspace.api';
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { CreateBoardCard } from './CreateBoardCard';
 import { CreateBoardDialog } from './CreateBoardDialog';
@@ -10,12 +11,12 @@ const BoardList = memo(
         const allBoards = useBoardStore((state) => state.boards);
 
         const boards = useMemo(() => {
-            return allBoards.filter((b) => b?.workspace?.id === workspaceId && !b?.isArchived);
+            return allBoards.filter((b: any) => b?.workspace?.id === workspaceId && !b?.isArchived);
         }, [allBoards, workspaceId]);
 
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {boards.map((board) => (
+                {boards.map((board: any) => (
                     <WorkspaceBoards key={board.id} board={board} viewMode="grid" />
                 ))}
                 <CreateBoardCard viewMode="grid" onClick={onCreateBoard} />
@@ -25,16 +26,20 @@ const BoardList = memo(
 );
 
 export const WorkspaceList = () => {
-    const workspaces = useWorkspaces();
+    const { data: workspacesResponse, isLoading } = useQuery({
+        queryKey: ['workspaces'],
+        queryFn: async () => {
+            const res = await WorkspaceApi.getWorkspaces();
+            return res.data;
+        }
+    });
+
+    const workspaces = workspacesResponse || [];
     const { fetchBoards } = useBoardStore();
     const [createBoardDialog, setCreateBoardDialog] = useState({
         open: false,
         workspaceId: '',
     });
-
-    const workspaceList = useMemo(() => {
-        return workspaces ? Object.values(workspaces) : [];
-    }, [workspaces]);
 
     const handleCreateBoard = useCallback((workspaceId: string) => {
         setCreateBoardDialog({ open: true, workspaceId });
@@ -44,15 +49,15 @@ export const WorkspaceList = () => {
         setCreateBoardDialog((prev) => ({ ...prev, open }));
     }, []);
 
-    useEffect(() => {
+    useMemo(() => {
         fetchBoards();
-    }, []);
+    }, [fetchBoards]);
 
-    useEffect(() => {
-        console.log('Danh sách Workspace trong Store:', workspaces);
-    }, [workspaces]);
+    if (isLoading) {
+        return <div className="py-10 text-center">Loading workspaces...</div>;
+    }
 
-    if (!workspaces || workspaceList.length === 0) {
+    if (workspaces.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-lg border-2 border-dashed">
                 <p>Bạn chưa có Workspace nào. Hãy tạo mới nhé!</p>
@@ -62,7 +67,7 @@ export const WorkspaceList = () => {
 
     return (
         <div className="space-y-8">
-            {workspaceList.map((workspace: any) => (
+            {workspaces.map((workspace: any) => (
                 <div key={workspace.id} className="space-y-4  p-6 rounded-lg bg-white">
                     {/* Header của Workspace */}
 

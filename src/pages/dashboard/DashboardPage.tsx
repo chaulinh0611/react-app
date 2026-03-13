@@ -20,10 +20,7 @@ export default function DashboardPage() {
             <hr className="border-gray-100" />
 
             {/* DANH SÁCH WORKSPACE (Code cũ của bạn) */}
-            <div className="space-y-4">
-                <h2 className="text-xl font-semibold text-gray-700">Your Workspaces</h2>
-                <Dashboard />
-            </div>
+            <Dashboard />
         </div>
     );
 }

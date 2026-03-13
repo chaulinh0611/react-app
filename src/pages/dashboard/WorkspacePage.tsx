@@ -11,7 +11,8 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-import { useBoardStore } from '@/entities/board/model/board.store';
+import { useQuery } from '@tanstack/react-query';
+import { BoardApi } from '@/entities/board/api/board.api';
 import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
 import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
@@ -22,7 +23,15 @@ type ViewMode = 'grid' | 'list';
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
-    const { boards, fetchBoards } = useBoardStore();
+    const { data: allBoardsData } = useQuery({
+        queryKey: ['boards'],
+        queryFn: async () => {
+            const res = await BoardApi.getBoards();
+            return res.data;
+        }
+    });
+
+    const boards: any[] = allBoardsData || [];
 
     const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
 
@@ -32,16 +41,12 @@ export default function WorkspacePage() {
     const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
     useEffect(() => {
-        fetchBoards();
-    }, [fetchBoards]);
-
-    useEffect(() => {
         boards.forEach((b) => fetchMembersByBoardId(b.id));
     }, [boards, fetchMembersByBoardId]);
 
     const workspaceBoards = useMemo(() => {
         if (!workspaceId) return [];
-        return boards.filter((b) => b.workspace?.id === workspaceId);
+        return boards.filter((b) => b.workspace?.id === workspaceId && !b.isArchived);
     }, [boards, workspaceId]);
 
     const workspaceTitle = workspaceBoards[0]?.workspace?.title ?? 'Workspace';

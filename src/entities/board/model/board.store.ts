@@ -12,8 +12,8 @@ interface BoardState {
 
 interface BoardActions {
     setBoards: (boards: Board[]) => void;
-    addBoard: (board: Board) => void;
     deleteBoard: (id: string) => void;
+    archiveBoard: (id: string) => Promise<void>;
     getBoardById: (id: string) => Board | undefined;
     setIsEditDialogOpen: (open: boolean) => void;
     setCurrentWorkspace: (id: string | null) => void;
@@ -45,6 +45,13 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
         set((state) => ({
             boards: state.boards.filter((b) => b.id !== id),
         })),
+
+    archiveBoard: async (id: string) => {
+        await BoardApi.archiveBoard(id);
+        set((state) => ({
+            boards: state.boards.filter((b) => b.id !== id),
+        }));
+    },
 
     getBoardById: (id) => get().boards.find((b) => b.id === id),
 

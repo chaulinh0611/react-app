@@ -10,6 +10,7 @@ interface Board {
     createdAt: string;
     isArchived: boolean;
     backgroundPath?: string;
+    backgroundUrl?: string;
     backgroundPublicId?: string;
     permissionLevel: 'private' | 'workspace' | 'public';
     boardMembers?: BoardMember[];

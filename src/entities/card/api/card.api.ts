@@ -29,15 +29,15 @@ export const CardApi = {
     moveCardToAnotherList: (payload: ReorderCardPayload) => {
         return axios.post(`/cards/${payload.cardId}/reorder-list`, payload);
     },
-
+    
     getCardsInBoard: (boardId: string, filters: CardFilters) => {
-        return axios.get(`/boards/${boardId}/cards`, { 
+        return axios.get(`/cards/board/${boardId}`, { 
             params: filters,
             paramsSerializer: { indexes: null } 
         });
     },
     getAssignedCards: (query: AssignedCardsQuery) => {
-        return axios.get('/cards/assigned-to-me', { params: query });
+        return axios.get('/cards/assigned', { params: query });
     },
     getCardsDueSoon: () => {
         return axios.get('/cards/due-soon');
@@ -45,7 +45,6 @@ export const CardApi = {
     globalSearch: (keyword: string) => {
         return axios.get('/cards/search', { params: { keyword } });
     },
-    // --- BỔ SUNG GỌI API CHO NÚT MEMBERS ---
     addMember: (cardId: string, memberId: string) => {
         return axios.post(`/cards/${cardId}/members`, { memberId });
     }

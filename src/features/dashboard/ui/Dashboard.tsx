@@ -8,7 +8,7 @@ export const Dashboard = () => {
                 <main className="flex-1 p-4 md:p-8 space-y-6">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                         <div>
-                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Dashboard</h2>
+                            <h2 className="text-3xl font-bold tracking-tight text-gray-900">Your Workspaces</h2>
                             <p className="text-muted-foreground">
                                 Manage your workspaces and track your team boards.
                             </p>

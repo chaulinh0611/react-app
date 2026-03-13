@@ -2,7 +2,9 @@ import { Button } from '@/shared/ui/button';
 import { Filter, Users, Tag } from 'lucide-react';
 import { useCardStore } from '@/entities/card/model/card.store';
 
-interface Props { boardId: string; }
+interface Props { 
+    boardId: string; 
+}
 
 export const BoardCardFilter = ({ boardId }: Props) => {
     const { getCardsInBoard } = useCardStore();
