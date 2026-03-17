@@ -17,7 +17,8 @@ export const ListApi = {
 
     archiveList: (id: string) => axios.patch<ApiResponse<void>>(`/lists/${id}/archive`),
 
-    unarchiveList: (id: string) => axios.patch<ApiResponse<void>>(`/lists/${id}/unarchive`),
+    unarchiveList: (id: string, boardId: string) =>
+        axios.patch<ApiResponse<void>>(`/lists/${id}/unarchive`, { boardId }),
 
     reorderLists: (
         listId: string,

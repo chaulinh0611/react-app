@@ -17,7 +17,7 @@ import {
     Image,
     ArrowLeft,
 } from 'lucide-react';
-import { useDeleteCard } from '@/entities/card/model/useCard';
+import { useArchiveCard, useDeleteCard } from '@/entities/card/model/useCard';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 
@@ -32,12 +32,21 @@ interface Props {
 
 export default function CardOption({ cardId, menu, setOpen, setMenu }: Props) {
     const { mutate: deleteCard } = useDeleteCard();
+    const { mutate: archiveCard } = useArchiveCard();
     // const { mutate: duplicateCard } = useDuplicateCard();
     function handleDeleteCard() {
         setOpen(false);
 
         setTimeout(() => {
             deleteCard(cardId);
+        }, 300);
+    }
+
+    function handleArchiveCard() {
+        setOpen(false);
+
+        setTimeout(() => {
+            archiveCard(cardId);
         }, 300);
     }
 
@@ -78,7 +87,7 @@ export default function CardOption({ cardId, menu, setOpen, setMenu }: Props) {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleArchiveCard}>
                         <Archive /> Archive
                     </DropdownMenuItem>
                     <DropdownMenuItem

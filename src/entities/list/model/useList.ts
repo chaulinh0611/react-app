@@ -61,7 +61,8 @@ export const useReorderLists = (boardId: string) => {
 export const useMoveListToAnotherBoard = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ listId, boardId }: { listId: string; boardId: string }) => ListApi.moveListToAnotherBoard(listId, boardId).then(res => res.data),
+        mutationFn: ({ listId, boardId }: { listId: string; boardId: string }) =>
+            ListApi.moveListToAnotherBoard(listId, boardId).then((res) => res.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['lists'] });
         },
@@ -78,6 +79,17 @@ export const useArchiveList = (boardId: string) => {
     });
 };
 
+export const useUnarchiveList = (boardId: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (listId: string) => ListApi.unarchiveList(listId, boardId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['lists', boardId] });
+            queryClient.invalidateQueries({ queryKey: ['cards'] });
+        },
+    });
+};
+
 export const useDuplicateList = (boardId: string) => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -87,4 +99,4 @@ export const useDuplicateList = (boardId: string) => {
             queryClient.invalidateQueries({ queryKey: ['lists', boardId] });
         },
     });
-}
+};

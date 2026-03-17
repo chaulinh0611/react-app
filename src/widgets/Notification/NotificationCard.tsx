@@ -7,8 +7,8 @@ import { useBoardById } from '@/entities/board/model/board.selector';
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { useEffect } from 'react';
 import { cn } from '@/shared/lib/utils';
-import { useNotificationStore } from '@/entities/notification/model/notification.store';
 import { useNavigate } from 'react-router-dom';
+import { useMarkNotificationAsRead } from '@/entities/notification/hooks/useNotification';
 
 interface NotificationCardProps {
     notification: Notification;
@@ -22,7 +22,7 @@ export default function NotificationCard({ notification }: NotificationCardProps
     const board = useBoardById(isBoardType ? notification.entityId : '');
 
     const fetchBoardById = useBoardStore((state) => state.fetchBoardById);
-    const markAsRead = useNotificationStore((state) => state.markAsReadApi);
+    const markAsReadMutation = useMarkNotificationAsRead();
 
     useEffect(() => {
         if (isBoardType && notification.entityId && !board) {
@@ -33,7 +33,7 @@ export default function NotificationCard({ notification }: NotificationCardProps
     const handleNotificationClick = (e: React.MouseEvent) => {
         e.preventDefault();
         if (!notification.isRead) {
-            markAsRead(notification.id);
+            markAsReadMutation.mutate(notification.id);
         }
         if (notification.actionUrl) {
             navigate(notification.actionUrl);

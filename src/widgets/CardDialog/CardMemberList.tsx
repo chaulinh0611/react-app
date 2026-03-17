@@ -33,7 +33,7 @@ export const CardMemberList = ({ member, handleRemoveMember }: Props) => {
                             <AvatarImage src={member.avatarUrl} />
                             <AvatarFallback>{member.fullName}</AvatarFallback>
                         </Avatar>
-                        <DropdownMenuLabel>{member.username}</DropdownMenuLabel>
+                        <DropdownMenuLabel>{member.fullName}</DropdownMenuLabel>
                     </div>
                     <DropdownMenuGroup>
                         <DropdownMenuItem>

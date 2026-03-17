@@ -12,7 +12,16 @@ export default function BoardPage() {
     }
 
     return (
-        <div className="h-full overflow-hidden">
+        <div
+            className="h-full overflow-hidden bg-slate-100 bg-cover bg-center"
+            style={
+                board?.backgroundPath
+                    ? {
+                          backgroundImage: `url(${board.backgroundPath})`,
+                      }
+                    : undefined
+            }
+        >
             <BoardLayout boardId={boardId as string} />
         </div>
     );

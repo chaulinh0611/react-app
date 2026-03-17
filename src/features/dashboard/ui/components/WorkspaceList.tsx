@@ -48,10 +48,6 @@ export const WorkspaceList = () => {
         fetchBoards();
     }, []);
 
-    useEffect(() => {
-        console.log('Danh sách Workspace trong Store:', workspaces);
-    }, [workspaces]);
-
     if (!workspaces || workspaceList.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-lg border-2 border-dashed">

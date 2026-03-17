@@ -12,7 +12,6 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
 import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
 import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
@@ -28,7 +27,6 @@ export default function WorkspacePage() {
 
     const { currentWorkspace, fetchWorkspaceById } = useWorkspaceStore();
     const workspaces = useWorkspaces();
-    const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -58,10 +56,6 @@ export default function WorkspacePage() {
             workspaces,
         });
     }, [workspaceId, currentWorkspace, workspaces]);
-
-    useEffect(() => {
-        boards.forEach((b) => fetchMembersByBoardId(b.id));
-    }, [boards, fetchMembersByBoardId]);
 
     const workspaceBoards = useMemo(() => {
         if (!workspaceId) return [];

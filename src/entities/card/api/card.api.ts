@@ -2,7 +2,7 @@ import type {
     CreateCardPayload,
     ReorderCardPayload,
     UpdateCardPayload,
-    MoveCardToAnotherListPayload
+    MoveCardToAnotherListPayload,
 } from '../model/type';
 import axios from 'axios';
 
@@ -25,6 +25,14 @@ export const CardApi = {
 
     deleteCard: (id: string) => {
         return axios.delete(`/cards/${id}`);
+    },
+
+    archiveCard: (id: string) => {
+        return axios.patch(`/cards/${id}/archive`);
+    },
+
+    unarchiveCard: (id: string) => {
+        return axios.patch(`/cards/${id}/unarchive`);
     },
 
     getMembersOnCard: (cardId: string) => {
@@ -56,9 +64,8 @@ export const CardApi = {
     },
 
     uploadBackground: (cardId: string, file: File) => {
-        const formData = new FormData()
-        formData.append("file", file)
-        return axios.post(`cards/${cardId}/background`, formData)
-    }
-
+        const formData = new FormData();
+        formData.append('file', file);
+        return axios.post(`cards/${cardId}/background`, formData);
+    },
 };

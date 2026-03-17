@@ -64,11 +64,12 @@ export const BoardApi = {
     },
 
     uploadBackground: (
+        boardId: string,
         file: File,
-    ): Promise<ApiResponse<{ backgroundUrl: string; backgroundPublicId: string }>> => {
+    ): Promise<ApiResponse<{ backgroundPath: string; backgroundPublicId: string }>> => {
         const formData = new FormData();
-        formData.append('file', file);
-        return axios.post('/boards/background-upload', formData, {
+        formData.append('background', file);
+        return axios.post(`/boards/${boardId}/background`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },

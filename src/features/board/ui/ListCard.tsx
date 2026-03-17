@@ -4,6 +4,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/ui/dialog';
 import CardDialog from '@/widgets/CardDialog/CardDialog';
 import { useEffect, useState } from 'react';
+import { TextAlignJustify } from 'lucide-react';
+import { useGetMembersOnCard } from '@/entities/card/model/useCard';
+import type { User } from '@/entities/board/model/user.type';
 
 interface ListCardProps {
     card: CardType;
@@ -12,11 +15,8 @@ interface ListCardProps {
 
 export default function ListCard({ card, isDragging }: ListCardProps) {
     const [open, setOpen] = useState(false);
-
-    useEffect(() => {
-        console.log('open', open);
-    }, [open]);
-
+    const { data: cardMembers } = useGetMembersOnCard(card.id);
+    console.log('cardMembers', cardMembers);
     return (
         <Dialog
             open={open}
@@ -41,34 +41,35 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                             {card.title}
                         </h4>
 
-                        {card.description && (
-                            <p className="text-xs text-gray-600 mb-3 line-clamp-2">
-                                {card.description}
-                            </p>
-                        )}
+                        {/* Card Labels */}
 
-                        {(card.cardMembers?.length || 0) > 0 && (
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center -space-x-2">
-                                    {card.cardMembers?.slice(0, 3).map((member) => (
-                                        <Avatar
-                                            key={member.id}
-                                            className="w-6 h-6 border-2 border-white ring-1 ring-gray-100"
-                                        >
-                                            <AvatarImage src={member.user.avatarUrl || undefined} />
-                                            <AvatarFallback className="text-[10px]">
-                                                {member.user.username.charAt(0).toUpperCase()}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                    ))}
-                                    {(card.cardMembers?.length || 0) > 3 && (
-                                        <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-gray-600 ring-1 ring-gray-100">
-                                            +{(card.cardMembers?.length || 0) - 3}
-                                        </div>
-                                    )}
+                        {/* Card Icon */}
+                        <div className="flex gap-2 items-center justify-between">
+                            {card.description && <TextAlignJustify className="h-3" />}
+
+                            {(cardMembers?.length || 0) > 0 && (
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center -space-x-2">
+                                        {cardMembers?.slice(0, 3).map((member: any) => (
+                                            <Avatar
+                                                key={member.userId}
+                                                className="w-6 h-6 border-2 border-white ring-1 ring-gray-100"
+                                            >
+                                                <AvatarImage src={member.avatarUrl || undefined} />
+                                                <AvatarFallback className="text-[10px]">
+                                                    {member.fullName.charAt(0).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        ))}
+                                        {(cardMembers?.length || 0) > 3 && (
+                                            <div className="w-6 h-6 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-[10px] font-medium text-gray-600 ring-1 ring-gray-100">
+                                                +{(cardMembers?.length || 0) - 3}
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </CardContent>
                 </Card>
             </DialogTrigger>

@@ -27,7 +27,7 @@ export const InvitePopover = () => {
     const { mutate: revokeLink } = useRevokeLink();
     const { mutate: generateShareLink } = useInviteMemberByLink();
     const [email, setEmail] = useState('');
-
+    console.log(BoardMembers);
     function handleInviteEmail() {
         inviteByEmail(
             { boardId: boardId as string, email },

@@ -21,8 +21,14 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
             queryKey: ['cards', list.id],
             queryFn: async () => {
                 const res = await CardApi.getCardsOnList({ listId: list.id });
-                const data = Array.isArray(res) ? res : (res?.data ?? []);
-                return { listId: list.id, cards: data };
+                const payload = Array.isArray(res) ? res : res?.data;
+                const data = Array.isArray(payload)
+                    ? payload
+                    : Array.isArray((payload as any)?.data)
+                      ? (payload as any).data
+                      : [];
+                const activeCards = data.filter((card: any) => !card.isArchived);
+                return { listId: list.id, cards: activeCards };
             },
             enabled: !!list.id,
         })),

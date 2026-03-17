@@ -33,7 +33,10 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
     // update card handle
     function handleUpdateCard() {
         updateCard(
-            { id: card.id, payload: { title, description: JSON.stringify(description) || undefined } },
+            {
+                id: card.id,
+                payload: { title, description: JSON.stringify(description) || undefined },
+            },
             {
                 onSuccess: () => {
                     setIsEditing(false);
@@ -109,12 +112,13 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                     </div>
                 </DialogHeader>
 
-                <div className="flex-1 mt-2 overflow-y-auto pl-4 pb-4">
+                <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
                     {/* Card Action */}
                     <CardAction cardId={card.id} />
 
-                    <div className="flex flex-col mt-3 gap-2 justify-between">
-                        <div className='flex justify-between items-center'>
+                    {/* Card Description */}
+                    <div className="flex flex-col mt-3  gap-2 justify-between ">
+                        <div className="flex justify-between items-center">
                             <div className="flex items-center gap-2">
                                 <TextAlignJustify className="w-4 h-4" />
                                 <Label>Description</Label>
