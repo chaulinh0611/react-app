@@ -22,7 +22,7 @@ export function MainLayout() {
                 <SidebarInset className="flex flex-col flex-1">
                     <Header />
 
-                    <main className="w-4/5 mx-auto">
+                    <main className="flex-1 overflow-auto bg-[#fafbfc]">
                         <Outlet />
                     </main>
                 </SidebarInset>

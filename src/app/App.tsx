@@ -16,6 +16,7 @@ const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
 const TemplatePage = lazy(() => import('@/pages/templates/TemplatePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
 const WorkspaceSettings = lazy(() => import('@/pages/dashboard/WorkspaceSettingsPage'));
+const UserSettings = lazy(() => import('@/pages/settings/UserSettingsPage'));
 
 export default function AppRoutes() {
     return (
@@ -34,6 +35,7 @@ export default function AppRoutes() {
                             <Route path="/workspace/:workspaceId/settings" element={<WorkspaceSettings />} />
                             <Route path="/dashboard" element={<Dashboard />} />
                             <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/settings" element={<UserSettings />} />
                             <Route path="/templates" element={<TemplatePage />} />
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />

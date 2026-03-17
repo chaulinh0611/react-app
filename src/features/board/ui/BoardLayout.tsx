@@ -20,17 +20,24 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
         }
 
         if (type === 'LIST') {
-            const newLists = useListStore.getState().boardsLists[boardId];
-            const [removed] = newLists.splice(source.index, 1);
-            newLists.splice(destination.index, 0, removed);
+            const currentLists = [...(useListStore.getState().boardsLists[boardId] || [])];
+            
+            // Calculate new position neighbors without mutating the original state
+            const removed = currentLists[source.index];
+            const remaining = currentLists.filter((_, i) => i !== source.index);
+            const reordered = [
+                ...remaining.slice(0, destination.index),
+                removed,
+                ...remaining.slice(destination.index)
+            ];
 
-            const beforeId = newLists[destination.index - 1];
-            const afterId = newLists[destination.index + 1];
+            const beforeId = reordered[destination.index - 1] || null;
+            const afterId = reordered[destination.index + 1] || null;
 
             const payload: ReorderListsPayload = {
                 boardId,
-                beforeId: beforeId || null,
-                afterId: afterId || null,
+                beforeId,
+                afterId,
                 listId: draggableId,
             };
 
@@ -41,16 +48,23 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
             // Reorder in same list
             if (source.droppableId === destination.droppableId) {
                 const listId = source.droppableId;
-                const cardList = useCardStore.getState().listCards[listId] || [];
-                const [removed] = cardList.splice(source.index, 1);
-                cardList.splice(destination.index, 0, removed);
+                const currentCards = [...(useCardStore.getState().listCards[listId] || [])];
+                
+                const removed = currentCards[source.index];
+                const remaining = currentCards.filter((_, i) => i !== source.index);
+                const reordered = [
+                    ...remaining.slice(0, destination.index),
+                    removed,
+                    ...remaining.slice(destination.index)
+                ];
 
-                const beforeId = cardList[destination.index - 1];
-                const afterId = cardList[destination.index + 1];
+                const beforeId = reordered[destination.index - 1] || null;
+                const afterId = reordered[destination.index + 1] || null;
+
                 const payload: ReorderCardPayload = {
                     listId,
-                    beforeId: beforeId || null,
-                    afterId: afterId || null,
+                    beforeId,
+                    afterId,
                     cardId: draggableId,
                 };
                 useCardStore.getState().reorderCards(payload);

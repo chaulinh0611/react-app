@@ -34,7 +34,9 @@ export const WorkspaceList = () => {
         }
     });
 
-    const workspaces = workspacesResponse || [];
+    const workspaces = useMemo(() => {
+        return (workspacesResponse || []).filter((ws: any) => !ws.isArchived);
+    }, [workspacesResponse]);
     const { fetchBoards } = useBoardStore();
     const [createBoardDialog, setCreateBoardDialog] = useState({
         open: false,

@@ -12,16 +12,16 @@ import {
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
-import { Dropzone, DropzoneContent, DropzoneEmptyState } from '@/components/ui/dropzone';
 import { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store'; // Import Store
 import { Loader2 } from 'lucide-react'; // Icon loading
 
 export const CreateWorkspaceDialog = () => {
-    const [files, setFiles] = useState<File[]>();
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [open, setOpen] = useState(false);
+    const queryClient = useQueryClient();
 
     const { createWorkspace, isLoading } = useWorkspaceStore();
 
@@ -33,10 +33,11 @@ export const CreateWorkspaceDialog = () => {
                 title: title.trim(), 
                 description: description.trim() 
             });
+            
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
 
             setTitle('');
             setDescription('');
-            setFiles([]);
             setOpen(false);
         } catch (error) {
             console.error("Create workspace failed:", error);
@@ -59,22 +60,6 @@ export const CreateWorkspaceDialog = () => {
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
-                    {/* Phần Background (Dropzone) */}
-                    <div className="grid items-center gap-2">
-                        <Label className="text-sm font-medium">Background</Label>
-                        <Dropzone
-                            src={files}
-                            onDrop={(acceptedFiles) => setFiles(acceptedFiles)}
-                            accept={{
-                                'image/*': ['.png', '.jpg', '.jpeg', '.gif'],
-                            }}
-                            maxSize={5 * 1024 * 1024}
-                            className="w-full"
-                        >
-                            <DropzoneContent />
-                            <DropzoneEmptyState />
-                        </Dropzone>
-                    </div>
 
                     {/* Phần Title */}
                     <div className="space-y-2">

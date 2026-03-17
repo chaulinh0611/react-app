@@ -7,11 +7,11 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import { Link, useNavigate } from 'react-router-dom';
-import { User, Settings, LogOut, ChevronsUpDown, Loader2 } from 'lucide-react';
+import { User, Settings, LogOut, ChevronsUpDown } from 'lucide-react';
 import { useUserStore } from '@/entities/users/model/user.store';
 
 export const NavUser = () => {
-    const { user, isLoading } = useUserStore();
+    const { user } = useUserStore();
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -79,7 +79,7 @@ export const NavUser = () => {
                 </DropdownMenuItem>
 
                 <DropdownMenuItem asChild>
-                    <Link to="/profile" className="cursor-pointer flex items-center gap-2">
+                    <Link to="/settings" className="cursor-pointer flex items-center gap-2">
                         <Settings className="h-4 w-4" />
                         <span>Settings</span>
                     </Link>

@@ -1,6 +1,7 @@
 import type { Board } from '@/entities/board/model/board.type';
 import { Link } from 'react-router-dom';
-import { Kanban, Users, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { cn } from '@/shared/lib/utils';
+import { Kanban, Users, Edit, MoreHorizontal, Trash, Archive } from 'lucide-react';
 
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
@@ -21,13 +22,21 @@ type Props = {
 };
 
 export function WorkspaceBoards({ board, viewMode }: Props) {
-    const { deleteBoard } = useBoardStore();
+    const { deleteBoard, archiveBoard } = useBoardStore();
     const memberCount = useMemberCountByBoardId(board.id);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
     const setIsEditDialogOpen = useListStore((state) => state.setIsEditDialogOpen);
     const handleDelete = () => {
         if (confirm(`Delete "${board.title}"?`)) {
             deleteBoard(board.id);
+        }
+    };
+
+    const handleArchive = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (confirm(`Archive "${board.title}"?`)) {
+            archiveBoard(board.id);
         }
     };
 
@@ -74,6 +83,13 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                                     </DropdownMenuItem>
 
                                     <DropdownMenuItem
+                                        onClick={handleArchive}
+                                    >
+                                        <Archive className="mr-2 h-4 w-4" />
+                                        Archive
+                                    </DropdownMenuItem>
+
+                                    <DropdownMenuItem
                                         onClick={(e) => {
                                             e.preventDefault();
                                             handleDelete();
@@ -100,8 +116,14 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                 rounded-xl border bg-card
                 transition-all
                 hover:-translate-y-1 hover:shadow-lg
-                px-6
+                px-6 min-h-[100px]
             "
+            style={board.backgroundUrl ? { 
+                backgroundImage: `url(${board.backgroundUrl})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                color: 'white'
+             } : {}}
         >
             {/* Actions */}
             <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition">
@@ -117,6 +139,10 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                         </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleArchive}>
+                            <Archive className="mr-2 h-4 w-4" />
+                            Archive
+                        </DropdownMenuItem>
                         <DropdownMenuItem onClick={handleDelete} className="text-destructive">
                             <Trash className="mr-2 h-4 w-4" />
                             Delete
@@ -128,13 +154,22 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
             <Link to={`/board/${board.id}`} className="block h-full">
                 <CardContent className="flex p-2! h-full justify-between flex-col gap-2">
                     <div className="flex items-start gap-2">
-                        <h3 className="text-base font-semibold overflow-hidden text-ellipsis line-clamp-2 leading-tight">
+                        <h3 className={cn(
+                            "text-base font-semibold overflow-hidden text-ellipsis line-clamp-2 leading-tight",
+                            board.backgroundUrl ? "text-white drop-shadow-md" : "text-gray-800"
+                        )}>
                             {board.title}
                         </h3>
                     </div>
 
-                    <div className="pt-2 border-t border-gray-100">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <div className={cn(
+                        "pt-2 border-t",
+                        board.backgroundUrl ? "border-white/20" : "border-gray-100"
+                    )}>
+                        <div className={cn(
+                            "flex items-center justify-between text-xs",
+                            board.backgroundUrl ? "text-white/80" : "text-muted-foreground"
+                        )}>
                             <span>{listCount} lists</span>
                             <div className="flex items-center gap-1">
                                 <Users className="h-3 w-3" />

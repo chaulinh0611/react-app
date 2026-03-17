@@ -144,13 +144,14 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
         try {
             const { data: newCardRes } = await CardApi.createCard(payload);
             const newCard = newCardRes.data || newCardRes;
+            const listId = newCard.listId || newCard.list?.id;
             set((state) => ({
                 ...state,
                 cards: { ...state.cards, [newCard.id]: newCard },
-                listCards: {
+                listCards: listId ? {
                     ...state.listCards,
-                    [newCard.listId || newCard.list.id]: [...(state.listCards[newCard.listId || newCard.list.id] || []), newCard.id],
-                },
+                    [listId]: [...(state.listCards[listId] || []), newCard.id],
+                } : state.listCards,
                 isLoading: false,
             }));
             return newCard;
@@ -161,6 +162,7 @@ export const useCardStore = create<CardState & CardAction>((set, get) => ({
     },
 
     updateCard: async (cardId, payload) => {
+        console.log(`[CardStore] Updating card ${cardId}`, payload);
         try {
             const response = await CardApi.updateCard(cardId, payload);
             const updatedCard = response.data.data || response.data;

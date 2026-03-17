@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { WorkspaceApi } from '@/entities/workspace/api/workspace.api';
 import { SidebarGroupLabel, SidebarGroup } from '@/shared/ui/sidebar';
 
-import { PanelsTopLeft, Origami, LayoutPanelTop } from 'lucide-react';
+import { PanelsTopLeft, Origami, LayoutTemplate } from 'lucide-react';
 
 import { Link } from 'react-router-dom';
 import { NavMain } from './NavMain';
@@ -47,8 +47,8 @@ export default function AppSidebar() {
                             to="/templates"
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md mb-1 transition-colors"
                         >
-                            <LayoutPanelTop className="h-4 w-4" />
-                            Template
+                            <LayoutTemplate className="h-4 w-4" />
+                            Templates
                         </Link>
                     </SidebarGroup>
                     <div>
