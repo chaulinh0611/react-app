@@ -11,16 +11,11 @@ export const BoardApi = {
         return axios.post('/boards', payload);
     },
 
-    updateBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<Board> => {
-        return axios.patch(`/boards/${id}`, payload);
-    },
-
-    patchBoard: (id: string, payload: Partial<CreateBoardPayload>): Promise<Board> => {
-        return axios.patch(`/boards/${id}`, payload);
-    },
-
-    deleteBoard: (id: string): Promise<void> => {
-        return axios.delete(`/boards/${id}`);
+    updateBoard: (
+        id: string,
+        payload: Partial<CreateBoardPayload>,
+    ): Promise<ApiResponse<Board>> => {
+        return axios.put(`/boards/${id}`, payload);
     },
 
     getPublicBoards: (): Promise<Board[]> => {
@@ -35,8 +30,12 @@ export const BoardApi = {
         return axios.get(`/boards/${boardId}/members`);
     },
 
-    inviteMemberViaEmail: (boardId: string, email: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/invite/email`, { email, role: 'board_member' });
+    inviteMemberViaEmail: (
+        boardId: string,
+        email: string,
+        role: string,
+    ): Promise<ApiResponse<void>> => {
+        return axios.post(`/boards/${boardId}/members/invite/email`, { email, role });
     },
 
     createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {

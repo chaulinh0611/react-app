@@ -33,14 +33,8 @@ export default function AppRoutes() {
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
-                            <Route
-                                path="/workspace/:workspaceId/members"
-                                element={<WorkspaceMembersPage />}
-                            />
-                            <Route
-                                path="/workspace/:workspaceId/settings"
-                                element={<WorkspaceSettingsPage />}
-                            />
+                            <Route path="/workspace/:workspaceId/members" element={<WorkspaceMembersPage />} />
+                            <Route path="/workspace/:workspaceId/settings" element={<WorkspaceSettingsPage />} />
                             <Route path="/workspace/join" element={<JoinWorkspacePage />} />
                             <Route path="/dashboard" element={<Dashboard />} />
 
