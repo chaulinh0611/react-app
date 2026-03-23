@@ -59,7 +59,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                     boardToEdit.id,
                     {
                         title: title.trim(),
-                        description: description.trim() || null,
+                        description: description.trim(),
                     }
                 );
                 onOpenChange(false);

@@ -12,7 +12,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
+import {  useBoardMembersStore  } from '@/entities/board/model/board-members.store';
 import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
 import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
@@ -28,7 +28,7 @@ export default function WorkspacePage() {
 
     const { currentWorkspace, fetchWorkspaceById } = useWorkspaceStore();
     const workspaces = useWorkspaces();
-    const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
+    const fetchMembersByBoardId = useBoardMembersStore((s) => s.fetchMembersByBoardId);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -65,7 +65,11 @@ export default function WorkspacePage() {
 
     const workspaceBoards = useMemo(() => {
         if (!workspaceId) return [];
-        return boards.filter((b) => b.workspace?.id === workspaceId);
+        return boards.filter(
+            (b) =>
+                b.workspace?.id === workspaceId &&
+                !b.isArchived
+        );
     }, [boards, workspaceId]);
 
     const workspaceTitle =
@@ -103,8 +107,8 @@ export default function WorkspacePage() {
     }, [workspaceBoards, searchQuery, sortBy]);
 
     return (
-        <div>
-            <div className="space-y-15 p-8 pt-8">
+        <div className="h-screen flex flex-col">
+        <div className="flex-1 overflow-y-auto space-y-15 p-8 pt-8">
                 <div>
                     <h1 className="text-3xl font-bold">{workspaceTitle}</h1>
                     <p className="text-muted-foreground">{workspaceDescription}</p>

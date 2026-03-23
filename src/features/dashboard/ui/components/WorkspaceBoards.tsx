@@ -1,6 +1,6 @@
 import type { Board } from '@/entities/board/model/board.type';
 import { Link } from 'react-router-dom';
-import { Kanban, Users, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Users, Edit, MoreHorizontal, Trash } from 'lucide-react';
 
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
@@ -10,6 +10,7 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
+import { Archive } from 'lucide-react';
 
 import { useBoardStore } from '@/entities/board/model/board.store';
 import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
@@ -22,112 +23,163 @@ type Props = {
 };
 
 export function WorkspaceBoards({ board, viewMode, onEdit }: Props) {
-    const { deleteBoard } = useBoardStore();
+    const {
+        deleteBoard,
+        archiveBoard,
+        setIsEditDialogOpen,
+        setCurrentEditingBoard,
+    } = useBoardStore();
+
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
-    const handleDelete = async () => {
+
+    const memberCount = useBoardMembersStore(
+        (state) => state.boardMembers[board.id]?.length || 0
+    );
+
+    const handleDelete = async (e?: React.MouseEvent) => {
+        e?.preventDefault();
         if (confirm(`Delete "${board.title}"?`)) {
             try {
                 await deleteBoard(board.id);
             } catch (err) {
-                console.error('delete failed', err);
+                console.error(err);
                 alert('Could not delete board.');
             }
         }
     };
 
-    const useMemberCountByBoardId = (boardId: string) => {
-        return useBoardMembersStore((state) => state.BoardMembers[boardId]?.length || 0);
+    const handleArchiveToggle = async (e?: React.MouseEvent) => {
+        e?.preventDefault();
+        try {
+            await archiveBoard(board.id);
+        } catch (err) {
+            console.error(err);
+            alert('Action failed');
+        }
     };
 
-    const memberCount = useMemberCountByBoardId(board.id);
+    const handleEdit = (e?: React.MouseEvent) => {
+        e?.preventDefault();
 
-    /* ================= LIST MODE ================= */
+        if (onEdit) {
+            onEdit(); 
+            return;
+        }
+
+        // fallback
+        setCurrentEditingBoard(board);
+        setIsEditDialogOpen(true);
+    };
+
+    // ===== LIST VIEW =====
     if (viewMode === 'list') {
         return (
             <Link to={`/board/${board.id}`} className="block mb-3">
-                <Card className="group transition hover:bg-muted/30 ">
-                    <CardContent className=" flex items-center gap-6 ">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600">
-                            <Kanban className="h-5 w-5 text-white" />
+                <Card className="group transition hover:bg-muted/30 overflow-hidden">
+                    <CardContent className="flex items-center gap-4 p-3">
+                        <div className="relative h-12 w-20 rounded-md overflow-hidden flex-shrink-0">
+                            {board.backgroundPath ? (
+                                <>
+                                    <div
+                                        className="absolute inset-0 bg-cover bg-center"
+                                        style={{
+                                            backgroundImage: `url(${board.backgroundPath})`,
+                                        }}
+                                    />
+                                    <div className="absolute inset-0 bg-black/20" />
+                                </>
+                            ) : (
+                                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600" />
+                            )}
                         </div>
 
                         <div className="flex-1 space-y-1.5">
-                            <h3 className="font-semibold leading-tight">{board.title}</h3>
+                            <h3 className="font-semibold">{board.title}</h3>
 
-                            <div className="mt-1 flex flex-wrap gap-6 text-sm text-muted-foreground">
+                            <div className="flex gap-6 text-sm text-muted-foreground">
                                 <span>{listCount} lists</span>
                                 <span>{memberCount} members</span>
                                 <span>
-                                    Created {new Date(board.createdAt).toLocaleDateString()}
+                                    {new Date(board.createdAt).toLocaleDateString()}
                                 </span>
                             </div>
                         </div>
 
-                        {/* Actions */}
-                        <div className="opacity-0 group-hover:opacity-100 transition">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                        <MoreHorizontal className="h-4 w-4" />
-                                    </Button>
-                                </DropdownMenuTrigger>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon">
+                                    <MoreHorizontal />
+                                </Button>
+                            </DropdownMenuTrigger>
 
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            onEdit?.();
-                                        }}
-                                    >
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Edit
-                                    </DropdownMenuItem>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={handleEdit}>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Edit
+                                </DropdownMenuItem>
 
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            handleDelete();
-                                        }}
-                                        className="text-destructive"
-                                    >
-                                        <Trash className="mr-2 h-4 w-4" />
-                                        Delete
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
+                                <DropdownMenuItem onClick={handleArchiveToggle}>
+                                    <Archive className="mr-2 h-4 w-4" />
+                                        Archive
+                                </DropdownMenuItem>
+
+                                <DropdownMenuItem
+                                    onClick={handleDelete}
+                                    className="text-destructive"
+                                >
+                                    <Trash className="mr-2 h-4 w-4" />
+                                    Delete
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </CardContent>
                 </Card>
             </Link>
         );
     }
 
-    /* ================= GRID MODE ================= */
+    // ===== GRID VIEW =====
     return (
-        <Card
-            className="
-                group relative
-                rounded-xl border bg-card
-                transition-all
-                hover:-translate-y-1 hover:shadow-lg
-                px-6
-            "
-        >
+        <Card className="group relative rounded-xl overflow-hidden hover:shadow-lg">
+            {/* Background */}
+            {board.backgroundPath ? (
+                <>
+                    <div
+                        className="absolute inset-0 bg-cover bg-center group-hover:scale-105 transition"
+                        style={{
+                            backgroundImage: `url(${board.backgroundPath})`,
+                        }}
+                    />
+                    <div className="absolute inset-0 bg-black/40" />
+                </>
+            ) : (
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600" />
+            )}
+
             {/* Actions */}
-            <div className="absolute top-2 right-2 z-10 opacity-0 group-hover:opacity-100 transition">
+            <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                            <MoreHorizontal className="h-4 w-4" />
+                        <Button size="icon" variant="ghost">
+                            <MoreHorizontal />
                         </Button>
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => onEdit?.()}>
+                        <DropdownMenuItem onClick={handleEdit}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+
+                        <DropdownMenuItem onClick={handleArchiveToggle}>
+                            <Archive className="mr-2 h-4 w-4" />
+                                Archive
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                            onClick={handleDelete}
+                            className="text-destructive"
+                        >
                             <Trash className="mr-2 h-4 w-4" />
                             Delete
                         </DropdownMenuItem>
@@ -136,20 +188,14 @@ export function WorkspaceBoards({ board, viewMode, onEdit }: Props) {
             </div>
 
             <Link to={`/board/${board.id}`} className="block h-full">
-                <CardContent className="flex p-2! h-full justify-between flex-col gap-2">
-                    <div className="flex items-start gap-2">
-                        <h3 className="text-base font-semibold overflow-hidden text-ellipsis line-clamp-2 leading-tight">
-                            {board.title}
-                        </h3>
-                    </div>
+                <CardContent className="relative z-10 text-white p-3 flex flex-col justify-between h-full">
+                    <h3 className="font-semibold line-clamp-2">{board.title}</h3>
 
-                    <div className="pt-2 border-t border-gray-100">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground">
-                            <span>{listCount} lists</span>
-                            <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                <span>{memberCount}</span>
-                            </div>
+                    <div className="flex justify-between text-xs">
+                        <span>{listCount} lists</span>
+                        <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span>{memberCount}</span>
                         </div>
                     </div>
                 </CardContent>

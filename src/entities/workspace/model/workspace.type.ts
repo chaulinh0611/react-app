@@ -5,7 +5,7 @@ interface Workspace {
     permissionLevel?: 'private' | 'workspace' | 'public';
     createdAt: string;
     updatedAt: string;
-    is_Archived: boolean;
+    isArchived: boolean;
     ownerId: string;
     members?: WorkspaceMember[];
 }
@@ -23,9 +23,6 @@ interface WorkspaceState {
     currentWorkspace: Workspace | null;
     isLoading: boolean;
     error: string | null;
-
-    // extended state for details
-    currentWorkspace: Workspace | null;
     workspaceMembers: WorkspaceMember[];
     workspaceBoards: any[];
 }

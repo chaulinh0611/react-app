@@ -1,75 +1,103 @@
-import { create } from "zustand"
-import { BoardApi } from "../api/board.api"
+import { create } from "zustand";
+import { BoardApi } from "../api/board.api";
 
 interface BoardMember {
-    userId: string
-    email: string
-    avatarUrl: string
-    fullName: string
-    role: string
-    username: string
+    userId: string;
+    email: string;
+    avatarUrl: string;
+    fullName: string;
+    role: string;
+    username: string;
 }
 
 interface BoardMembersState {
-    BoardMembers: Record<string, BoardMember[]>
-    loading: boolean
-    error: any
+    boardMembers: Record<string, BoardMember[]>;
+    loading: boolean;
+    error: string | null;
 }
 
 interface BoardMembersActions {
-    fetchMembersByBoardId: (boardId: string) => Promise<void>
-    inviteMemberViaEmail: (boardId: string, emaill: string) => void
-    removeMember: (boardId: string, memberId: string) => void
+    _unwrap: (val: any) => any;
+    fetchMembersByBoardId: (boardId: string) => Promise<BoardMember[]>;
+    inviteMemberViaEmail: (boardId: string, email: string, role: string) => Promise<void>;
+    removeMember: (boardId: string, userId: string) => Promise<void>;
 }
 
 export const useBoardMembersStore = create<BoardMembersState & BoardMembersActions>((set, get) => ({
-    BoardMembers: {},
+
+    boardMembers: {},
     loading: false,
     error: null,
 
-    fetchMembersByBoardId: async (boardId: string) => {
-        set({ loading: true, error: null })
-        try {
-            // const { BoardMembers } = get()
-            // if (BoardMembers[boardId]) {
-            //     set({ loading: false })
-            //     return
-            // }
+    _unwrap: (val: any): any => {
+        if (val?.data) return val.data;
+        return val;
+    },
 
-            const res = await BoardApi.getMembers(boardId)
-            set(state => ({
-                BoardMembers: {
-                    ...state.BoardMembers,
-                    [boardId]: res.data,
+    fetchMembersByBoardId: async (boardId) => {
+        set({ loading: true, error: null });
+
+        try {
+            const res = await BoardApi.getMembers(boardId);
+            const data = get()._unwrap(res);
+
+            set((state) => ({
+                boardMembers: {
+                    ...state.boardMembers,
+                    [boardId]: data,
                 },
                 loading: false,
-            }))
-        } catch (error) {
+            }));
+
+            return data;
+        } catch (err) {
             set({
-                error,
                 loading: false,
-            })
+                error: (err as Error).message,
+            });
+            throw err;
         }
     },
 
+    inviteMemberViaEmail: async (boardId, email, role) => {
+        set({ loading: true, error: null });
 
-    inviteMemberViaEmail: async (boardId: string, email: string) => {
         try {
-            await BoardApi.inviteMemberViaEmail(boardId, email)
-        } catch (error) {
+            await BoardApi.inviteMemberViaEmail(boardId, email, role);
+
+            await get().fetchMembersByBoardId(boardId);
+
+            set({ loading: false });
+        } catch (err) {
             set({
-                error,
                 loading: false,
-            })
+                error: (err as Error).message,
+            });
+            throw err;
         }
     },
 
-    removeMember: (boardId: string, memberId: string) => {
-        set((state) => ({
-            BoardMembers: {
-                ...state.BoardMembers,
-                [boardId]: state.BoardMembers[boardId].filter((m) => m.id !== memberId),
-            },
-        }))
+    removeMember: async (boardId, userId) => {
+        set({ loading: true, error: null });
+
+        try {
+            await BoardApi.removeMember(boardId, userId);
+
+            set((state) => ({
+                boardMembers: {
+                    ...state.boardMembers,
+                    [boardId]: state.boardMembers[boardId]?.filter(
+                        (m) => m.userId !== userId
+                    ) || [],
+                },
+                loading: false,
+            }));
+        } catch (err) {
+            set({
+                loading: false,
+                error: (err as Error).message,
+            });
+            throw err;
+        }
     },
 }));

@@ -15,7 +15,7 @@ export const BoardApi = {
         id: string,
         payload: Partial<CreateBoardPayload>,
     ): Promise<ApiResponse<Board>> => {
-        return axios.put(`/boards/${id}`, payload);
+        return axios.patch(`/boards/${id}`, payload);
     },
 
     getPublicBoards: (): Promise<Board[]> => {
@@ -58,6 +58,10 @@ export const BoardApi = {
         return axios.post(`/boards/${id}/archive`);
     },
 
+    deleteBoard: (id: string): Promise<void> => {
+        return axios.delete(`/boards/${id}`);
+    },
+
     reopenBoard: (id: string): Promise<void> => {
         return axios.post(`/boards/${id}/reopen`);
     },
@@ -88,6 +92,12 @@ export const BoardApi = {
         payload: CreateBoardPayload,
     ): Promise<ApiResponse<Board>> => {
         return axios.post(`/boards/template/${templateId}`, payload);
+    },
+    inviteMemberViaLink: (
+        boardId: string,
+        role: string,
+    ): Promise<ApiResponse<string>> => {
+        return axios.post(`/boards/${boardId}/members/invite/link`, { role });
     },
 
     getListsOfBoard: (boardId: string): Promise<ApiResponse<any>> => {

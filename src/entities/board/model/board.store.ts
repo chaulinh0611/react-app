@@ -9,13 +9,13 @@ interface BoardState {
 }
 
 interface BoardActions {
-    // helper used internally to unwrap API responses
     _unwrap?: (val: any) => any;
     setBoards: (boards: Board[]) => void;
     addBoard: (board: Board) => void;
     deleteBoard: (id: string) => Promise<void>;
     getBoardById: (id: string) => Board | undefined;
-
+    updateBoard: (id: string, payload: Partial<Omit<CreateBoardPayload, 'workspaceId'>>) => Promise<Board>;
+    archiveBoard: (id: string) => Promise<void>;
     setIsEditDialogOpen: (open: boolean) => void;
     setCurrentWorkspace: (id: string | null) => void;
 
@@ -24,6 +24,8 @@ interface BoardActions {
         title: string;
         description?: string;
     }) => Promise<Board>;
+    currentEditingBoard: Board | null;
+    setCurrentEditingBoard: (board: Board | null) => void;
 
     fetchBoards: () => Promise<void>;
     fetchBoardById: (id: string) => Promise<void>;
@@ -33,6 +35,9 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
     boards: [],
     isEditDialogOpen: false,
     currentWorkspace: null,
+    currentEditingBoard: null,
+
+    setCurrentEditingBoard: (board) => set({ currentEditingBoard: board }),
 
     _unwrap: (val: any): any => {
         if (val && typeof val === 'object' && 'data' in val) {
@@ -62,24 +67,40 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
 
     getBoardById: (id) => get().boards.find((b) => b.id === id),
 
-    updateBoard: async (id: string, payload: Partial<Omit<CreateBoardPayload, 'workspaceId'>>) => {
+    updateBoard: async (id, payload) => {
         try {
-            let updatedData: Board = await BoardApi.updateBoard(id, payload);
-            if ((updatedData as any).data) {
-                updatedData = (updatedData as any).data;
-            }
+            console.log('UPDATE BOARD', {
+                id: id,
+                data: { ...payload },
+            });
+            const res = await BoardApi.updateBoard(id, payload);
+
+            const updatedData: Board = get()._unwrap!(res);
+
             set((state) => ({
-                boards: state.boards.map((b) => {
-                    if (b.id !== id) return b;
-                    return {
-                        ...b,
-                        ...updatedData,
-                    };
-                }),
+                boards: state.boards.map((b) =>
+                    b.id === id ? { ...b, ...updatedData } : b
+                ),
             }));
+
             return updatedData;
         } catch (err) {
             console.error('Failed to update board', err);
+            throw err;
+        }
+    },
+
+    archiveBoard: async (id: string) => {
+        try {
+            await BoardApi.archiveBoard(id);
+
+            set((state) => ({
+                boards: state.boards.map((b) =>
+                    b.id === id ? { ...b, isArchived: true } : b
+                ),
+            }));
+        } catch (err) {
+            console.error('Failed to archive board', err);
             throw err;
         }
     },
@@ -101,7 +122,7 @@ export const useBoardStore = create<BoardState & BoardActions>((set, get) => ({
     },
 
     fetchBoards: async () => {
-        const raw = await BoardApi.getBoards();
+        const raw = await BoardApi.getAccessiableBoards();
         console.log('API boards raw:', raw);
         const response = get()._unwrap!(raw) || [];
         let list: Board[] = [];

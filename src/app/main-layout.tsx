@@ -10,9 +10,9 @@ export function MainLayout() {
         <SidebarProvider>
             <div className="flex h-screen w-full bg-white">
                 <AppSidebar />
-                <SidebarInset className="flex flex-col flex-1 overflow-hidden">
+                <SidebarInset className="flex flex-col flex-1">
                     <Header />
-                    <main className="flex-1 overflow-hidden">
+                    <main className="flex-1 h-full overflow-y-auto">
                         <Outlet />
                     </main>
                 </SidebarInset>

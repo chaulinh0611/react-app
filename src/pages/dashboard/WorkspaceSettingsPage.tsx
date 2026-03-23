@@ -19,7 +19,7 @@ export default function WorkspaceSettingsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  /* ================= FETCH ================= */
+
 
   useEffect(() => {
     if (!workspaceId) return;
@@ -32,7 +32,6 @@ export default function WorkspaceSettingsPage() {
     setDescription(currentWorkspace.description || "");
   }, [currentWorkspace]);
 
-  /* ================= UPDATE ================= */
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,13 +48,12 @@ export default function WorkspaceSettingsPage() {
     }
   };
 
-  /* ================= ARCHIVE ================= */
 
   const handleArchiveToggle = async () => {
     if (!workspaceId || !currentWorkspace) return;
 
     try {
-      if (currentWorkspace.is_Archived) {
+      if (currentWorkspace.isArchived) {
         await unarchiveWorkspace(workspaceId);
         alert("Workspace reopened");
       } else {
@@ -87,7 +85,6 @@ export default function WorkspaceSettingsPage() {
     }
   };
 
-  /* ================= RENDER ================= */
 
   if (isLoading && !currentWorkspace) {
     return <div className="p-6">Loading workspace...</div>;
@@ -98,7 +95,7 @@ export default function WorkspaceSettingsPage() {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-100 flex justify-center py-10">
+    <div className="w-full h-screen overflow-y-auto bg-gray-100 flex justify-center py-10">
       <div className="w-full max-w-3xl space-y-8">
 
         {/* HEADER */}
@@ -175,12 +172,12 @@ export default function WorkspaceSettingsPage() {
             <span
               className={`px-2 py-1 text-xs rounded-full font-medium
               ${
-                currentWorkspace.is_Archived
+                currentWorkspace.isArchived
                   ? "bg-yellow-100 text-yellow-700"
                   : "bg-green-100 text-green-700"
               }`}
             >
-              {currentWorkspace.is_Archived ? "Archived" : "Active"}
+              {currentWorkspace.isArchived ? "Archived" : "Active"}
             </span>
           </p>
 
@@ -188,7 +185,7 @@ export default function WorkspaceSettingsPage() {
             onClick={handleArchiveToggle}
             className="px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white transition"
           >
-            {currentWorkspace.is_Archived
+            {currentWorkspace.isArchived
               ? "Reopen Workspace"
               : "Archive Workspace"}
           </button>

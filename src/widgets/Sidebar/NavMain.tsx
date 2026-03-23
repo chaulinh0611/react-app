@@ -9,7 +9,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/shared/ui
 import { Link } from 'react-router-dom';
 import type { Workspace } from '@/entities/workspace/model/workspace.type';
 import { Button } from '@/shared/ui/button';
-import { ArrowBigLeft, ChevronRight, List, Settings, User2 } from 'lucide-react';
+import { ChevronRight, List, Settings, User2 } from 'lucide-react';
 
 interface Props {
     workspaces: Workspace[];
