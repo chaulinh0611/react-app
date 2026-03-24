@@ -1,36 +1,15 @@
-import { useEffect, useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
+import { SidebarGroupLabel, SidebarGroup, Sidebar } from '@/shared/ui/sidebar';
 
-import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store'
-
-import {
-    SidebarGroupLabel,
-    SidebarGroup,
-    Sidebar,
-} from '@/shared/ui/sidebar'
-
-import { PanelsTopLeft, Origami, LayoutPanelTop } from 'lucide-react'
-
-import { NavMain } from './NavMain'
-import { NavUser } from './NavUser'
+import { PanelsTopLeft, Origami, LayoutPanelTop } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { NavMain } from './NavMain';
+import { NavUser } from './NavUser';
 
 export default function AppSidebar() {
-    const {
-        workspaces,
-        workspaceIds,
-        isLoading,
-        getWorkspaces,
-    } = useWorkspaceStore()
+    const { data: workspaces = [], isLoading } = useWorkspacesQuery();
 
-    const activeWorkspaces = useMemo(() => {
-        return workspaceIds
-            .map((id) => workspaces[id])
-            .filter((ws) => ws && ws.isArchived !== true)
-    }, [workspaceIds, workspaces])
-
-    useEffect(() => {
-        getWorkspaces()
-    }, [])
+    const activeWorkspaces = workspaces.filter((ws) => !ws.isArchived);
 
     return (
         <Sidebar
@@ -45,7 +24,7 @@ export default function AppSidebar() {
                         className="flex items-center gap-2 px-4 py-2"
                     >
                         <Origami className="w-8 h-8 font-bold" />
-                        <span className="text-4xl font-bold text-gray-900">
+                        <span className="text-2xl font-bold text-gray-900">
                             Kanby
                         </span>
                     </Link>
@@ -93,5 +72,5 @@ export default function AppSidebar() {
                 <NavUser />
             </div>
         </Sidebar>
-    )
+    );
 }

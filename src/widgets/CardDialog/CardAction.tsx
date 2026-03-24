@@ -2,6 +2,13 @@ import { Button } from '@/shared/ui/button';
 import { UserPlus, Tag, ListTodo, File } from 'lucide-react';
 import { useCreateChecklist } from '@/entities/checklist/model/useChecklist';
 import {
+    useAssignExistingLabel,
+    useBoardLabels,
+    useCardLabels,
+    useCreateLabel,
+} from '@/entities/label/model/useLabel';
+import { LABEL_COLORS, LABEL_COLOR_HEX, type LabelColor } from '@/entities/label/model/label.type';
+import {
     Popover,
     PopoverTrigger,
     PopoverContent,
@@ -13,12 +20,25 @@ import { useState } from 'react';
 import { useAddMemberToCard, useGetUnassignedMembers } from '@/entities/card/model/useCard';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Label } from '@/shared/ui/label';
+import { toast } from 'sonner';
+import { useParams } from 'react-router-dom';
 
 export default function CardAction({ cardId }: { cardId: string }) {
+    const { boardId = '' } = useParams();
     const { mutate: createChecklist } = useCreateChecklist();
     const [title, setTitle] = useState('');
+    const [labelName, setLabelName] = useState('');
+    const [labelColor, setLabelColor] = useState<LabelColor>('blue');
     const { mutate: addMemberToCard } = useAddMemberToCard();
+    const createLabel = useCreateLabel();
+    const assignLabel = useAssignExistingLabel();
+    const { data: boardLabels = [] } = useBoardLabels(boardId);
+    const { data: cardLabels = [] } = useCardLabels(cardId);
     const { data: unassignedMembers } = useGetUnassignedMembers(cardId);
+
+    const unassignedBoardLabels = boardLabels.filter(
+        (boardLabel) => !cardLabels.some((cardLabel) => cardLabel.id === boardLabel.id),
+    );
 
     function handleAddChecklist() {
         createChecklist(
@@ -42,6 +62,31 @@ export default function CardAction({ cardId }: { cardId: string }) {
                 },
             },
         );
+    }
+
+    async function handleCreateLabel() {
+        try {
+            await createLabel.mutateAsync({
+                cardId,
+                payload: {
+                    color: labelColor,
+                    name: labelName.trim() || undefined,
+                },
+            });
+            setLabelName('');
+            toast.success('Label created');
+        } catch (error: any) {
+            toast.error(error?.message || 'Create label failed');
+        }
+    }
+
+    async function handleAssignExistingLabel(labelId: string) {
+        try {
+            await assignLabel.mutateAsync({ cardId, labelId });
+            toast.success('Label assigned to card');
+        } catch (error: any) {
+            toast.error(error?.message || 'Assign label failed');
+        }
     }
 
     return (
@@ -82,10 +127,80 @@ export default function CardAction({ cardId }: { cardId: string }) {
             </Popover>
 
             {/* Label */}
-            <Button variant={'outline'} className="text-[12px] rounded-sm ">
-                <Tag />
-                Label
-            </Button>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button variant={'outline'} className="text-[12px] rounded-sm ">
+                        <Tag />
+                        Label
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent align="start" className="w-72 space-y-3">
+                    <PopoverHeader className="mb-0">
+                        <PopoverTitle>Create Label</PopoverTitle>
+                    </PopoverHeader>
+
+                    <div className="space-y-2">
+                        <Label>Assign existing labels on board</Label>
+                        <div className="max-h-32 space-y-1 overflow-y-auto rounded-md border border-gray-200 p-2">
+                            {unassignedBoardLabels.length === 0 && (
+                                <p className="text-xs text-gray-500">No available board labels</p>
+                            )}
+                            {unassignedBoardLabels.map((item) => (
+                                <button
+                                    key={item.id}
+                                    type="button"
+                                    className="flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs hover:bg-gray-100"
+                                    onClick={() => handleAssignExistingLabel(item.id)}
+                                >
+                                    <span className="inline-flex items-center gap-2">
+                                        <span
+                                            className="h-2.5 w-2.5 rounded-full"
+                                            style={{ backgroundColor: LABEL_COLOR_HEX[item.color] }}
+                                        />
+                                        {item.name || item.color}
+                                    </span>
+                                    <span className="text-[10px] text-gray-500">Assign</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label>Color</Label>
+                        <div className="flex flex-wrap gap-2">
+                            {LABEL_COLORS.map((color) => (
+                                <button
+                                    key={color}
+                                    type="button"
+                                    className={`h-7 w-7 rounded-full border-2 ${labelColor === color ? 'border-black' : 'border-transparent'}`}
+                                    style={{ backgroundColor: LABEL_COLOR_HEX[color] }}
+                                    onClick={() => setLabelColor(color)}
+                                    aria-label={`Select ${color}`}
+                                />
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="label-name">Name</Label>
+                        <Input
+                            id="label-name"
+                            value={labelName}
+                            onChange={(e) => setLabelName(e.target.value)}
+                            placeholder="Optional label name"
+                            onKeyDown={(e) => e.key === 'Enter' && handleCreateLabel()}
+                        />
+                    </div>
+
+                    <Button
+                        className="w-full"
+                        onClick={handleCreateLabel}
+                        disabled={createLabel.isPending}
+                    >
+                        {createLabel.isPending ? 'Creating...' : 'Create Label'}
+                    </Button>
+                </PopoverContent>
+            </Popover>
 
             {/* Checklist */}
             <Popover>

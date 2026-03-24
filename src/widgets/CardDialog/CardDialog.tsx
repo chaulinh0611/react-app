@@ -1,4 +1,4 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 import type { Card } from '@/entities/card/model/type';
 import { DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Input } from '@/shared/ui/input';
@@ -15,14 +15,17 @@ import CardOption from './CardOption';
 import { validateHandle } from '@/shared/lib/validate_handle';
 import CardDescription from './CardDescription';
 import { Button } from '@/shared/ui/button';
+import CardLabels from './CardLabels';
 
 // Props
 interface CardDialogProps {
     card: Card;
     setOpen: (open: boolean) => void;
+    boardId: string;
+    listId: string;
 }
 
-export default function CardDialog({ card, setOpen }: CardDialogProps) {
+export default function CardDialog({ card, setOpen, boardId, listId }: CardDialogProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(card.title);
     const [description, setDescription] = useState(card.description);
@@ -102,6 +105,8 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                                     </DropdownMenuTrigger>
                                     <CardOption
                                         cardId={card.id}
+                                        boardId={boardId}
+                                        listId={listId}
                                         menu={menu}
                                         setOpen={setOpen}
                                         setMenu={setMenu}
@@ -115,6 +120,8 @@ export default function CardDialog({ card, setOpen }: CardDialogProps) {
                 <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
                     {/* Card Action */}
                     <CardAction cardId={card.id} />
+
+                    <CardLabels cardId={card.id} />
 
                     {/* Card Description */}
                     <div className="flex flex-col mt-3  gap-2 justify-between ">

@@ -5,34 +5,39 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Field, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { useNavigate } from 'react-router-dom';
 import { Input } from '@/shared/ui/input';
-import { authApi } from '@/entities/auth/api/auth.api';
+import { useForgotPassword } from '@/entities/auth/model/useAuthQueries';
 
 export function ForgotPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
     const [email, setEmail] = useState('');
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
     const navigate = useNavigate();
+    const { mutate: forgotPassword, isPending: loading } = useForgotPassword();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setSuccess(null);
 
-        try {
-            setLoading(true);
-            await authApi.forgotPassword(email);
-
-            setSuccess('OTP đã được gửi về email.');
-            setTimeout(() => {
-                navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-            }, 1000);
-        } catch (err: any) {
-            setError('Không thể gửi OTP. Vui lòng kiểm tra email.');
-        } finally {
-            setLoading(false);
+        if (!email) {
+            setError('Please enter your email');
+            return;
         }
+
+        forgotPassword(email, {
+            onSuccess: () => {
+                setSuccess('OTP đã được gửi về email.');
+                setTimeout(() => {
+                    navigate(`/reset-password?email=${encodeURIComponent(email)}`);
+                }, 1000);
+            },
+            onError: (err: any) => {
+                const message =
+                    err.response?.data?.message || 'Không thể gửi OTP. Vui lòng kiểm tra email.';
+                setError(message);
+            },
+        });
     };
 
     return (

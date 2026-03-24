@@ -5,18 +5,17 @@ import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
-import { useLogin } from '../model/useLogin';
-import { LoginSchema } from '../model';
+import { useLogin as useLoginMutation } from '@/entities/auth/model/useAuthQueries';
+import { LoginSchema, type LoginSchemaType } from '../model';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/shared/ui/form';
 import { OAuthButton } from './OAuthButton';
 import { Link } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const { login } = useLogin();
+    const { mutate: login, isPending: isLoading } = useLoginMutation();
     const [error, setError] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
 
-    const form = useForm<LoginFormValues>({
+    const form = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
         defaultValues: {
             email: '',
@@ -24,16 +23,21 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
         },
     });
 
-    const onSubmit = async (data: LoginFormValues) => {
-        setIsLoading(true);
+    const onSubmit = async (data: LoginSchemaType) => {
         setError(null);
         try {
-            await login(data.email, data.password);
+            login(data, {
+                onError: (err: any) => {
+                    const message =
+                        err.response?.data?.message || 'Login failed. Please try again.';
+                    alert(message);
+                    setError(message);
+                },
+            });
         } catch (err: any) {
-            alert(err.response.data.message || 'Login failed. Please try again.');
-            setError(err.response.data.message || 'Login failed. Please try again.');
-        } finally {
-            setIsLoading(false);
+            const message = err.response?.data?.message || 'Login failed. Please try again.';
+            alert(message);
+            setError(message);
         }
     };
 
@@ -97,6 +101,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                             />
                             <Button
                                 type="submit"
+                                disabled={isLoading}
                                 className="w-full cursor-pointer rounded-[3px]! mt-2"
                             >
                                 Continue

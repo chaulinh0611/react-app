@@ -3,9 +3,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar';
 import { Card } from '@/shared/ui/card';
 import { Dot } from 'lucide-react';
-import { useBoardById } from '@/entities/board/model/board.selector';
-import { useBoardStore } from '@/entities/board/model/board.store';
-import { useEffect } from 'react';
+import { useGetBoardById } from '@/entities/board/model/useBoard';
 import { cn } from '@/shared/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useMarkNotificationAsRead } from '@/entities/notification/hooks/useNotification';
@@ -19,16 +17,8 @@ export default function NotificationCard({ notification }: NotificationCardProps
     const isCardType = notification.entityType === 'card';
     const isBoardType = notification.entityType === 'board';
 
-    const board = useBoardById(isBoardType ? notification.entityId : '');
-
-    const fetchBoardById = useBoardStore((state) => state.fetchBoardById);
+    const { data: board } = useGetBoardById(isBoardType ? notification.entityId : '');
     const markAsReadMutation = useMarkNotificationAsRead();
-
-    useEffect(() => {
-        if (isBoardType && notification.entityId && !board) {
-            fetchBoardById(notification.entityId);
-        }
-    }, [isBoardType, notification.entityId, board, fetchBoardById]);
 
     const handleNotificationClick = (e: React.MouseEvent) => {
         e.preventDefault();

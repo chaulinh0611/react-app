@@ -98,6 +98,8 @@ export default function BoardList({
                                             <ListCard
                                                 card={card}
                                                 isDragging={snapshot.isDragging}
+                                                boardId={list.boardId}
+                                                listId={list.id}
                                             />
                                         </div>
                                     )}

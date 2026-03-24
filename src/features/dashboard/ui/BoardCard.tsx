@@ -9,14 +9,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
-import { useBoardStore } from '@/entities/board/model/board.store';
+import { useDeleteBoard } from '@/entities/board/model/useBoard';
 
 export function BoardCard({ board }: { board: Board }) {
-    const { deleteBoard, setIsEditDialogOpen } = useBoardStore();
+    const deleteBoard = useDeleteBoard();
 
     const handleDelete = () => {
         if (confirm(`Delete board "${board.title}"?`)) {
-            deleteBoard(board.id);
+            deleteBoard.mutate(board.id);
         }
     };
 
@@ -31,7 +31,7 @@ export function BoardCard({ board }: { board: Board }) {
                     </DropdownMenuTrigger>
 
                     <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setIsEditDialogOpen(true)}>
+                        <DropdownMenuItem disabled>
                             <Edit className="w-4 h-4 mr-2" />
                             Edit board
                         </DropdownMenuItem>

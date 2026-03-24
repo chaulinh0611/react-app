@@ -63,9 +63,32 @@ export const CardApi = {
         return axios.post(`/cards/${cardId}/duplicate`, { targetListId: listId, title });
     },
 
+    moveCardToBoard: (
+        cardId: string,
+        targetBoardId: string,
+        targetListId: string,
+        beforeId?: string | null,
+        afterId?: string | null,
+    ) => {
+        return axios.post(`/cards/${cardId}/move`, {
+            targetBoardId,
+            targetListId,
+            beforeId,
+            afterId,
+        });
+    },
+
     uploadBackground: (cardId: string, file: File) => {
         const formData = new FormData();
         formData.append('file', file);
         return axios.post(`cards/${cardId}/background`, formData);
+    },
+
+    getAssignedCards: (query?: any) => {
+        return axios.get(`/cards/assigned`, { params: query });
+    },
+
+    getCardsDueSoon: () => {
+        return axios.get(`/cards/due-soon`);
     },
 };

@@ -13,11 +13,9 @@ import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
-
-import { useBoardStore } from '@/entities/board/model/board.store';
+import { useCreateBoard, useUpdateBoard } from '@/entities/board/model/useBoard';
 
 import type { Board } from '@/entities/board/model/board.type';
-
 
 type Props = {
     open: boolean;
@@ -28,7 +26,8 @@ type Props = {
 
 export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit }: Props) {
     const navigate = useNavigate();
-    const { createBoard, updateBoard } = useBoardStore();
+    const createBoardMutation = useCreateBoard();
+    const updateBoardMutation = useUpdateBoard();
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -45,7 +44,6 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
         }
     }, [boardToEdit]);
 
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!title.trim()) return;
@@ -55,23 +53,25 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
 
             if (boardToEdit) {
                 // update existing (include workspace id for correct route)
-                await updateBoard(
-                    boardToEdit.id,
-                    {
+                await updateBoardMutation.mutateAsync({
+                    boardId: boardToEdit.id,
+                    payload: {
                         title: title.trim(),
-                        description: description.trim(),
-                    }
-                );
+                        description: description.trim() || undefined,
+                    },
+                });
                 onOpenChange(false);
             } else {
-                const board = await createBoard({
+                const board = await createBoardMutation.mutateAsync({
                     title: title.trim(),
                     description: description.trim(),
                     workspaceId,
                 });
 
                 onOpenChange(false);
-                navigate(`/board/${board.id}`);
+                if (board?.id) {
+                    navigate(`/board/${board.id}`);
+                }
             }
 
             setTitle('');
@@ -83,12 +83,12 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-[520px]">
+            <DialogContent className="sm:max-w-130">
                 <DialogHeader>
                     <DialogTitle>{boardToEdit ? 'Edit board' : 'Create new board'}</DialogTitle>
                     <DialogDescription>
-                        {boardToEdit 
-                            ? 'Update board details.' 
+                        {boardToEdit
+                            ? 'Update board details.'
                             : 'Create a board to organize your tasks and collaborate with your team.'}
                     </DialogDescription>
                 </DialogHeader>

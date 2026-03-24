@@ -18,6 +18,7 @@ export const BoardApi = {
         return axios.patch(`/boards/${id}`, payload);
     },
 
+
     getPublicBoards: (): Promise<Board[]> => {
         return axios.get('/boards/public');
     },
@@ -102,5 +103,9 @@ export const BoardApi = {
 
     getListsOfBoard: (boardId: string): Promise<ApiResponse<any>> => {
         return axios.get(`/boards/${boardId}/lists`);
+    },
+
+    getArchivedBoards: (): Promise<any[]> => {
+        return axios.get('/boards/archived');
     },
 };
