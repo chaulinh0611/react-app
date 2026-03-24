@@ -3,20 +3,23 @@ import type { Card as CardType } from '@/entities/card/model/type';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Dialog, DialogContent, DialogTrigger } from '@/shared/ui/dialog';
 import CardDialog from '@/widgets/CardDialog/CardDialog';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { TextAlignJustify } from 'lucide-react';
 import { useGetMembersOnCard } from '@/entities/card/model/useCard';
-import type { User } from '@/entities/board/model/user.type';
+import { useCardLabels } from '@/entities/label/model/useLabel';
+import { LABEL_COLOR_HEX } from '@/entities/label/model/label.type';
 
 interface ListCardProps {
     card: CardType;
     isDragging?: boolean;
+    boardId: string;
+    listId: string;
 }
 
-export default function ListCard({ card, isDragging }: ListCardProps) {
+export default function ListCard({ card, isDragging, boardId, listId }: ListCardProps) {
     const [open, setOpen] = useState(false);
     const { data: cardMembers } = useGetMembersOnCard(card.id);
-    console.log('cardMembers', cardMembers);
+    const { data: labels = [] } = useCardLabels(card.id);
     return (
         <Dialog
             open={open}
@@ -42,6 +45,19 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                         </h4>
 
                         {/* Card Labels */}
+                        {labels.length > 0 && (
+                            <div className="mb-2 flex flex-wrap gap-1">
+                                {labels.map((label) => (
+                                    <span
+                                        key={label.id}
+                                        className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                                        style={{ backgroundColor: LABEL_COLOR_HEX[label.color] }}
+                                    >
+                                        {label.name || label.color}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Card Icon */}
                         <div className="flex gap-2 items-center justify-between">
@@ -74,7 +90,7 @@ export default function ListCard({ card, isDragging }: ListCardProps) {
                 </Card>
             </DialogTrigger>
             <DialogContent className="rounded-sm min-w-5xl p-0! max-h-[min(700px,80vh)] flex flex-col overflow-hidden">
-                <CardDialog card={card} setOpen={setOpen} />
+                <CardDialog card={card} setOpen={setOpen} boardId={boardId} listId={listId} />
             </DialogContent>
         </Dialog>
     );

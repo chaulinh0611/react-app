@@ -15,7 +15,11 @@ export const BoardApi = {
         id: string,
         payload: Partial<CreateBoardPayload>,
     ): Promise<ApiResponse<Board>> => {
-        return axios.put(`/boards/${id}`, payload);
+        return axios.patch(`/boards/${id}`, payload);
+    },
+
+    deleteBoard: (id: string): Promise<ApiResponse<void>> => {
+        return axios.delete(`/boards/${id}`);
     },
 
     getPublicBoards: (): Promise<Board[]> => {
@@ -92,5 +96,9 @@ export const BoardApi = {
 
     getListsOfBoard: (boardId: string): Promise<ApiResponse<any>> => {
         return axios.get(`/boards/${boardId}/lists`);
+    },
+
+    getArchivedBoards: (): Promise<any[]> => {
+        return axios.get('/boards/archived');
     },
 };

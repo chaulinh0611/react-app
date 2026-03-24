@@ -6,6 +6,7 @@ import { NotificationPopover } from '../Notification/NotificationContent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { InviteButton } from './InviteButton';
 import { SettingButton } from './SettingButton';
+import { GlobalCardSearch } from '@/features/card/ui/GlobalCardSearch';
 
 export const Header = () => {
     const { pathname } = useLocation();
@@ -32,10 +33,7 @@ export const Header = () => {
                 <span className="text-2xl font-bold text-gray-900">{getTitle()}</span>
                 <div className="flex items-center gap-2">
                     {/* Search component */}
-                    <div className="relative w-full max-w-sm">
-                        <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                        <Input className="pl-10" placeholder="Search..." type="search" />
-                    </div>
+                    <GlobalCardSearch />
 
                     {/* Notification component */}
                     <Popover>

@@ -1,21 +1,14 @@
-import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
-import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
+import { useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
 import { SidebarGroupLabel, SidebarGroup } from '@/shared/ui/sidebar';
 
 import { PanelsTopLeft, Origami, LayoutPanelTop } from 'lucide-react';
-import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { NavMain } from './NavMain';
 import { NavUser } from './NavUser';
 import { Sidebar } from '@/shared/ui/sidebar';
 
 export default function AppSidebar() {
-    const workspaces = useWorkspaces();
-    const { getWorkspaces } = useWorkspaceStore();
-
-    useEffect(() => {
-        getWorkspaces();
-    }, [getWorkspaces]);
+    const { data: workspaces = [] } = useWorkspacesQuery();
 
     return (
         <Sidebar

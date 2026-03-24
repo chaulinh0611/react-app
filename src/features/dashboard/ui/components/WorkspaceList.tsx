@@ -1,14 +1,20 @@
-import { useEffect, useState, useCallback, useMemo, memo } from 'react';
-import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
-import { useBoardStore } from '@/entities/board/model/board.store';
+import { useState, useCallback, useMemo, memo } from 'react';
+import { useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
+import { useGetAccessibleBoards } from '@/entities/board/model/useBoard';
 import { CreateBoardCard } from './CreateBoardCard';
 import { CreateBoardDialog } from './CreateBoardDialog';
 import { WorkspaceBoards } from './WorkspaceBoards';
 
 const BoardList = memo(
-    ({ workspaceId, onCreateBoard }: { workspaceId: string; onCreateBoard: () => void }) => {
-        const allBoards = useBoardStore((state) => state.boards);
-
+    ({
+        workspaceId,
+        onCreateBoard,
+        allBoards,
+    }: {
+        workspaceId: string;
+        onCreateBoard: () => void;
+        allBoards: any[];
+    }) => {
         const boards = useMemo(() => {
             return allBoards.filter((b) => b?.workspace?.id === workspaceId && !b?.isArchived);
         }, [allBoards, workspaceId]);
@@ -25,15 +31,15 @@ const BoardList = memo(
 );
 
 export const WorkspaceList = () => {
-    const workspaces = useWorkspaces();
-    const { fetchBoards } = useBoardStore();
+    const { data: workspaces = [] } = useWorkspacesQuery();
+    const { data: allBoards = [] } = useGetAccessibleBoards();
     const [createBoardDialog, setCreateBoardDialog] = useState({
         open: false,
         workspaceId: '',
     });
 
     const workspaceList = useMemo(() => {
-        return workspaces ? Object.values(workspaces) : [];
+        return workspaces;
     }, [workspaces]);
 
     const handleCreateBoard = useCallback((workspaceId: string) => {
@@ -42,10 +48,6 @@ export const WorkspaceList = () => {
 
     const handleDialogOpenChange = useCallback((open: boolean) => {
         setCreateBoardDialog((prev) => ({ ...prev, open }));
-    }, []);
-
-    useEffect(() => {
-        fetchBoards();
     }, []);
 
     if (!workspaces || workspaceList.length === 0) {
@@ -81,6 +83,7 @@ export const WorkspaceList = () => {
                     <BoardList
                         workspaceId={workspace.id}
                         onCreateBoard={() => handleCreateBoard(workspace.id)}
+                        allBoards={allBoards}
                     />
                 </div>
             ))}

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { Search, Filter, Grid, List, ArrowUpAZ, ArrowDownAZ, Clock, Calendar } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
@@ -11,10 +11,11 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMemberStore } from '@/entities/board-member/model/board-member.store';
-import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
-import { useWorkspaces } from '@/entities/workspace/model/workspace.selector';
+import { useGetAccessibleBoards } from '@/entities/board/model/useBoard';
+import {
+    useWorkspaceByIdQuery,
+    useWorkspacesQuery,
+} from '@/entities/workspace/model/workspace.queries';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
 import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
 import { CreateBoardDialog } from '@/features/dashboard/ui/components/CreateBoardDialog';
@@ -24,11 +25,10 @@ type ViewMode = 'grid' | 'list';
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
-    const { boards, fetchBoards } = useBoardStore();
+    const { data: boards = [] } = useGetAccessibleBoards();
 
-    const { currentWorkspace, fetchWorkspaceById } = useWorkspaceStore();
-    const workspaces = useWorkspaces();
-    const fetchMembersByBoardId = useBoardMemberStore((s) => s.fetchMembersByBoardId);
+    const { data: currentWorkspace } = useWorkspaceByIdQuery(workspaceId ?? '');
+    const { data: workspaces = [] } = useWorkspacesQuery();
 
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');
@@ -37,31 +37,6 @@ export default function WorkspacePage() {
     const [editingBoard, setEditingBoard] = useState<
         import('@/entities/board/model/board.type').Board | null
     >(null);
-
-    useEffect(() => {
-        fetchBoards();
-    }, [fetchBoards]);
-
-    useEffect(() => {
-        if (workspaceId) {
-            console.log('WorkspacePage requesting workspace', workspaceId);
-            fetchWorkspaceById(workspaceId)
-                .then((ws) => console.log('workspace fetched', ws))
-                .catch((err) => console.error('fetchWorkspaceById failed', err));
-        }
-    }, [workspaceId, fetchWorkspaceById]);
-
-    useEffect(() => {
-        console.log('WorkspacePage state', {
-            workspaceId,
-            currentWorkspace,
-            workspaces,
-        });
-    }, [workspaceId, currentWorkspace, workspaces]);
-
-    useEffect(() => {
-        boards.forEach((b) => fetchMembersByBoardId(b.id));
-    }, [boards, fetchMembersByBoardId]);
 
     const workspaceBoards = useMemo(() => {
         if (!workspaceId) return [];

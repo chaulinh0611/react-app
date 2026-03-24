@@ -135,6 +135,33 @@ export const useGetUnassignedMembers = (cardId: string) => {
     });
 };
 
+export const useMoveCardToBoard = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({
+            cardId,
+            targetBoardId,
+            targetListId,
+            beforeId,
+            afterId,
+        }: {
+            cardId: string;
+            targetBoardId: string;
+            targetListId: string;
+            beforeId?: string | null;
+            afterId?: string | null;
+        }) =>
+            CardApi.moveCardToBoard(cardId, targetBoardId, targetListId, beforeId, afterId).then(
+                (res) => res.data,
+            ),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: ['lists'] });
+            queryClient.invalidateQueries({ queryKey: ['board'] });
+        },
+    });
+};
+
 export const useDuplicateCard = () => {
     const queryClient = useQueryClient();
     return useMutation({
@@ -161,5 +188,19 @@ export const useUploadBackground = () => {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cards'] });
         },
+    });
+};
+
+export const useGetAssignedCards = (query?: any) => {
+    return useQuery({
+        queryKey: ['assigned-cards', query],
+        queryFn: () => CardApi.getAssignedCards(query).then((res) => res.data),
+    });
+};
+
+export const useGetCardsDueSoon = () => {
+    return useQuery({
+        queryKey: ['cards-due-soon'],
+        queryFn: () => CardApi.getCardsDueSoon().then((res) => res.data),
     });
 };

@@ -11,8 +11,7 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-import { useBoardStore } from '@/entities/board/model/board.store';
-import { useBoardMembersStore } from '@/entities/board/model/board-members.store';
+import { useDeleteBoard, useGetBoardMembers } from '@/entities/board/model/useBoard';
 import { useListStore } from '@/entities/list/model/list.store';
 
 type Props = {
@@ -22,12 +21,13 @@ type Props = {
 };
 
 export function WorkspaceBoards({ board, viewMode, onEdit }: Props) {
-    const { deleteBoard } = useBoardStore();
+    const deleteBoard = useDeleteBoard();
+    const { data: boardMembers = [] } = useGetBoardMembers(board.id);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
     const handleDelete = async () => {
         if (confirm(`Delete "${board.title}"?`)) {
             try {
-                await deleteBoard(board.id);
+                await deleteBoard.mutateAsync(board.id);
             } catch (err) {
                 console.error('delete failed', err);
                 alert('Could not delete board.');
@@ -35,11 +35,7 @@ export function WorkspaceBoards({ board, viewMode, onEdit }: Props) {
         }
     };
 
-    const useMemberCountByBoardId = (boardId: string) => {
-        return useBoardMembersStore((state) => state.BoardMembers[boardId]?.length || 0);
-    };
-
-    const memberCount = useMemberCountByBoardId(board.id);
+    const memberCount = boardMembers.length;
 
     /* ================= LIST MODE ================= */
     if (viewMode === 'list') {

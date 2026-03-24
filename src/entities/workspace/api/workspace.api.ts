@@ -1,15 +1,15 @@
-import type { ApiResponse } from "@/shared/models/response";
-import type { Workspace } from "../model/workspace.type";
-import type { WorkspaceMember } from "../model/workspace.type";
-import axios from "axios";
+import type { ApiResponse } from '@/shared/models/response';
+import type { Workspace } from '../model/workspace.type';
+import type { WorkspaceMember } from '../model/workspace.type';
+import axios from 'axios';
 
 const getConfig = () => {
     const token = localStorage.getItem('accessToken');
     return {
         headers: {
             Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
+            'Content-Type': 'application/json',
+        },
     };
 };
 
@@ -18,13 +18,17 @@ export const WorkspaceApi = {
         return axios.get('/workspaces', getConfig());
     },
 
+    getArchivedWorkspaces: (): Promise<Workspace[]> => {
+        return axios.get('/workspaces/archived', getConfig());
+    },
+
     createWorkspace: (payload: { title: string; description?: string }): Promise<Workspace> => {
         return axios.post('/workspaces', payload, getConfig());
     },
-  
+
     async updateWorkspace(id: string, payload: any) {
         const res = await axios.put(`/workspaces/${id}`, payload);
-        return res.data.data; 
+        return res.data.data;
     },
 
     deleteWorkspace: (id: string): Promise<ApiResponse<void>> => {
@@ -64,7 +68,10 @@ export const WorkspaceApi = {
     },
 
     removeWorkspaceMember: (workspaceId: string, email: string): Promise<ApiResponse<void>> => {
-        return axios.delete(`/workspaces/${workspaceId}/members`, { data: { email }, ...getConfig() });
+        return axios.delete(`/workspaces/${workspaceId}/members`, {
+            data: { email },
+            ...getConfig(),
+        });
     },
 
     archiveWorkspace: (id: string): Promise<ApiResponse<void>> => {
@@ -77,5 +84,5 @@ export const WorkspaceApi = {
 
     getBoardsInWorkspace: (workspaceId: string): Promise<any[]> => {
         return axios.get(`/workspaces/${workspaceId}/boards`, getConfig());
-    }
-}
+    },
+};

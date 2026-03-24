@@ -17,6 +17,8 @@ const WorkspaceSettingsPage = lazy(() => import('@/pages/dashboard/WorkspaceSett
 const BoardPage = lazy(() => import('@/pages/boards/BoardPage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
 const JoinBoardPage = lazy(() => import('@/pages/boards/JoinBoardPage'));
+const UserSettingsPage = lazy(() => import('@/pages/profile/UserSettingsPage'));
+const TemplatePage = lazy(() => import('@/pages/template/TemplatePage'));
 
 export default function AppRoutes() {
     return (
@@ -33,16 +35,24 @@ export default function AppRoutes() {
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />
-                            <Route path="/workspace/:workspaceId/members" element={<WorkspaceMembersPage />} />
-                            <Route path="/workspace/:workspaceId/settings" element={<WorkspaceSettingsPage />} />
+                            <Route
+                                path="/workspace/:workspaceId/members"
+                                element={<WorkspaceMembersPage />}
+                            />
+                            <Route
+                                path="/workspace/:workspaceId/settings"
+                                element={<WorkspaceSettingsPage />}
+                            />
                             <Route path="/workspace/join" element={<JoinWorkspacePage />} />
                             <Route path="/dashboard" element={<Dashboard />} />
 
                             <Route path="/profile" element={<ProfilePage />} />
+                            <Route path="/settings" element={<UserSettingsPage />} />
 
                             <Route index element={<Navigate to="/dashboard" replace />} />
                             <Route path="/board/:boardId" element={<BoardPage />} />
                             <Route path="/join-board" element={<JoinBoardPage />} />
+                            <Route path="/templates" element={<TemplatePage />} />
                         </Route>
                     </Route>
                     <Route path="*" element={<NotFoundPage />} />

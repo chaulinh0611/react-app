@@ -10,13 +10,13 @@ import {
 } from '@/shared/ui/dialog';
 
 import { Button } from '@/shared/ui/button';
-import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
+import { useCreateWorkspaceMutation } from '@/entities/workspace/model/workspace.queries';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { useState } from 'react';
 
 export const CreateWorkspaceDialog = () => {
-    const { createWorkspace } = useWorkspaceStore();
+    const createWorkspace = useCreateWorkspaceMutation();
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -28,7 +28,7 @@ export const CreateWorkspaceDialog = () => {
         }
 
         try {
-            await createWorkspace({
+            await createWorkspace.mutateAsync({
                 title,
                 description,
             });

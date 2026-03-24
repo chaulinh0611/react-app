@@ -1,16 +1,9 @@
-import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useWorkspaceStore } from '@/entities/workspace/model/workspace.store';
+import { useWorkspaceByIdQuery } from '@/entities/workspace/model/workspace.queries';
 
 export default function WorkspaceMembersPage() {
     const { workspaceId } = useParams();
-    const { currentWorkspace, getWorkspaceById } = useWorkspaceStore();
-
-    useEffect(() => {
-        if (workspaceId) {
-            getWorkspaceById(workspaceId);
-        }
-    }, [workspaceId, getWorkspaceById]);
+    const { data: currentWorkspace } = useWorkspaceByIdQuery(workspaceId ?? '');
 
     return (
         <div>
