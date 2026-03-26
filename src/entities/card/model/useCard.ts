@@ -89,7 +89,7 @@ export const useReorderCard = () => {
 export const useMoveCardToAnotherList = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (payload: MoveCardToAnotherListPayload) =>
+        mutationFn: (payload: any) =>
             CardApi.moveCardToAnotherList(payload).then((res) => res.data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['cards'] });

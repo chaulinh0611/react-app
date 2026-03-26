@@ -84,74 +84,58 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
         }
 
         if (type === 'CARD') {
+            if (!destination) return;
+
             const sourceList = boardLists.find((l) => l.id === source.droppableId);
             const destList = boardLists.find((l) => l.id === destination.droppableId);
-
             if (!sourceList || !destList) return;
 
+            const getPosition = (cards, index) => ({
+                beforeId: index > 0 ? cards[index - 1].id : null,
+                afterId: index < cards.length - 1 ? cards[index + 1].id : null,
+            });
+
             if (source.droppableId === destination.droppableId) {
-                // Move within the same list
                 const newCards = [...sourceList.items];
                 const [removed] = newCards.splice(source.index, 1);
                 newCards.splice(destination.index, 0, removed);
 
-                const newLists = boardLists.map((l) => {
-                    if (l.id === sourceList.id) {
-                        return { ...l, items: newCards };
-                    }
-                    return l;
-                });
+                setBoardLists((prev) =>
+                    prev.map((l) => (l.id === sourceList.id ? { ...l, items: newCards } : l)),
+                );
 
-                setBoardLists(newLists);
+                const pos = getPosition(newCards, destination.index);
 
-                const beforeId = destination.index > 0 ? newCards[destination.index - 1].id : null;
-                const afterId =
-                    destination.index < newCards.length - 1
-                        ? newCards[destination.index + 1].id
-                        : null;
-
-                const payload: ReorderCardPayload = {
+                reorderCard({
                     cardId: draggableId,
-                    targetListId: destList.id,
-                    beforeId,
-                    afterId,
-                };
-
-                reorderCard(payload);
+                    listId: destList.id,
+                    ...pos,
+                });
             } else {
-                // Move to another list
                 const sourceCards = [...sourceList.items];
                 const destCards = [...destList.items];
+
                 const [removed] = sourceCards.splice(source.index, 1);
-
-                destCards.splice(destination.index, 0, { ...removed, listId: destList.id });
-
-                const newLists = boardLists.map((l) => {
-                    if (l.id === sourceList.id) {
-                        return { ...l, items: sourceCards };
-                    }
-                    if (l.id === destList.id) {
-                        return { ...l, items: destCards };
-                    }
-                    return l;
+                destCards.splice(destination.index, 0, {
+                    ...removed,
+                    listId: destList.id,
                 });
 
-                setBoardLists(newLists);
+                setBoardLists((prev) =>
+                    prev.map((l) => {
+                        if (l.id === sourceList.id) return { ...l, items: sourceCards };
+                        if (l.id === destList.id) return { ...l, items: destCards };
+                        return l;
+                    }),
+                );
 
-                const beforeId = destination.index > 0 ? destCards[destination.index - 1].id : null;
-                const afterId =
-                    destination.index < destCards.length - 1
-                        ? destCards[destination.index + 1].id
-                        : null;
+                const pos = getPosition(destCards, destination.index);
 
-                const payload: MoveCardToAnotherListPayload = {
+                moveCardToAnotherList({
                     cardId: draggableId,
-                    targetListId: destList.id,
-                    beforeId,
-                    afterId,
-                };
-
-                moveCardToAnotherList(payload);
+                    listId: destList.id,
+                    ...pos,
+                });
             }
         }
     };
