@@ -1,21 +1,21 @@
 import { cn } from '@/shared/lib/utils';
 import { Button } from '@/shared/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
-import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/shared/ui/field';
+import { FieldDescription, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRegister as useRegisterMutation } from '@/entities/auth/model/useAuthQueries';
-import { RegisterSchema, RegisterSchemaType } from '../model';
+import { RegisterSchema, type RegisterSchemaType } from '../model';
 import { OAuthButton } from './OAuthButton';
 import { FormField, FormItem, FormControl, FormMessage } from '@/shared/ui/form';
 import { Form } from '@/shared/ui/form';
 import { Link } from 'react-router-dom';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export function RegisterForm({ className, ...props }: React.ComponentProps<'div'>) {
     const { mutate: register, isPending: isLoading } = useRegisterMutation();
-    const [error, setError] = useState<string | null>(null);
+    const { addToast } = useAnimatedToast();
 
     const form = useForm<RegisterSchemaType>({
         resolver: zodResolver(RegisterSchema),
@@ -28,7 +28,6 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<'div'
     });
 
     const onSubmit = (data: RegisterSchemaType) => {
-        setError(null);
         register(
             {
                 username: data.username,
@@ -37,10 +36,17 @@ export function RegisterForm({ className, ...props }: React.ComponentProps<'div'
             },
             {
                 onError: (err: any) => {
-                    const message =
-                        err.response?.data?.message || 'Registration failed. Please try again.';
-                    alert(message);
-                    setError(message);
+                    addToast({
+                        title: 'Registration Failed',
+                        message: err.message || 'An error occurred during registration.',
+                        type: 'error',
+                    });
+                },
+                onSuccess: () => {
+                    addToast({
+                        title: 'Registration Successful',
+                        message: 'Your account has been created successfully.',
+                    });
                 },
             },
         );

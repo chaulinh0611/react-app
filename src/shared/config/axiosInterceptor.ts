@@ -10,6 +10,7 @@ export const keyHeader = {
 
 export const keyStorage = {
     ACCESS_TOKEN: 'accessToken',
+    REFRESH_TOKEN: 'refreshToken',
 };
 
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;

@@ -10,10 +10,16 @@ import { LoginSchema, type LoginSchemaType } from '../model';
 import { FormField, FormItem, FormLabel, FormControl, FormMessage, Form } from '@/shared/ui/form';
 import { OAuthButton } from './OAuthButton';
 import { Link } from 'react-router-dom';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
+import { validateHandle } from '@/shared/lib/validate_handle';
+import { AuthErrorCode } from '@/shared/models/errorCode';
+import { useNavigate } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
     const { mutate: login, isPending: isLoading } = useLoginMutation();
     const [error, setError] = useState<string | null>(null);
+    const { addToast } = useAnimatedToast();
+    const navigator = useNavigate();
 
     const form = useForm<LoginSchemaType>({
         resolver: zodResolver(LoginSchema),
@@ -25,20 +31,32 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
 
     const onSubmit = async (data: LoginSchemaType) => {
         setError(null);
-        try {
-            login(data, {
-                onError: (err: any) => {
-                    const message =
-                        err.response?.data?.message || 'Login failed. Please try again.';
-                    alert(message);
-                    setError(message);
-                },
-            });
-        } catch (err: any) {
-            const message = err.response?.data?.message || 'Login failed. Please try again.';
-            alert(message);
-            setError(message);
-        }
+
+        login(data, {
+            onError: (err: any) => {
+                const message: string =
+                    (err.error_code === 'VALIDATE_ERROR' ? validateHandle(err) : err.message) ||
+                    'Login failed. Please try again.';
+
+                if (err.error_code === AuthErrorCode.EMAIL_NOT_VERIFIED) {
+                    navigator('/verify-email?email=' + form.getValues('email'));
+                    return;
+                }
+                addToast({
+                    title: 'Login Failed',
+                    message: message,
+                    type: 'error',
+                });
+            },
+
+            onSuccess: (res: any) => {
+                addToast({
+                    title: 'Login Successful',
+                    message: 'You have successfully logged in.',
+                    type: 'success',
+                });
+            },
+        });
     };
 
     return (

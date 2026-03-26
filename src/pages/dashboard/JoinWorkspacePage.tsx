@@ -1,49 +1,35 @@
-import { useEffect } from "react"
-import { useNavigate, useSearchParams } from "react-router-dom"
-import axios from "axios"
+import { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 
 export default function JoinWorkspacePage() {
+    const [params] = useSearchParams();
+    const navigate = useNavigate();
 
-  const [params] = useSearchParams()
-  const navigate = useNavigate()
+    useEffect(() => {
+        const token = params.get('token');
 
-  useEffect(() => {
+        if (!token) return;
 
-    const token = params.get("token")
+        const join = async () => {
+            try {
+                const res = await axios.get(`/workspaces/join?token=${token}`, {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+                    },
+                });
 
-    if (!token) return
+                const workspaceId = res.data.workspaceId;
 
-    const join = async () => {
-      try {
-
-        const res = await axios.get(
-          `/workspaces/join?token=${token}`,
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+                navigate(`/workspace/${workspaceId}`);
+            } catch (err) {
+                alert('Invalid or expired invite link:' + (err as Error).message);
+                navigate('/');
             }
-          }
-        )
+        };
 
-        const workspaceId = res.data.workspaceId
+        join();
+    }, []);
 
-        navigate(`/workspace/${workspaceId}`)
-
-      } catch (err) {
-
-        alert("Invalid or expired invite link:" + (err as Error).message)
-        navigate("/")
-
-      }
-    }
-
-    join()
-
-  }, [])
-
-  return (
-    <div className="flex items-center justify-center h-screen">
-      Joining workspace...
-    </div>
-  )
+    return <div className="flex items-center justify-center h-screen">Joining workspace...</div>;
 }

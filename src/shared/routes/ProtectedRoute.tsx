@@ -1,17 +1,8 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
+import { isAccessTokenValid } from '@/shared/lib/utils/token';
 
 export const ProtectedRoute = () => {
-    const accessToken = localStorage.getItem('accessToken');
-    const location = useLocation();
-
-    const authRoutes = ['/login', '/register', '/forgot-password', '/reset-password'];
-    const isAuthRoute = authRoutes.includes(location.pathname);
-
-    if (isAuthRoute && accessToken) {
-        return <Navigate to="/dashboard" replace />;
-    }
-
-    if (!isAuthRoute && !accessToken) {
+    if (!isAccessTokenValid(localStorage.getItem('accessToken'))) {
         return <Navigate to="/login" replace />;
     }
 

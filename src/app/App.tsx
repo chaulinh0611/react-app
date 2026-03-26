@@ -2,14 +2,15 @@ import { BrowserRouter, Route, Routes, Navigate } from 'react-router-dom';
 import LoadingSpinner from '@/shared/ui/LoadingSpinner';
 import { lazy, Suspense } from 'react';
 import { ProtectedRoute } from '@/shared/routes/ProtectedRoute';
+import { PublicOnlyRoute } from '@/shared/routes/PublicOnlyRoute';
 import { MainLayout } from './main-layout';
 
-const LoginPage = lazy(() => import('@/pages/login/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/login/RegisterPage'));
+const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/pages/auth/RegisterPage'));
 const Dashboard = lazy(() => import('@/pages/dashboard/DashboardPage'));
 const ProfilePage = lazy(() => import('@/pages/profile/ProfilePage'));
-const ForgotPassword = lazy(() => import('@/pages/forgotpassword/ForgotPassword'));
-const ResetPassword = lazy(() => import('@/pages/resetpassword/ResetPassword'));
+const ForgotPassword = lazy(() => import('@/pages/auth/ForgotPassword'));
+const ResetPassword = lazy(() => import('@/pages/auth/ResetPassword'));
 const Workspace = lazy(() => import('@/pages/dashboard/WorkspacePage'));
 const WorkspaceMembersPage = lazy(() => import('@/pages/dashboard/WorkspaceMembersPage'));
 const JoinWorkspacePage = lazy(() => import('@/pages/dashboard/JoinWorkspacePage'));
@@ -19,19 +20,22 @@ const NotFoundPage = lazy(() => import('@/pages/NotFound/NotFoundPage'));
 const JoinBoardPage = lazy(() => import('@/pages/boards/JoinBoardPage'));
 const UserSettingsPage = lazy(() => import('@/pages/profile/UserSettingsPage'));
 const TemplatePage = lazy(() => import('@/pages/template/TemplatePage'));
+const VerifyPage = lazy(() => import('@/pages/auth/VerifyPage'));
+const OAuth2CallbackPage = lazy(() => import('@/pages/auth/OAuth2CallbackPage'));
 
 export default function AppRoutes() {
     return (
         <BrowserRouter basename="/react-app">
             <Suspense fallback={<LoadingSpinner />}>
                 <Routes>
-                    <Route element={<ProtectedRoute />}>
+                    <Route element={<PublicOnlyRoute />}>
                         <Route path="/login" element={<LoginPage />} />
                         <Route path="/register" element={<RegisterPage />} />
                         <Route path="/forgot-password" element={<ForgotPassword />} />
                         <Route path="/reset-password" element={<ResetPassword />} />
+                        <Route path="/verify-email" element={<VerifyPage />} />
+                        <Route path="/oauth2" element={<OAuth2CallbackPage />} />
                     </Route>
-
                     <Route path="/" element={<ProtectedRoute />}>
                         <Route element={<MainLayout />}>
                             <Route path="/workspace/:workspaceId" element={<Workspace />} />

@@ -3,7 +3,6 @@ import { Button } from '@/shared/ui/button/button';
 import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Field, FieldGroup, FieldLabel } from '@/shared/ui/field';
-import { useNavigate } from 'react-router-dom';
 import { Input } from '@/shared/ui/input';
 import { useForgotPassword } from '@/entities/auth/model/useAuthQueries';
 
@@ -12,7 +11,6 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
-    const navigate = useNavigate();
     const { mutate: forgotPassword, isPending: loading } = useForgotPassword();
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -28,9 +26,6 @@ export function ForgotPasswordForm({ className, ...props }: React.ComponentProps
         forgotPassword(email, {
             onSuccess: () => {
                 setSuccess('OTP đã được gửi về email.');
-                setTimeout(() => {
-                    navigate(`/reset-password?email=${encodeURIComponent(email)}`);
-                }, 1000);
             },
             onError: (err: any) => {
                 const message =

@@ -6,9 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/sha
 import { Field, FieldGroup, FieldLabel } from '@/shared/ui/field';
 import { Input } from '@/shared/ui/input';
 import { useResetPassword } from '@/entities/auth/model/useAuthQueries';
-
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 export function ResetPasswordForm({ className, ...props }: React.ComponentProps<'div'>) {
-    const [otp, setOTP] = useState('');
+    const { addToast } = useAnimatedToast();
+
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -18,6 +19,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
     const { mutate: resetPassword, isPending: loading } = useResetPassword();
 
     const email = searchParams.get('email');
+    const otp = searchParams.get('otp');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +30,7 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
             return;
         }
 
-        if (otp.length !== 6) {
+        if (!otp || otp.length !== 6) {
             setError('OTP phải gồm 6 chữ số!');
             return;
         }
@@ -50,6 +52,14 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                         err?.response?.data?.message || 'OTP không đúng hoặc đã hết hạn!';
                     setError(message);
                 },
+
+                onSuccess: () => {
+                    addToast({
+                        title: 'Reset password successful!',
+                        message: 'You can now log in with your new password.',
+                        type: 'success',
+                    });
+                },
             },
         );
     };
@@ -65,22 +75,6 @@ export function ResetPasswordForm({ className, ...props }: React.ComponentProps<
                 <CardContent>
                     <form onSubmit={handleSubmit}>
                         <FieldGroup>
-                            {/* OTP */}
-                            <Field>
-                                <FieldLabel>OTP (6 digits)</FieldLabel>
-                                <Input
-                                    type="text"
-                                    maxLength={6}
-                                    value={otp}
-                                    onChange={(e) => {
-                                        setOTP(e.target.value.replace(/\D/g, ''));
-                                        setError(null);
-                                    }}
-                                    placeholder="Enter OTP"
-                                    required
-                                />
-                            </Field>
-
                             {/* New password */}
                             <Field>
                                 <FieldLabel>New password</FieldLabel>
