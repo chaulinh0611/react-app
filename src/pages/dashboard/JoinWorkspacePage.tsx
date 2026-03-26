@@ -23,7 +23,7 @@ export default function JoinWorkspacePage() {
 
                 navigate(`/workspace/${workspaceId}`);
             } catch (err) {
-                alert('Invalid or expired invite link:' + (err as Error).message);
+                // alert('Invalid or expired invite link:' + (err as Error).message);
                 navigate('/');
             }
         };
