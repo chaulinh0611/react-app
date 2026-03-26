@@ -1,24 +1,16 @@
 import { useState, useCallback, useMemo, memo } from 'react';
-import { useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
-import { useGetAccessibleBoards } from '@/entities/board/model/useBoard';
+import {
+    useWorkspaceBoardsQuery,
+    useWorkspacesQuery,
+} from '@/entities/workspace/model/workspace.queries';
 import { CreateBoardCard } from './CreateBoardCard';
 import { CreateBoardDialog } from './CreateBoardDialog';
 import { WorkspaceBoards } from './WorkspaceBoards';
 
 const BoardList = memo(
-    ({
-        workspaceId,
-        onCreateBoard,
-        allBoards,
-    }: {
-        workspaceId: string;
-        onCreateBoard: () => void;
-        allBoards: any[];
-    }) => {
-        const boards = useMemo(() => {
-            return allBoards.filter((b) => b?.workspace?.id === workspaceId && !b?.isArchived);
-        }, [allBoards, workspaceId]);
-
+    ({ workspaceId, onCreateBoard }: { workspaceId: string; onCreateBoard: () => void }) => {
+        const { data: res } = useWorkspaceBoardsQuery(workspaceId);
+        const boards = res?.data || [];
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                 {boards.map((board) => (
@@ -32,7 +24,6 @@ const BoardList = memo(
 
 export const WorkspaceList = () => {
     const { data: workspaces = [] } = useWorkspacesQuery();
-    const { data: allBoards = [] } = useGetAccessibleBoards();
     const [createBoardDialog, setCreateBoardDialog] = useState({
         open: false,
         workspaceId: '',
@@ -83,7 +74,6 @@ export const WorkspaceList = () => {
                     <BoardList
                         workspaceId={workspace.id}
                         onCreateBoard={() => handleCreateBoard(workspace.id)}
-                        allBoards={allBoards}
                     />
                 </div>
             ))}

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { cn } from '@/shared/lib/utils';
@@ -17,7 +16,6 @@ import { useNavigate } from 'react-router-dom';
 
 export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) {
     const { mutate: login, isPending: isLoading } = useLoginMutation();
-    const [error, setError] = useState<string | null>(null);
     const { addToast } = useAnimatedToast();
     const navigator = useNavigate();
 
@@ -30,8 +28,6 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
     });
 
     const onSubmit = async (data: LoginSchemaType) => {
-        setError(null);
-
         login(data, {
             onError: (err: any) => {
                 const message: string =
@@ -49,7 +45,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                 });
             },
 
-            onSuccess: (res: any) => {
+            onSuccess: () => {
                 addToast({
                     title: 'Login Successful',
                     message: 'You have successfully logged in.',

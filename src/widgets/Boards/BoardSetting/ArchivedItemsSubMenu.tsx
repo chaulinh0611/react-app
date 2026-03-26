@@ -1,6 +1,6 @@
-import { CardApi } from '@/entities/card/api/card.api';
+import { BoardApi } from '@/entities/board/api/board.api';
 import { useUnarchiveCard } from '@/entities/card/model/useCard';
-import { useListsByBoardId, useUnarchiveList } from '@/entities/list/model/useList';
+import { useUnarchiveList } from '@/entities/list/model/useList';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -11,7 +11,7 @@ import {
 } from '@/shared/ui/dropdown-menu';
 import { Input } from '@/shared/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/shared/ui/tabs';
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { Archive, Search } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -27,73 +27,55 @@ type ArchivedCard = {
     title: string;
     isArchived?: boolean;
     listTitle?: string;
-};
-
-const getCardsFromResponse = (res: any) => {
-    if (Array.isArray(res)) return res;
-
-    const payload = res?.data;
-    if (Array.isArray(payload)) return payload;
-    if (Array.isArray(payload?.data)) return payload.data;
-
-    return [];
+    list?: {
+        id: string;
+        title: string;
+    };
 };
 
 export const ArchivedItemsSubMenu = () => {
     const { boardId = '' } = useParams();
     const [keyword, setKeyword] = useState('');
 
-    const { data: lists = [] } = useListsByBoardId(boardId);
     const { mutate: unarchiveList, isPending: isUnarchivingList } = useUnarchiveList(boardId);
     const { mutate: unarchiveCard, isPending: isUnarchivingCard } = useUnarchiveCard();
 
-    const cardQueries = useQueries({
-        queries: lists.map((list: any) => ({
-            queryKey: ['cards', list.id],
-            queryFn: async () => {
-                const res = await CardApi.getCardsOnList({ listId: list.id });
-                const cards = getCardsFromResponse(res);
+    // Fetch archived lists directly
+    const { data: archivedListsData = [] } = useQuery({
+        queryKey: ['archivedLists', boardId],
+        queryFn: () => BoardApi.getArchivedListsInBoard(boardId).then((res) => res.data),
+        enabled: !!boardId,
+    });
 
-                return {
-                    listId: list.id,
-                    listTitle: list.title,
-                    cards,
-                };
-            },
-            enabled: !!list.id,
-        })),
+    // Fetch archived cards directly
+    const { data: archivedCardsData = [] } = useQuery({
+        queryKey: ['archivedCards', boardId],
+        queryFn: () => BoardApi.getArchivedCardsInBoard(boardId).then((res) => res.data),
+        enabled: !!boardId,
     });
 
     const archivedLists = useMemo(() => {
         const normalizedKeyword = keyword.trim().toLowerCase();
 
-        return lists
-            .filter((list: ArchivedList) => list.isArchived)
-            .filter((list: ArchivedList) =>
-                !normalizedKeyword ? true : list.title.toLowerCase().includes(normalizedKeyword),
-            );
-    }, [lists, keyword]);
+        const lists = Array.isArray(archivedListsData) ? archivedListsData : [];
+        return lists.filter((list: ArchivedList) =>
+            !normalizedKeyword ? true : list.title.toLowerCase().includes(normalizedKeyword),
+        );
+    }, [archivedListsData, keyword]);
 
     const archivedCards = useMemo(() => {
         const normalizedKeyword = keyword.trim().toLowerCase();
 
-        return cardQueries.flatMap((query: any) => {
-            if (!query.data) return [];
-
-            const cards = (query.data.cards as ArchivedCard[]) || [];
-            return cards
-                .filter((card) => card.isArchived)
-                .filter((card) =>
-                    !normalizedKeyword
-                        ? true
-                        : card.title.toLowerCase().includes(normalizedKeyword),
-                )
-                .map((card) => ({
-                    ...card,
-                    listTitle: query.data.listTitle,
-                }));
-        });
-    }, [cardQueries, keyword]);
+        const cards = Array.isArray(archivedCardsData) ? archivedCardsData : [];
+        return cards
+            .filter((card) =>
+                !normalizedKeyword ? true : card.title.toLowerCase().includes(normalizedKeyword),
+            )
+            .map((card) => ({
+                ...card,
+                listTitle: card.list?.title || 'Unknown List',
+            }));
+    }, [archivedCardsData, keyword]);
 
     return (
         <>

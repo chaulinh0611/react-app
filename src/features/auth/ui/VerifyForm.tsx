@@ -16,7 +16,6 @@ import { useEffect, useRef, useState } from 'react';
 import { useVerifyEmail } from '@/entities/auth/model/useAuthQueries';
 import { useSendVerifyEmail } from '@/entities/auth/model/useAuthQueries';
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
-import { has } from 'lodash';
 
 export function InputOTPForm() {
     const [searchParams] = useSearchParams();

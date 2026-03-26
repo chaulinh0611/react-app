@@ -11,8 +11,11 @@ import {
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 
-import { useWorkspaceByIdQuery, useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
-import { useGetAccessibleBoards } from '@/entities/board/model/useBoard';
+import {
+    useWorkspaceBoardsQuery,
+    useWorkspaceByIdQuery,
+    useWorkspacesQuery,
+} from '@/entities/workspace/model/workspace.queries';
 import { WorkspaceBoards } from '@/features/dashboard/ui/components/WorkspaceBoards';
 import { CreateBoardCard } from '@/features/dashboard/ui/components/CreateBoardCard';
 import { CreateBoardDialog } from '@/features/dashboard/ui/components/CreateBoardDialog';
@@ -22,11 +25,12 @@ type ViewMode = 'grid' | 'list';
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
 
-    const { data: boards = [] } = useGetAccessibleBoards();
+    const { data: boards } = useWorkspaceBoardsQuery(workspaceId ?? '');
+
+    const workspaceBoards = boards?.data || [];
 
     const { data: currentWorkspace } = useWorkspaceByIdQuery(workspaceId ?? '');
     const { data: workspaces = [] } = useWorkspacesQuery();
-
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<SortOption>('recent');
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -34,15 +38,6 @@ export default function WorkspacePage() {
     const [editingBoard, setEditingBoard] = useState<
         import('@/entities/board/model/board.type').Board | null
     >(null);
-
-    const workspaceBoards = useMemo(() => {
-        if (!workspaceId) return [];
-        return boards.filter(
-            (b) =>
-                b.workspace?.id === workspaceId &&
-                !b.isArchived
-        );
-    }, [boards, workspaceId]);
 
     const workspaceTitle =
         currentWorkspace?.title ||
@@ -55,7 +50,7 @@ export default function WorkspacePage() {
 
     const filteredBoards = useMemo(() => {
         const filtered = workspaceBoards.filter(
-            (b) =>
+            (b: any) =>
                 b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 b.description?.toLowerCase().includes(searchQuery.toLowerCase()),
         );
@@ -80,7 +75,7 @@ export default function WorkspacePage() {
 
     return (
         <div className="h-screen flex flex-col">
-        <div className="flex-1 overflow-y-auto space-y-15 p-8 pt-8">
+            <div className="flex-1 overflow-y-auto space-y-15 p-8 pt-8">
                 <div>
                     <h1 className="text-3xl font-bold">{workspaceTitle}</h1>
                     <p className="text-muted-foreground">{workspaceDescription}</p>
@@ -154,11 +149,7 @@ export default function WorkspacePage() {
                     }
                 >
                     {filteredBoards.map((board) => (
-                        <WorkspaceBoards
-                            key={board.id}
-                            board={board}
-                            viewMode={viewMode}
-                        />
+                        <WorkspaceBoards key={board.id} board={board} viewMode={viewMode} />
                     ))}
 
                     <CreateBoardCard

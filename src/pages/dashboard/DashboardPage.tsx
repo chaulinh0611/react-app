@@ -1,6 +1,6 @@
 import { Dashboard } from '@/features/dashboard/ui/Dashboard';
-import { AssignedCardsWidget } from '@/features/card/ui/AssignedCardsWidget';
-import { DueSoonCardsWidget } from '@/features/card/ui/DueSoonCardsWidget';
+// import { AssignedCardsWidget } from '@/features/card/ui/AssignedCardsWidget';
+// import { DueSoonCardsWidget } from '@/features/card/ui/DueSoonCardsWidget';
 
 export default function DashboardPage() {
     return (
@@ -11,15 +11,15 @@ export default function DashboardPage() {
                 <p className="text-muted-foreground">Đây là tổng quan công việc của bạn hôm nay.</p>
             </div>
 
-            {/* KHU VỰC NHIỆM VỤ CÁ NHÂN (SCRUM-163 & 164) */}
+            {/* KHU VỰC NHIỆM VỤ CÁ NHÂN (SCRUM-163 & 164)
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <AssignedCardsWidget />
                 <DueSoonCardsWidget />
-            </div>
+            </div> */}
 
             <hr className="border-gray-100" />
 
-            {/* DANH SÁCH WORKSPACE (Code cũ của bạn) */}
+            {/* DANH SÁCH WORKSPACE */}
             <Dashboard />
         </div>
     );

@@ -18,7 +18,6 @@ export const BoardApi = {
         return axios.patch(`/boards/${id}`, payload);
     },
 
-
     getPublicBoards: (): Promise<Board[]> => {
         return axios.get('/boards/public');
     },
@@ -94,10 +93,7 @@ export const BoardApi = {
     ): Promise<ApiResponse<Board>> => {
         return axios.post(`/boards/template/${templateId}`, payload);
     },
-    inviteMemberViaLink: (
-        boardId: string,
-        role: string,
-    ): Promise<ApiResponse<string>> => {
+    inviteMemberViaLink: (boardId: string, role: string): Promise<ApiResponse<string>> => {
         return axios.post(`/boards/${boardId}/members/invite/link`, { role });
     },
 
@@ -107,5 +103,13 @@ export const BoardApi = {
 
     getArchivedBoards: (): Promise<any[]> => {
         return axios.get('/boards/archived');
+    },
+
+    getArchivedListsInBoard: (boardId: string): Promise<any[]> => {
+        return axios.get(`/boards/${boardId}/archived/lists`);
+    },
+
+    getArchivedCardsInBoard: (boardId: string): Promise<any[]> => {
+        return axios.get(`/boards/${boardId}/archived/cards`);
     },
 };

@@ -9,7 +9,7 @@ interface InviteByEmail {
 }
 
 const boardKeys = {
-    all: ['accessible-boards'] as const,
+    all: ['boards'] as const,
     byId: (boardId: string) => ['board', boardId] as const,
     members: (boardId: string) => ['board-members', boardId] as const,
     template: () => ['board-template'] as const,
@@ -108,11 +108,11 @@ export const useArchiveBoard = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (boardId: string) => BoardApi.archiveBoard(boardId),
-        onSuccess: (_, boardId) => {
+        mutationFn: ({ boardId }: { boardId: string }) => BoardApi.archiveBoard(boardId),
+        onSuccess: (_, { boardId }) => {
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
-        }
+        },
     });
 };
 
@@ -120,8 +120,8 @@ export const useDeleteBoard = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (boardId: string) => BoardApi.deleteBoard(boardId),
-        onSuccess: (_, boardId) => {
+        mutationFn: ({ boardId }: { boardId: string }) => BoardApi.deleteBoard(boardId),
+        onSuccess: (_, { boardId }) => {
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.removeQueries({ queryKey: boardKeys.byId(boardId) });
         },
