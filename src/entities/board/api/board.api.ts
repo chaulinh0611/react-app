@@ -58,6 +58,10 @@ export const BoardApi = {
         return axios.post(`/boards/${id}/archive`);
     },
 
+    unarchiveBoard: (id: string): Promise<void> => {
+        return axios.post(`/boards/${id}/reopen`);
+    },
+
     deleteBoard: (id: string): Promise<void> => {
         return axios.delete(`/boards/${id}`);
     },

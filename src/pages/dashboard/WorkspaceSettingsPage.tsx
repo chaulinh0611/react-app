@@ -7,14 +7,18 @@ import {
     useUnarchiveWorkspaceMutation,
     useDeleteWorkspaceMutation,
 } from '@/entities/workspace/model/workspace.queries';
+import { useUnarchiveBoard, useGetArchivedBoards } from '@/entities/board/model/useBoard';
 
 export default function WorkspaceSettingsPage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const navigate = useNavigate();
-
     const { data: currentWorkspace, isLoading } = useWorkspaceByIdQuery(workspaceId ?? '');
     const updateWorkspace = useUpdateWorkspaceMutation();
     const archiveWorkspace = useArchiveWorkspaceMutation();
+    const unarchiveBoard = useUnarchiveBoard();
+    const workspaceArchivedBoards = useGetArchivedBoards().data?.filter(b => b.workspace?.id === workspaceId) || [];
+
+    console.log("Archived board", workspaceArchivedBoards);
     const unarchiveWorkspace = useUnarchiveWorkspaceMutation();
     const deleteWorkspace = useDeleteWorkspaceMutation();
 
@@ -146,6 +150,48 @@ export default function WorkspaceSettingsPage() {
                     </form>
                 </section>
 
+                {/* ARCHIVED BOARDS */}
+                <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
+                    <h2 className="text-lg font-semibold text-gray-800">
+                        Archived Boards
+                    </h2>
+
+                    {workspaceArchivedBoards.length === 0 ? (
+                        <p className="text-sm text-gray-500">
+                            No archived boards in this workspace.
+                        </p>
+                    ) : (
+                        <div className="space-y-3">
+                            {workspaceArchivedBoards.map((board) => (
+                                <div
+                                    key={board.id}
+                                    className="flex items-center justify-between border rounded-md px-4 py-2"
+                                >
+                                    <div>
+                                        <p className="font-medium">{board.title}</p>
+                                        <p className="text-xs text-gray-500">
+                                            Created: {new Date(board.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        onClick={async () => {
+                                            try {
+                                                await unarchiveBoard.mutateAsync(board.id);
+                                                alert('Board restored');
+                                            } catch (err) {
+                                                console.error(err);
+                                            }
+                                        }}
+                                        className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
+                                    >
+                                        Unarchive
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </section>
                 {/* STATUS */}
                 <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
                     <h2 className="text-lg font-semibold text-gray-800">

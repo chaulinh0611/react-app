@@ -61,6 +61,14 @@ export const useGetBoardMembers = (boardId: string) => {
     });
 };
 
+//Get archive board
+export const useGetArchivedBoards = () => {
+    return useQuery({
+        queryKey: ['archived-boards'],
+        queryFn: async () => normalizeBoards(await BoardApi.getArchivedBoards()),
+    });
+};
+
 export const useBoardTemplateQuery = () => {
     return useQuery({
         queryKey: ['board-template'],
@@ -113,6 +121,17 @@ export const useArchiveBoard = () => {
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
         },
+    });
+};
+
+export const useUnarchiveBoard = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (boardId: string) => BoardApi.unarchiveBoard(boardId),
+        onSuccess: (_, boardId) => {
+            queryClient.invalidateQueries({ queryKey: boardKeys.all });
+            queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
+        }
     });
 };
 
