@@ -142,6 +142,7 @@ export const useDeleteBoard = () => {
         mutationFn: ({ boardId }: { boardId: string }) => BoardApi.deleteBoard(boardId),
         onSuccess: (_, { boardId }) => {
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
+            queryClient.invalidateQueries({ queryKey: ['workspaces'] });
             queryClient.removeQueries({ queryKey: boardKeys.byId(boardId) });
         },
     });
@@ -184,6 +185,47 @@ export const useUploadBoardBackground = () => {
             BoardApi.uploadBackground(boardId, file),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(variables.boardId) });
+            queryClient.invalidateQueries({ queryKey: boardKeys.all });
+        },
+    });
+};
+
+export const useCreateBoardFromTemplate = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({
+            templateId,
+            payload,
+        }: {
+            templateId: string;
+            payload: CreateBoardPayload;
+        }) => {
+            const result = await BoardApi.createBoardFromTemplate(templateId, payload);
+            return normalizeBoard(result);
+        },
+        onSuccess: (board) => {
+            queryClient.invalidateQueries({ queryKey: boardKeys.all });
+            if (board?.id) {
+                queryClient.setQueryData(boardKeys.byId(board.id), board);
+            }
+        },
+    });
+};
+
+export const useGetStarredBoards = () => {
+    return useQuery({
+        queryKey: ['starred-boards'],
+        queryFn: async () => normalizeBoards(await BoardApi.getStarredBoards()),
+    });
+};
+
+export const useToggleStarBoard = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ boardId }: { boardId: string }) => BoardApi.toggleStarBoard(boardId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['starred-boards'] });
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
         },
     });

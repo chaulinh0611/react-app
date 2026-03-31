@@ -14,8 +14,7 @@ import {
     DialogDescription,
     DialogTrigger,
 } from '@/shared/ui/dialog';
-import { useState } from 'react';
-import { toast } from 'sonner';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 const PasswordRegex = /(?=^.{8,}$)((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/;
 
@@ -48,9 +47,14 @@ const PasswordSchema = z
 
 type PasswordFormValues = z.infer<typeof PasswordSchema>;
 
-export function PasswordForm() {
+interface PasswordFormProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
+
+export function PasswordForm({ open, onOpenChange }: PasswordFormProps) {
     const { mutateAsync: updateProfile, isPending } = useUpdateProfile();
-    const [open, setOpen] = useState(false);
+    const { addToast } = useAnimatedToast();
 
     const {
         register,
@@ -65,17 +69,20 @@ export function PasswordForm() {
     const onSubmit = async (data: PasswordFormValues) => {
         try {
             await updateProfile({ password: data.password } as any);
-            toast.success('Password changed successfully!');
+            addToast({ message: 'Password changed successfully!', type: 'success' });
             reset();
-            setOpen(false);
+            onOpenChange(false);
         } catch (error: any) {
-            const backendError = error.response?.data?.message || error.message;
-            toast.error('Failed to change password: ' + backendError);
+            const backendError = error.response?.data?.message || 'Password change failed. Please try again.';
+            reset();
+            onOpenChange(false);
+            addToast({ message: backendError, type: 'error' });
+
         }
     };
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogTrigger asChild>
                 <Button variant="outline" className="w-fit">
                     Change Password
@@ -88,7 +95,7 @@ export function PasswordForm() {
                         Ensure your account is using a long, random password to stay secure.
                     </DialogDescription>
                 </DialogHeader>
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                <form onSubmit={(e) => { e.stopPropagation(); handleSubmit(onSubmit)(e); }} className="space-y-4 pt-4">
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label>New Password</Label>

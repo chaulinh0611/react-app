@@ -1,10 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export default function JoinWorkspacePage() {
     const [params] = useSearchParams();
     const navigate = useNavigate();
+    const { addToast } = useAnimatedToast();
 
     useEffect(() => {
         const token = params.get('token');
@@ -23,7 +25,10 @@ export default function JoinWorkspacePage() {
 
                 navigate(`/workspace/${workspaceId}`);
             } catch (err) {
-                // alert('Invalid or expired invite link:' + (err as Error).message);
+                addToast({
+                    message: 'Invalid or expired invite link: ' + (err as Error).message,
+                    type: 'error',
+                });
                 navigate('/');
             }
         };

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,11 +10,15 @@ import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { Card, CardContent } from '@/shared/ui/card';
 import { PasswordForm } from './PasswordForm';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 const ProfileSchema = z.object({
-    fullName: z.string().min(2, 'Name must be at least 2 characters'),
-    jobTitle: z.string().optional().or(z.literal('')),
-    bio: z.string().max(500).optional().or(z.literal('')),
+    fullName: z
+        .string()
+        .min(2, 'Full name must be at least 2 characters')
+        .max(50, 'Full name must not exceed 50 characters'),
+    jobTitle: z.string().max(100, 'Job title must not exceed 100 characters').optional().or(z.literal('')),
+    bio: z.string().max(500, 'Bio must not exceed 500 characters').optional().or(z.literal('')),
     email: z.string().email().optional().or(z.literal('')),
 });
 
@@ -26,6 +30,8 @@ export function ProfileForm() {
     const { mutateAsync: updateUser, isPending: isUpdatePending } = useUpdateProfile();
     const { mutateAsync: uploadAvatarFn, isPending: isUploadPending } = useUploadAvatar();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const { addToast } = useAnimatedToast();
+    const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
     const {
         register,
@@ -53,12 +59,13 @@ export function ProfileForm() {
 
         try {
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('avatar', file);
             await uploadAvatarFn(formData);
-            alert('Avatar updated successfully!');
+            addToast({ message: 'Avatar updated successfully!', type: 'success' });
         } catch (error: any) {
             console.error('Upload failed', error);
-            alert(error.message || 'Server error occurred during upload.');
+            const msg = error?.response?.data?.message || 'Avatar upload failed. Please use a smaller image and try again.';
+            addToast({ message: msg, type: 'error' });
         }
     };
 
@@ -66,18 +73,15 @@ export function ProfileForm() {
         try {
             const payload: any = {
                 fullName: data.fullName,
+                bio: data.bio || '',
             };
 
-            if (data.jobTitle && data.jobTitle.trim() !== '')
-                payload.jobTitle = data.jobTitle;
-            if (data.bio && data.bio.trim() !== '') payload.bio = data.bio;
-
             await updateUser(payload);
-            alert('Profile updated successfully!');
+            addToast({ message: 'Profile updated successfully!', type: 'success' });
         } catch (error: any) {
-            const backendError = error.response?.data?.message || error.message;
             console.error('Lỗi từ Backend:', error.response?.data || error);
-            alert('Cập nhật thất bại. Lý do: ' + backendError);
+            const msg = error?.response?.data?.message || 'Failed to update profile. Please try again.';
+            addToast({ message: msg, type: 'error' });
         }
     };
 
@@ -152,7 +156,11 @@ export function ProfileForm() {
                         <div className="grid md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label>Full Name</Label>
-                                <Input {...register('fullName')} placeholder="Your full name" />
+                                <Input
+                                    {...register('fullName')}
+                                    placeholder="Your full name"
+                                    maxLength={50}
+                                />
                                 {errors.fullName && (
                                     <p className="text-red-500 text-xs">
                                         {errors.fullName.message}
@@ -174,20 +182,27 @@ export function ProfileForm() {
                         </div>
 
                         <div className="space-y-2">
-                            <Label>Bio</Label>
+                            <Label>
+                                Bio
+                                <span className="text-xs text-gray-400 ml-2">(max 500 characters)</span>
+                            </Label>
                             <textarea
                                 {...register('bio')}
                                 rows={3}
+                                maxLength={500}
                                 className="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                                 placeholder="Tell us something about yourself..."
                             />
+                            {errors.bio && (
+                                <p className="text-red-500 text-xs">{errors.bio.message}</p>
+                            )}
                         </div>
 
                         <div className="flex justify-between pt-4 items-center">
-                            <PasswordForm />
+                            <PasswordForm open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
                             <Button
                                 type="submit"
-                                disabled={isUpdatePending || isUploadPending}
+                            disabled={isUpdatePending || isUploadPending || passwordDialogOpen}
                                 className="bg-black text-white px-8"
                             >
                                 {isUpdatePending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

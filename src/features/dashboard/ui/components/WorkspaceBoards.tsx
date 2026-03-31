@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { Board } from '@/entities/board/model/board.type';
 import { Link } from 'react-router-dom';
-import { Users, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Users, Edit, MoreHorizontal, Trash, Star } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import {
@@ -10,51 +10,72 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
-import { Archive } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/shared/ui/dialog';
+import { Archive, AlertTriangle } from 'lucide-react';
 import {
     useDeleteBoard,
     useArchiveBoard,
     useGetBoardMembers,
+    useToggleStarBoard,
 } from '@/entities/board/model/useBoard';
 import { useListStore } from '@/entities/list/model/list.store';
 import { CreateBoardDialog } from './CreateBoardDialog';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 type Props = {
     board: Board;
     viewMode: 'grid' | 'list';
+    isStarred?: boolean;
 };
 
-export function WorkspaceBoards({ board, viewMode }: Props) {
+export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
     const archiveBoard = useArchiveBoard();
     const deleteBoard = useDeleteBoard();
+    const toggleStar = useToggleStarBoard();
+    const { addToast } = useAnimatedToast();
     const { data: members = [] } = useGetBoardMembers(board.id);
     const memberCount = members.length;
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const handleDelete = async () => {
-        if (confirm(`Delete "${board.title}"?`)) {
-            try {
-                await deleteBoard.mutateAsync(board.id);
-            } catch (err) {
-                console.error(err);
-                alert('Could not delete board.');
-            }
+    const confirmDelete = async () => {
+        try {
+            await deleteBoard.mutateAsync({ boardId: board.id });
+            addToast({ message: `Board "${board.title}" has been deleted.`, type: 'success' });
+            setIsDeleteDialogOpen(false);
+        } catch (err) {
+            console.error(err);
+            addToast({ message: 'Could not delete board. Please try again.', type: 'error' });
         }
     };
 
     const handleArchiveToggle = async () => {
         try {
-            await archiveBoard.mutateAsync(board.id);
+            await archiveBoard.mutateAsync({ boardId: board.id });
+            addToast({ message: `Board "${board.title}" has been archived.`, type: 'success' });
         } catch (err) {
             console.error(err);
-            alert('Action failed');
+            addToast({ message: 'Could not archive board. Please try again.', type: 'error' });
         }
     };
 
     const handleEdit = () => {
         setIsEditDialogOpen(true);
+    };
+
+    const handleToggleStar = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleStar.mutate({ boardId: board.id });
     };
 
     // ===== LIST VIEW =====
@@ -80,14 +101,24 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                                 )}
                             </div>
 
-                            <div className="flex-1 space-y-1.5">
-                                <h3 className="font-semibold">{board.title}</h3>
+                            <div className="flex-1 space-y-1.5 min-w-0">
+                                <h3 className="font-semibold truncate" title={board.title}>{board.title}</h3>
                                 <div className="flex gap-6 text-sm text-muted-foreground">
                                     <span>{listCount} lists</span>
                                     <span>{memberCount} members</span>
                                     <span>{new Date(board.createdAt).toLocaleDateString()}</span>
                                 </div>
                             </div>
+
+                            <button
+                                onClick={handleToggleStar}
+                                className={`p-1 rounded transition-colors ${
+                                    isStarred ? 'text-yellow-400 opacity-100' : 'text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-yellow-300'
+                                }`}
+                                title={isStarred ? 'Unstar board' : 'Star board'}
+                            >
+                                <Star className={`w-4 h-4 ${isStarred ? 'fill-yellow-400' : ''}`} />
+                            </button>
 
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -108,8 +139,12 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                                     </DropdownMenuItem>
 
                                     <DropdownMenuItem
-                                        onClick={handleDelete}
-                                        className="text-destructive"
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                            setIsDeleteDialogOpen(true);
+                                        }}
+                                        className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                                     >
                                         <Trash className="mr-2 h-4 w-4" />
                                         Delete
@@ -149,7 +184,16 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600" />
                 )}
 
-                <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100">
+                <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 flex items-center gap-1">
+                    <button
+                        onClick={handleToggleStar}
+                        className={`p-1 rounded transition-colors ${
+                            isStarred ? 'text-yellow-400 opacity-100' : 'text-white/70 opacity-0 group-hover:opacity-100 hover:text-yellow-300'
+                        }`}
+                        title={isStarred ? 'Unstar board' : 'Star board'}
+                    >
+                        <Star className={`w-4 h-4 ${isStarred ? 'fill-yellow-400' : ''}`} />
+                    </button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button size="icon" variant="ghost">
@@ -168,7 +212,14 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                                 Archive
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem onClick={handleDelete} className="text-destructive">
+                            <DropdownMenuItem
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive focus:bg-destructive/10 focus:text-destructive"
+                            >
                                 <Trash className="mr-2 h-4 w-4" />
                                 Delete
                             </DropdownMenuItem>
@@ -198,6 +249,39 @@ export function WorkspaceBoards({ board, viewMode }: Props) {
                     boardToEdit={board}
                 />
             )}
+
+            <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <div className="flex items-center gap-3 text-destructive mb-2">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
+                                <AlertTriangle className="h-6 w-6" />
+                            </div>
+                            <DialogTitle className="text-xl">Delete Board</DialogTitle>
+                        </div>
+                        <DialogDescription className="text-base break-words">
+                            Are you sure you want to delete <span className="font-semibold text-foreground break-all italic">"{board.title}"</span>? 
+                            This action is permanent and cannot be undone. All lists and cards within this board will be lost.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6 gap-2 sm:gap-0">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsDeleteDialogOpen(false)}
+                            className="w-full sm:w-auto"
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            className="w-full sm:w-auto shadow-sm shadow-destructive/20"
+                        >
+                            Delete Board
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }

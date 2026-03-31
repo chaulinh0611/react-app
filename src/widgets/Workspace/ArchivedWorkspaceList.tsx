@@ -67,10 +67,10 @@ export function ArchivedWorkspaces() {
                                 key={ws.id}
                                 className="flex items-center justify-between p-4 border rounded-lg bg-gray-50"
                             >
-                                <div>
-                                    <h4 className="font-semibold">{ws.title}</h4>
+                                <div className="min-w-0 mr-4">
+                                    <h4 className="font-semibold break-all italic">{ws.title}</h4>
                                     {ws.description && (
-                                        <p className="text-sm text-gray-500">{ws.description}</p>
+                                        <p className="text-sm text-gray-500 break-words">{ws.description}</p>
                                     )}
                                 </div>
                                 <Button

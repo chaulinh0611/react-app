@@ -48,6 +48,7 @@ export const GlobalCardSearch = () => {
                 placeholder="Search everywhere..."
                 className="pl-9 h-9"
                 onChange={(e) => onSearch(e.target.value)}
+                maxLength={100}
             />
             {isSearching && (
                 <Loader2 className="absolute right-2 top-2.5 h-4 w-4 animate-spin text-muted-foreground" />
@@ -70,7 +71,7 @@ export const GlobalCardSearch = () => {
                                         setShowResults(false);
                                     }}
                                 >
-                                    <p className="text-sm font-medium">{board.title}</p>
+                                    <p className="text-sm font-medium truncate">{board.title}</p>
                                 </div>
                             ))}
                         </div>
@@ -95,7 +96,7 @@ export const GlobalCardSearch = () => {
                                         }
                                     }}
                                 >
-                                    <p className="text-sm font-medium">{card.title}</p>
+                                    <p className="text-sm font-medium truncate">{card.title}</p>
                                     {card.list && (
                                         <p className="text-xs text-muted-foreground">
                                             in {card.list.title}
@@ -121,7 +122,7 @@ export const GlobalCardSearch = () => {
                                         setShowResults(false);
                                     }}
                                 >
-                                    <p className="text-sm font-medium">{ws.title}</p>
+                                    <p className="text-sm font-medium truncate">{ws.title}</p>
                                 </div>
                             ))}
                         </div>
@@ -144,10 +145,10 @@ export const GlobalCardSearch = () => {
                                             : '?'}
                                     </div>
                                     <div>
-                                        <p className="text-sm font-medium leading-none">
+                                        <p className="text-sm font-medium leading-none truncate">
                                             {member.fullName || member.username}
                                         </p>
-                                        <p className="text-xs text-muted-foreground">
+                                        <p className="text-xs text-muted-foreground truncate">
                                             {member.email}
                                         </p>
                                     </div>

@@ -14,6 +14,7 @@ import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { Textarea } from '@/shared/ui/textarea';
 import { useCreateBoard, useUpdateBoard } from '@/entities/board/model/useBoard';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 import type { Board } from '@/entities/board/model/board.type';
 
@@ -32,6 +33,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    const { addToast } = useAnimatedToast();
 
     // populate fields when editing
     useEffect(() => {
@@ -76,6 +78,10 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
 
             setTitle('');
             setDescription('');
+        } catch (err: any) {
+            const msg = err?.response?.data?.message
+                || 'Could not save board. Please check your input and try again.';
+            addToast({ message: msg, type: 'error' });
         } finally {
             setLoading(false);
         }
@@ -83,7 +89,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="sm:max-w-130">
+            <DialogContent className="sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle>{boardToEdit ? 'Edit board' : 'Create new board'}</DialogTitle>
                     <DialogDescription>
@@ -93,8 +99,8 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="space-y-2">
+                <form onSubmit={handleSubmit} className="space-y-4 overflow-hidden">
+                    <div className="space-y-2 min-w-0">
                         <Label htmlFor="title">Board title</Label>
                         <Input
                             id="title"
@@ -103,10 +109,11 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                             placeholder="e.g. Project Alpha"
                             autoFocus
                             required
+                            maxLength={255}
                         />
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 min-w-0">
                         <Label htmlFor="description">
                             Description <span className="text-muted-foreground">(optional)</span>
                         </Label>
@@ -116,6 +123,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Short description of your board"
                             rows={3}
+                            className="max-h-32 overflow-y-auto resize-none"
                         />
                     </div>
 

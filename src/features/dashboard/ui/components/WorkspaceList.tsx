@@ -3,35 +3,94 @@ import {
     useWorkspaceBoardsQuery,
     useWorkspacesQuery,
 } from '@/entities/workspace/model/workspace.queries';
+import { useGetAccessibleBoards, useGetStarredBoards } from '@/entities/board/model/useBoard';
+import { useGetProfile } from '@/entities/auth/model/useAuthQueries';
 import { CreateBoardCard } from './CreateBoardCard';
 import { CreateBoardDialog } from './CreateBoardDialog';
 import { WorkspaceBoards } from './WorkspaceBoards';
+import { User, Briefcase, Loader2 } from 'lucide-react';
+import { Button } from '@/shared/ui/button';
+import { StarredBoardsSection } from './StarredBoardsSection';
+import { RecentlyViewedSection } from './RecentlyViewedSection';
+import { useRecentBoards } from '@/entities/board/model/useRecentlyViewed';
 
 const BoardList = memo(
-    ({ workspaceId, onCreateBoard }: { workspaceId: string; onCreateBoard: () => void }) => {
-        const { data: res } = useWorkspaceBoardsQuery(workspaceId);
-        const boards = res?.data || [];
+    ({ workspaceId, onCreateBoard, boards: providedBoards, starredIds }: { workspaceId: string; onCreateBoard?: () => void; boards?: any[]; starredIds: Set<string> }) => {
+        const { data: res } = useWorkspaceBoardsQuery(providedBoards ? '' : workspaceId);
+        const boards = providedBoards || (Array.isArray(res) ? res : (res as any)?.data) || [];
+        
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {boards.map((board) => (
-                    <WorkspaceBoards key={board.id} board={board} viewMode="grid" />
+                {boards.map((board: any) => (
+                    <WorkspaceBoards 
+                        key={board.id} 
+                        board={board} 
+                        viewMode="grid" 
+                        isStarred={starredIds.has(board.id)} 
+                    />
                 ))}
-                <CreateBoardCard viewMode="grid" onClick={onCreateBoard} />
+                {onCreateBoard && <CreateBoardCard viewMode="grid" onClick={onCreateBoard} />}
             </div>
         );
     },
 );
 
 export const WorkspaceList = () => {
-    const { data: workspaces = [] } = useWorkspacesQuery();
+    const { data: workspaces = [], isLoading: isWorkspacesLoading } = useWorkspacesQuery();
+    const { data: allBoards = [], isLoading: isBoardsLoading } = useGetAccessibleBoards();
+    const { data: profileRes, isLoading: isProfileLoading } = useGetProfile();
+    const { data: starredBoards = [] } = useGetStarredBoards();
+    const currentUser = profileRes?.data;
+    const { getRecentIds } = useRecentBoards(currentUser?.id);
+
+    const starredIds = useMemo(() => new Set((starredBoards as any[]).map((b: any) => b.id)), [starredBoards]);
+
+    // Get recently viewed boards from allBoards using IDs from localStorage
+    const recentlyViewedBoards = useMemo(() => {
+        const ids = getRecentIds();
+        return ids
+            .map((id) => (allBoards as any[]).find((b: any) => b.id === id))
+            .filter(Boolean)
+            .filter((b: any) => !b.isArchived && !starredIds.has(b.id))
+            .slice(0, 8);
+    }, [getRecentIds, allBoards, starredIds]);
+
     const [createBoardDialog, setCreateBoardDialog] = useState({
         open: false,
         workspaceId: '',
     });
+    
+    const [visibleCount, setVisibleCount] = useState(10);
+    const [guestVisibleCount, setGuestVisibleCount] = useState(10);
 
-    const workspaceList = useMemo(() => {
-        return workspaces;
-    }, [workspaces]);
+    const joinedWorkspaceIds = useMemo(() => new Set(workspaces.map((ws: any) => ws.id)), [workspaces]);
+
+    const guestWorkspaces = useMemo(() => {
+        const guestMap: Record<string, { id: string; title: string; description: string; boards: any[] }> = {};
+        
+        allBoards.forEach((board: any) => {
+            const ws = board.workspace;
+            if (ws && !joinedWorkspaceIds.has(ws.id)) {
+                // Additional check: is the current user the owner of the workspace?
+                // If they are, it should NOT be in Guest Workspaces
+                if (currentUser && ws.owner?.id === currentUser.id) {
+                    return;
+                }
+
+                if (!guestMap[ws.id]) {
+                    guestMap[ws.id] = {
+                        id: ws.id,
+                        title: ws.title,
+                        description: ws.description || 'Guest Workspace',
+                        boards: [],
+                    };
+                }
+                guestMap[ws.id].boards.push(board);
+            }
+        });
+        
+        return Object.values(guestMap);
+    }, [allBoards, joinedWorkspaceIds, currentUser]);
 
     const handleCreateBoard = useCallback((workspaceId: string) => {
         setCreateBoardDialog({ open: true, workspaceId });
@@ -41,42 +100,116 @@ export const WorkspaceList = () => {
         setCreateBoardDialog((prev) => ({ ...prev, open }));
     }, []);
 
-    if (!workspaces || workspaceList.length === 0) {
+    const isLoading = isWorkspacesLoading || isBoardsLoading || isProfileLoading;
+
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center py-20 text-gray-500">
+                <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                <p>Loading your workspaces...</p>
+            </div>
+        );
+    }
+
+    if (workspaces.length === 0 && guestWorkspaces.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-lg border-2 border-dashed">
-                <p>Bạn chưa có Workspace nào. Hãy tạo mới nhé!</p>
+                <p>You don't have any workspaces yet. Create one now!</p>
             </div>
         );
     }
 
     return (
-        <div className="space-y-8">
-            {workspaceList.map((workspace: any) => (
-                <div key={workspace.id} className="space-y-4  p-6 rounded-lg bg-white">
-                    {/* Header của Workspace */}
+        <div className="space-y-12 min-w-0">
+            {/* STARRED BOARDS */}
+            <StarredBoardsSection boards={starredBoards as any[]} />
 
-                    <div className="flex items-center justify-between border-b pb-3">
-                        <div className="flex items-center gap-3">
-                            <div>
-                                <h3 className="font-bold text-xl text-gray-800">
-                                    {workspace.title}
-                                </h3>
-                                {workspace.description && (
-                                    <p className="text-sm text-gray-600 mt-1">
-                                        {workspace.description}
-                                    </p>
-                                )}
-                            </div>
-                        </div>
+            {/* RECENTLY VIEWED */}
+            <RecentlyViewedSection boards={recentlyViewedBoards as any[]} />
+
+            {/* YOUR WORKSPACES */}
+            {workspaces.length > 0 && (
+                <div className="space-y-6">
+                    <div className="flex items-center gap-2 text-gray-700">
+                        <User className="h-5 w-5" />
+                        <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900/80">Your Workspaces</h2>
                     </div>
-
-                    {/* Danh sách Boards */}
-                    <BoardList
-                        workspaceId={workspace.id}
-                        onCreateBoard={() => handleCreateBoard(workspace.id)}
-                    />
+                    
+                    <div className="space-y-8">
+                        {workspaces.slice(0, visibleCount).map((workspace: any) => (
+                            <div key={workspace.id} className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0">
+                                <div className="flex items-center justify-between border-b pb-3 w-full">
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="font-bold text-xl text-gray-800 truncate" title={workspace.title}>
+                                                {workspace.title}
+                                            </h3>
+                                            {workspace.description && (
+                                                <p className="text-sm text-gray-600 mt-1 truncate" title={workspace.description}>
+                                                    {workspace.description}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <BoardList
+                                    workspaceId={workspace.id}
+                                    onCreateBoard={() => handleCreateBoard(workspace.id)}
+                                    starredIds={starredIds}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    {workspaces.length > visibleCount && (
+                        <div className="flex justify-center pt-2">
+                            <Button variant="outline" onClick={() => setVisibleCount(prev => prev + 10)}>
+                                Show more workspaces
+                            </Button>
+                        </div>
+                    )}
                 </div>
-            ))}
+            )}
+
+            {/* GUEST WORKSPACES */}
+            {guestWorkspaces.length > 0 && (
+                <div className="space-y-6 mt-12 bg-gray-50/50 p-6 rounded-xl border border-dashed border-gray-200">
+                    <div className="flex items-center gap-2 text-indigo-700">
+                        <Briefcase className="h-5 w-5" />
+                        <h2 className="text-xl font-bold uppercase tracking-tight">Guest Workspaces</h2>
+                    </div>
+                    
+                    <div className="space-y-8">
+                        {guestWorkspaces.slice(0, guestVisibleCount).map((workspace: any) => (
+                            <div key={workspace.id} className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0">
+                                <div className="flex items-center justify-between border-b pb-3 w-full">
+                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                        <div className="min-w-0 flex-1">
+                                            <h3 className="font-bold text-xl text-gray-800 truncate" title={workspace.title}>
+                                                {workspace.title}
+                                            </h3>
+                                            <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 w-fit px-2.5 py-1 rounded-md mt-2 border border-indigo-100">
+                                                GUEST
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <BoardList
+                                    workspaceId={workspace.id}
+                                    boards={workspace.boards}
+                                    starredIds={starredIds}
+                                />
+                            </div>
+                        ))}
+                    </div>
+                    {guestWorkspaces.length > guestVisibleCount && (
+                        <div className="flex justify-center pt-2">
+                            <Button variant="outline" onClick={() => setGuestVisibleCount(prev => prev + 10)}>
+                                Show more guest workspaces
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             <CreateBoardDialog
                 open={createBoardDialog.open}

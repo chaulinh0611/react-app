@@ -40,7 +40,7 @@ const ErrorPage2 = () => {
                 </div>
             </div>
             <img
-                src="../../public/Scrum.png"
+                src="/react-app/Scrum.png"
                 alt="Scrum"
                 className="hidden bg-cover object-cover xl:inline dark:brightness-[0.95] dark:invert"
             />

@@ -116,4 +116,12 @@ export const BoardApi = {
     getArchivedCardsInBoard: (boardId: string): Promise<any[]> => {
         return axios.get(`/boards/${boardId}/archived/cards`);
     },
+
+    toggleStarBoard: (boardId: string): Promise<any> => {
+        return axios.post(`/boards/${boardId}/star`);
+    },
+
+    getStarredBoards: (): Promise<any> => {
+        return axios.get('/boards/starred');
+    },
 };

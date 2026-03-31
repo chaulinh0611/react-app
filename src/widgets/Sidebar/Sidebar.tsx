@@ -46,11 +46,11 @@ export default function AppSidebar() {
                         </Link>
 
                         <Link
-                            to="/template"
+                            to="/templates"
                             className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md mb-1"
                         >
                             <LayoutPanelTop className="h-4 w-4" />
-                            Template
+                            Templates
                         </Link>
                     </SidebarGroup>
 

@@ -6,7 +6,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { User, Settings, LogOut, ChevronsUpDown } from 'lucide-react';
 import { useGetProfile, useLogout } from '@/entities/auth/model/useAuthQueries';
 
@@ -14,7 +14,6 @@ export const NavUser = () => {
     const { data: profileData } = useGetProfile();
     const user = profileData?.data;
     const { mutate: logout } = useLogout();
-    const navigate = useNavigate();
 
     const handleLogout = () => {
         logout();
@@ -23,9 +22,13 @@ export const NavUser = () => {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-3 w-full p-2 hover:bg-gray-100 rounded-md transition-all outline-none group text-left">
-                    <div className="h-9 w-9 rounded-full bg-linear-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
-                        {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
-                    </div>
+                    {user?.avatarUrl ? (
+                        <img src={user.avatarUrl} alt="Avatar" className="h-9 w-9 rounded-full object-cover shadow-sm shrink-0" />
+                    ) : (
+                        <div className="h-9 w-9 rounded-full bg-linear-to-tr from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+                            {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                        </div>
+                    )}
 
                     {/* Info User */}
                     <div className="flex-1 overflow-hidden">

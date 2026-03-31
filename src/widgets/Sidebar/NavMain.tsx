@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
     SidebarGroupLabel,
     SidebarGroup,
@@ -16,17 +17,19 @@ interface Props {
 }
 
 export const NavMain = ({ workspaces }: Props) => {
+    const [visibleCount, setVisibleCount] = useState(10);
+    
     return (
         <SidebarGroup className="px-4">
             <SidebarGroupLabel>Workspace</SidebarGroupLabel>
             <SidebarMenu>
-                {workspaces.map((w) => {
+                {workspaces.slice(0, visibleCount).map((w) => {
                     return (
                         <Collapsible key={w.id}>
                             <CollapsibleTrigger asChild>
-                                <Button variant="ghost" className="w-full justify-start">
-                                    <ChevronRight />
-                                    {w.title}
+                                <Button variant="ghost" className="w-full justify-start overflow-hidden">
+                                    <ChevronRight className="shrink-0" />
+                                    <span className="truncate" title={w.title}>{w.title}</span>
                                 </Button>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
@@ -65,6 +68,17 @@ export const NavMain = ({ workspaces }: Props) => {
                         </Collapsible>
                     );
                 })}
+                {workspaces.length > visibleCount && (
+                    <SidebarMenuItem>
+                        <Button 
+                            variant="ghost" 
+                            className="w-full text-xs text-gray-500 justify-center h-8 border border-dashed border-gray-200" 
+                            onClick={() => setVisibleCount(p => p + 10)}
+                        >
+                            Show more
+                        </Button>
+                    </SidebarMenuItem>
+                )}
             </SidebarMenu>
         </SidebarGroup>
     );

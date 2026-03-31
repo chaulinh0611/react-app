@@ -73,7 +73,7 @@ export default function ListCard({ card, isDragging, boardId, listId }: ListCard
                                             >
                                                 <AvatarImage src={member.avatarUrl || undefined} />
                                                 <AvatarFallback className="text-[10px]">
-                                                    {member.fullName.charAt(0).toUpperCase()}
+                                                    {(member.fullName || 'U').charAt(0).toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
                                         ))}

@@ -8,6 +8,7 @@ import {
     useDeleteWorkspaceMutation,
 } from '@/entities/workspace/model/workspace.queries';
 import { useUnarchiveBoard, useGetArchivedBoards } from '@/entities/board/model/useBoard';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export default function WorkspaceSettingsPage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -24,6 +25,7 @@ export default function WorkspaceSettingsPage() {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const { addToast } = useAnimatedToast();
 
     useEffect(() => {
         if (!currentWorkspace) return;
@@ -41,9 +43,10 @@ export default function WorkspaceSettingsPage() {
                 id: workspaceId,
                 payload: { title, description },
             });
-            alert('Workspace updated successfully');
+            addToast({ message: 'Workspace updated successfully', type: 'success' });
         } catch (err) {
             console.error(err);
+            addToast({ message: 'Failed to update workspace', type: 'error' });
         }
     };
 
@@ -54,13 +57,14 @@ export default function WorkspaceSettingsPage() {
         try {
             if (currentWorkspace.isArchived) {
                 await unarchiveWorkspace.mutateAsync(workspaceId);
-                alert('Workspace reopened');
+                addToast({ message: 'Workspace reopened', type: 'success' });
             } else {
                 await archiveWorkspace.mutateAsync(workspaceId);
-                alert('Workspace archived');
+                addToast({ message: 'Workspace archived', type: 'success' });
             }
         } catch (err) {
             console.error(err);
+            addToast({ message: 'Failed to toggle archive status', type: 'error' });
         }
     };
 
@@ -76,10 +80,11 @@ export default function WorkspaceSettingsPage() {
 
         try {
             await deleteWorkspace.mutateAsync(workspaceId);
-            alert('Workspace deleted');
+            addToast({ message: 'Workspace deleted', type: 'success' });
             navigate('/');
         } catch (err) {
             console.error(err);
+            addToast({ message: 'Failed to delete workspace', type: 'error' });
         }
     };
 
@@ -178,9 +183,10 @@ export default function WorkspaceSettingsPage() {
                                         onClick={async () => {
                                             try {
                                                 await unarchiveBoard.mutateAsync(board.id);
-                                                alert('Board restored');
+                                                addToast({ message: 'Board restored', type: 'success' });
                                             } catch (err) {
                                                 console.error(err);
+                                                addToast({ message: 'Failed to restore board', type: 'error' });
                                             }
                                         }}
                                         className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"

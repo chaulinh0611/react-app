@@ -4,6 +4,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar';
 import { Card } from '@/shared/ui/card';
 import { Dot } from 'lucide-react';
 import { useGetBoardById } from '@/entities/board/model/useBoard';
+import { useWorkspaceByIdQuery } from '@/entities/workspace/model/workspace.queries';
 import { cn } from '@/shared/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { useMarkNotificationAsRead } from '@/entities/notification/hooks/useNotification';
@@ -16,8 +17,10 @@ export default function NotificationCard({ notification }: NotificationCardProps
     const navigate = useNavigate();
     const isCardType = notification.entityType === 'card';
     const isBoardType = notification.entityType === 'board';
+    const isWorkspaceType = notification.entityType === 'workspace';
 
     const { data: board } = useGetBoardById(isBoardType ? notification.entityId : '');
+    const { data: workspace } = useWorkspaceByIdQuery(isWorkspaceType ? notification.entityId : '');
     const markAsReadMutation = useMarkNotificationAsRead();
 
     const handleNotificationClick = (e: React.MouseEvent) => {
@@ -53,14 +56,20 @@ export default function NotificationCard({ notification }: NotificationCardProps
                 </div>
 
                 {isCardType && (
-                    <div className="text-[12px] font-medium text-blue-600 bg-blue-50 w-fit px-1.5 py-0.5 rounded mt-0.5">
-                        Thẻ:
+                    <div className="text-[12px] font-medium text-blue-600 bg-blue-50 w-fit px-1.5 py-0.5 rounded mt-1">
+                        Card
                     </div>
                 )}
 
-                {isBoardType && board && (
-                    <div className="text-[12    px] font-medium text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded mt-0.5">
-                        Bảng: {board.title}
+                {isBoardType && (
+                    <div className="text-[12px] font-medium text-indigo-600 bg-indigo-50 w-fit px-1.5 py-0.5 rounded mt-1">
+                        Board: {board?.title || 'Loading...'}
+                    </div>
+                )}
+
+                {isWorkspaceType && (
+                    <div className="text-[12px] font-medium text-purple-600 bg-purple-50 w-fit px-1.5 py-0.5 rounded mt-1">
+                        Workspace: {workspace?.title || 'Loading...'}
                     </div>
                 )}
 

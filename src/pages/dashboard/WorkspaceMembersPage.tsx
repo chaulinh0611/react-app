@@ -8,6 +8,7 @@ import {
 } from '@/entities/workspace/model/workspace.queries';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export default function WorkspaceMembersPage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -23,19 +24,20 @@ export default function WorkspaceMembersPage() {
 
     const [email, setEmail] = useState('');
     const [shareLink, setShareLink] = useState('');
+    const { addToast } = useAnimatedToast();
 
     const handleInvite = async () => {
         if (!email) {
-            alert('Please enter email');
+            addToast({ message: 'Please enter email', type: 'warning' });
             return;
         }
 
         try {
             await inviteWorkspaceMember.mutateAsync({ workspaceId: workspaceId!, email });
-            alert('Invitation sent!');
+            addToast({ message: 'Invitation sent!', type: 'success' });
             setEmail('');
         } catch {
-            alert('Failed to send invitation');
+            addToast({ message: 'Failed to send invitation', type: 'error' });
         }
     };
 
@@ -43,14 +45,15 @@ export default function WorkspaceMembersPage() {
         try {
             const link = await createShareLink.mutateAsync(workspaceId!);
             setShareLink(link);
+            addToast({ message: 'Share link created', type: 'success' });
         } catch {
-            alert('Failed to create share link');
+            addToast({ message: 'Failed to create share link', type: 'error' });
         }
     };
 
     const copyLink = async () => {
         await navigator.clipboard.writeText(shareLink);
-        alert('Link copied!');
+        addToast({ message: 'Link copied!', type: 'success' });
         setShareLink(''); // quay lại nút ban đầu
     };
 
@@ -60,8 +63,9 @@ export default function WorkspaceMembersPage() {
         if (window.confirm('Remove this member?')) {
             try {
                 await removeWorkspaceMember.mutateAsync({ workspaceId, email });
+                addToast({ message: 'Member removed', type: 'success' });
             } catch {
-                alert('Failed to remove member');
+                addToast({ message: 'Failed to remove member', type: 'error' });
             }
         }
     };

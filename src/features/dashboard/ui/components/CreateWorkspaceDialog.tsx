@@ -14,16 +14,21 @@ import { useCreateWorkspaceMutation } from '@/entities/workspace/model/workspace
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export const CreateWorkspaceDialog = () => {
     const createWorkspace = useCreateWorkspaceMutation();
+    const { addToast } = useAnimatedToast();
+    const navigate = useNavigate();
 
+    const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
 
     const handleCreate = async () => {
         if (!title.trim()) {
-            alert('Title is required');
+            addToast({ message: 'Title is required', type: 'error' });
             return;
         }
 
@@ -33,16 +38,21 @@ export const CreateWorkspaceDialog = () => {
                 description,
             });
 
-            alert('Workspace created successfully!');
+            addToast({ message: 'Workspace created successfully!', type: 'success' });
 
             setTitle('');
             setDescription('');
-        } catch (err) {
-            alert('Create workspace failed!');
+            setOpen(false);
+            navigate('/dashboard');
+        } catch (err: any) {
+            const msg = err?.response?.data?.message
+                || err?.message
+                || 'Create workspace failed!';
+            addToast({ message: msg, type: 'error' });
         }
     };
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <span className="text-lg font-semibold">＋</span> New Workspace
@@ -64,17 +74,21 @@ export const CreateWorkspaceDialog = () => {
                             className="col-span-3"
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
+                            maxLength={100}
+                            placeholder="Enter workspace name..."
                         />
                     </div>
                     <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="username" className="text-right">
+                        <Label htmlFor="description" className="text-right">
                             Description
                         </Label>
                         <Input
-                            id="username"
+                            id="description"
                             className="col-span-3"
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
+                            maxLength={512}
+                            placeholder="Enter workspace description (optional)..."
                         />
                     </div>
                 </div>

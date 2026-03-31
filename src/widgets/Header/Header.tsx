@@ -1,16 +1,17 @@
 import { Button } from '@/shared/ui/button';
-import { Input } from '@/shared/ui/input';
-import { Bell, SearchIcon } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { NotificationPopover } from '../Notification/NotificationContent';
 import { Popover, PopoverContent, PopoverTrigger } from '@/shared/ui/popover';
 import { InviteButton } from './InviteButton';
 import { SettingButton } from './SettingButton';
 import { GlobalCardSearch } from '@/features/card/ui/GlobalCardSearch';
+import { useUnreadCount } from '@/entities/notification/hooks/useNotification';
 
 export const Header = () => {
     const { pathname } = useLocation();
     const currentPath = pathname.split('/')[1];
+    const { data: unreadCount = 0 } = useUnreadCount();
 
     const getTitle = () => {
         switch (currentPath) {
@@ -38,8 +39,13 @@ export const Header = () => {
                     {/* Notification component */}
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="outline">
-                                <Bell className="h-5 w-5" />
+                            <Button variant="outline" className="relative group">
+                                <Bell className="h-5 w-5 text-gray-600 group-hover:text-black transition-colors" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white ring-2 ring-white">
+                                        {unreadCount > 9 ? '9+' : unreadCount}
+                                    </span>
+                                )}
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent
