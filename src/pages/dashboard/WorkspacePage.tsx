@@ -24,10 +24,11 @@ type ViewMode = 'grid' | 'list';
 
 export default function WorkspacePage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
+    const { data: workspaceBoardsData } = useWorkspaceBoardsQuery(workspaceId ?? '');
+    const workspaceBoards = useMemo(() => {
+        return Array.isArray(workspaceBoardsData) ? workspaceBoardsData : [];
+    }, [workspaceBoardsData]);
 
-    const { data: boards } = useWorkspaceBoardsQuery(workspaceId ?? '');
-
-    const workspaceBoards = boards?.data || [];
 
     const { data: currentWorkspace } = useWorkspaceByIdQuery(workspaceId ?? '');
     const { data: workspaces = [] } = useWorkspacesQuery();
@@ -49,11 +50,18 @@ export default function WorkspacePage() {
         'Workspace description';
 
     const filteredBoards = useMemo(() => {
-        const filtered = workspaceBoards.filter(
-            (b: any) =>
-                b.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                b.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+    if (!Array.isArray(workspaceBoards)) return [];
+
+    const filtered = workspaceBoards.filter((b: any) => {
+        if (b.isArchived) return false;
+
+        const q = searchQuery.toLowerCase();
+
+        return (
+            b.title?.toLowerCase().includes(q) ||
+            b.description?.toLowerCase().includes(q)
         );
+    });
 
         switch (sortBy) {
             case 'az':

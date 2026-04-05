@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { usePromiseToast } from '@/shared/ui/animated-toast';
 import {
     useWorkspaceByIdQuery,
     useUpdateWorkspaceMutation,
@@ -11,21 +12,22 @@ import { useUnarchiveBoard, useGetArchivedBoards } from '@/entities/board/model/
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export default function WorkspaceSettingsPage() {
+    const promiseToast = usePromiseToast();
+    const { addToast, removeToast } = useAnimatedToast();
     const { workspaceId } = useParams<{ workspaceId: string }>();
     const navigate = useNavigate();
     const { data: currentWorkspace, isLoading } = useWorkspaceByIdQuery(workspaceId ?? '');
     const updateWorkspace = useUpdateWorkspaceMutation();
     const archiveWorkspace = useArchiveWorkspaceMutation();
     const unarchiveBoard = useUnarchiveBoard();
-    const workspaceArchivedBoards = useGetArchivedBoards().data?.filter(b => b.workspace?.id === workspaceId) || [];
+    const workspaceArchivedBoards =
+        useGetArchivedBoards().data?.filter((b) => b.workspace?.id === workspaceId) || [];
 
-    console.log("Archived board", workspaceArchivedBoards);
     const unarchiveWorkspace = useUnarchiveWorkspaceMutation();
     const deleteWorkspace = useDeleteWorkspaceMutation();
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const { addToast } = useAnimatedToast();
 
     useEffect(() => {
         if (!currentWorkspace) return;
@@ -38,54 +40,64 @@ export default function WorkspaceSettingsPage() {
         e.preventDefault();
         if (!workspaceId) return;
 
-        try {
-            await updateWorkspace.mutateAsync({
+        await promiseToast({
+            promise: updateWorkspace.mutateAsync({
                 id: workspaceId,
                 payload: { title, description },
-            });
-            addToast({ message: 'Workspace updated successfully', type: 'success' });
-        } catch (err) {
-            console.error(err);
-            addToast({ message: 'Failed to update workspace', type: 'error' });
-        }
+            }),
+            loading: 'Updating workspace...',
+            success: 'Workspace updated successfully',
+            error: 'Failed to update workspace',
+        });
     };
 
     /* ================= ARCHIVE ================= */
     const handleArchiveToggle = async () => {
         if (!workspaceId || !currentWorkspace) return;
 
-        try {
-            if (currentWorkspace.isArchived) {
-                await unarchiveWorkspace.mutateAsync(workspaceId);
-                addToast({ message: 'Workspace reopened', type: 'success' });
-            } else {
-                await archiveWorkspace.mutateAsync(workspaceId);
-                addToast({ message: 'Workspace archived', type: 'success' });
-            }
-        } catch (err) {
-            console.error(err);
-            addToast({ message: 'Failed to toggle archive status', type: 'error' });
-        }
+        await promiseToast({
+            promise: currentWorkspace.isArchived
+                ? unarchiveWorkspace.mutateAsync(workspaceId)
+                : archiveWorkspace.mutateAsync(workspaceId),
+            loading: 'Updating workspace...',
+            success: currentWorkspace.isArchived ? 'Workspace reopened' : 'Workspace archived',
+            error: 'Action failed',
+        });
+
+        navigate('/');
     };
 
     /* ================= DELETE ================= */
     const handleDelete = async () => {
         if (!workspaceId) return;
 
-        const confirmed = window.confirm(
-            'Are you sure you want to delete this workspace? This action cannot be undone.',
-        );
+        const id = addToast({
+            title: 'Confirm delete',
+            message: 'Are you sure you want to delete this workspace?',
+            type: 'warning',
+            duration: 0,
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    removeToast(id);
 
-        if (!confirmed) return;
+                    await promiseToast({
+                        promise: deleteWorkspace.mutateAsync(workspaceId),
+                        loading: 'Deleting workspace...',
+                        success: 'Workspace deleted',
+                        error: 'Delete failed',
+                    });
 
-        try {
-            await deleteWorkspace.mutateAsync(workspaceId);
-            addToast({ message: 'Workspace deleted', type: 'success' });
-            navigate('/');
-        } catch (err) {
-            console.error(err);
-            addToast({ message: 'Failed to delete workspace', type: 'error' });
-        }
+                    navigate('/');
+                },
+            },
+            secondaryAction: {
+                label: 'Cancel',
+                onClick: () => {
+                    removeToast(id);
+                },
+            },
+        });
     };
 
     /* ================= RENDER ================= */
@@ -100,7 +112,6 @@ export default function WorkspaceSettingsPage() {
     return (
         <div className="w-full min-h-screen bg-gray-100 flex justify-center py-10">
             <div className="w-full max-w-3xl space-y-8">
-
                 {/* HEADER */}
                 <div className="flex items-center gap-4">
                     <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow">
@@ -115,15 +126,11 @@ export default function WorkspaceSettingsPage() {
 
                 {/* GENERAL */}
                 <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-5">
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        General Information
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-800">General Information</h2>
 
                     <form onSubmit={handleSave} className="space-y-4">
                         <div>
-                            <label className="text-sm text-gray-500">
-                                Workspace Title
-                            </label>
+                            <label className="text-sm text-gray-500">Workspace Title</label>
 
                             <input
                                 type="text"
@@ -134,9 +141,7 @@ export default function WorkspaceSettingsPage() {
                         </div>
 
                         <div>
-                            <label className="text-sm text-gray-500">
-                                Description
-                            </label>
+                            <label className="text-sm text-gray-500">Description</label>
 
                             <textarea
                                 rows={3}
@@ -157,9 +162,7 @@ export default function WorkspaceSettingsPage() {
 
                 {/* ARCHIVED BOARDS */}
                 <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        Archived Boards
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Archived Boards</h2>
 
                     {workspaceArchivedBoards.length === 0 ? (
                         <p className="text-sm text-gray-500">
@@ -175,19 +178,22 @@ export default function WorkspaceSettingsPage() {
                                     <div>
                                         <p className="font-medium">{board.title}</p>
                                         <p className="text-xs text-gray-500">
-                                            Created: {new Date(board.createdAt).toLocaleDateString()}
+                                            Created:{' '}
+                                            {new Date(board.createdAt).toLocaleDateString()}
                                         </p>
                                     </div>
 
                                     <button
                                         onClick={async () => {
-                                            try {
-                                                await unarchiveBoard.mutateAsync(board.id);
-                                                addToast({ message: 'Board restored', type: 'success' });
-                                            } catch (err) {
-                                                console.error(err);
-                                                addToast({ message: 'Failed to restore board', type: 'error' });
-                                            }
+                                            await promiseToast({
+                                                promise: unarchiveBoard.mutateAsync({
+                                                    boardId: board.id,
+                                                    workspaceId: board.workspace.id,
+                                                }),
+                                                loading: 'Restoring board...',
+                                                success: 'Board restored',
+                                                error: 'Failed to restore board',
+                                            });
                                         }}
                                         className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-md text-sm"
                                     >
@@ -200,9 +206,7 @@ export default function WorkspaceSettingsPage() {
                 </section>
                 {/* STATUS */}
                 <section className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800">
-                        Workspace Status
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Workspace Status</h2>
 
                     <p className="text-sm text-gray-600 flex items-center gap-2">
                         Current status:
@@ -221,17 +225,13 @@ export default function WorkspaceSettingsPage() {
                         onClick={handleArchiveToggle}
                         className="px-4 py-2 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white transition"
                     >
-                        {currentWorkspace.isArchived
-                            ? 'Reopen Workspace'
-                            : 'Archive Workspace'}
+                        {currentWorkspace.isArchived ? 'Reopen Workspace' : 'Archive Workspace'}
                     </button>
                 </section>
 
                 {/* DELETE */}
                 <section className="bg-red-50 rounded-xl border border-red-300 p-6 space-y-4 shadow-sm">
-                    <h2 className="text-lg font-semibold text-red-600">
-                        Danger Zone
-                    </h2>
+                    <h2 className="text-lg font-semibold text-red-600">Danger Zone</h2>
 
                     <p className="text-sm text-red-500">
                         Deleting a workspace is permanent and cannot be undone.
@@ -244,7 +244,6 @@ export default function WorkspaceSettingsPage() {
                         Delete Workspace
                     </button>
                 </section>
-
             </div>
         </div>
     );

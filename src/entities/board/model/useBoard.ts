@@ -100,15 +100,22 @@ export const useUpdateBoard = () => {
             payload,
         }: {
             boardId: string;
+            workspaceId: string; 
             payload: Partial<CreateBoardPayload>;
         }) => normalizeBoard(await BoardApi.updateBoard(boardId, payload)),
         onSuccess: (board, variables) => {
-            queryClient.invalidateQueries({ queryKey: boardKeys.all });
-            queryClient.invalidateQueries({ queryKey: boardKeys.byId(variables.boardId) });
-            if (board) {
-                queryClient.setQueryData(boardKeys.byId(variables.boardId), board);
-            }
-        },
+            queryClient.setQueryData(boardKeys.byId(variables.boardId), board);
+
+            queryClient.setQueryData(boardKeys.all, (old: Board[] = []) =>
+                old.map((b) =>
+                    b.id === variables.boardId ? { ...b, ...board } : b
+                )
+            );
+
+            queryClient.invalidateQueries({
+                queryKey: ['workspaces', variables.workspaceId, 'boards'],
+            });
+        }
     });
 };
 
@@ -116,22 +123,36 @@ export const useArchiveBoard = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ boardId }: { boardId: string }) => BoardApi.archiveBoard(boardId),
-        onSuccess: (_, { boardId }) => {
+        mutationFn: ({ boardId }: { boardId: string; workspaceId: string }) =>
+            BoardApi.archiveBoard(boardId),
+
+        onSuccess: (_, { boardId, workspaceId }) => {
+            queryClient.invalidateQueries({
+                queryKey: ['workspaces', workspaceId, 'boards'],
+            });
+
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
         },
     });
 };
-
 export const useUnarchiveBoard = () => {
     const queryClient = useQueryClient();
+
     return useMutation({
-        mutationFn: (boardId: string) => BoardApi.unarchiveBoard(boardId),
-        onSuccess: (_, boardId) => {
+        mutationFn: (data: { boardId: string; workspaceId: string }) =>
+            BoardApi.unarchiveBoard(data.boardId),
+
+        onSuccess: (_, { boardId, workspaceId }) => {
+            queryClient.invalidateQueries({ queryKey: ['archived-boards'] });
+
+            queryClient.invalidateQueries({
+                queryKey: ['workspaces', workspaceId, 'boards'],
+            });
+
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
-        }
+        },
     });
 };
 

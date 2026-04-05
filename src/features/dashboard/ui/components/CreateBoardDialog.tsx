@@ -57,6 +57,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                 // update existing (include workspace id for correct route)
                 await updateBoardMutation.mutateAsync({
                     boardId: boardToEdit.id,
+                    workspaceId,
                     payload: {
                         title: title.trim(),
                         description: description.trim() || undefined,

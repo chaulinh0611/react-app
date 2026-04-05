@@ -8,6 +8,7 @@ import {
     DialogFooter,
     DialogClose,
 } from '@/shared/ui/dialog';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 import { Button } from '@/shared/ui/button';
 import { useCreateWorkspaceMutation } from '@/entities/workspace/model/workspace.queries';
@@ -15,13 +16,10 @@ import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export const CreateWorkspaceDialog = () => {
-    const createWorkspace = useCreateWorkspaceMutation();
     const { addToast } = useAnimatedToast();
-    const navigate = useNavigate();
-
+    const createWorkspace = useCreateWorkspaceMutation();
     const [open, setOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -38,23 +36,27 @@ export const CreateWorkspaceDialog = () => {
                 description,
             });
 
-            addToast({ message: 'Workspace created successfully!', type: 'success' });
+            addToast({
+                title: 'Workspace Created',
+                message: 'Workspace created successfully!',
+                type: 'success',
+            });
 
             setTitle('');
             setDescription('');
             setOpen(false);
-            navigate('/dashboard');
-        } catch (err: any) {
-            const msg = err?.response?.data?.message
-                || err?.message
-                || 'Create workspace failed!';
-            addToast({ message: msg, type: 'error' });
+        } catch (err) {
+            addToast({
+                title: 'Create Workspace Failed',
+                message: 'Failed to create workspace.',
+                type: 'error',
+            });
         }
     };
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>
+                <Button onClick={() => setOpen(true)}>
                     <span className="text-lg font-semibold">＋</span> New Workspace
                 </Button>
             </DialogTrigger>
@@ -96,7 +98,9 @@ export const CreateWorkspaceDialog = () => {
                     <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
                     </DialogClose>
-                    <Button onClick={handleCreate}>Create</Button>
+                    <Button onClick={handleCreate} disabled={createWorkspace.isPending}>
+                        {createWorkspace.isPending ? 'Creating...' : 'Create'}
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

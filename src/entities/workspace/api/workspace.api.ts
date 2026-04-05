@@ -82,7 +82,8 @@ export const WorkspaceApi = {
         return axios.post(`/workspaces/${id}/unarchive`, {}, getConfig());
     },
 
-    getBoardsInWorkspace: (workspaceId: string): Promise<any[]> => {
-        return axios.get(`/workspaces/${workspaceId}/boards`, getConfig());
-    },
+    getBoardsInWorkspace: async (workspaceId: string) => {
+        const res = await axios.get(`/workspaces/${workspaceId}/boards`, getConfig());
+        return res.data;
+    }
 };

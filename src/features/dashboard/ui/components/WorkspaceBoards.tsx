@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 import type { Board } from '@/entities/board/model/board.type';
 import { Link } from 'react-router-dom';
 import { Users, Edit, MoreHorizontal, Trash, Star } from 'lucide-react';
@@ -25,9 +26,9 @@ import {
     useGetBoardMembers,
     useToggleStarBoard,
 } from '@/entities/board/model/useBoard';
+import { useLocation } from 'react-router-dom';
 import { useListStore } from '@/entities/list/model/list.store';
 import { CreateBoardDialog } from './CreateBoardDialog';
-import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 type Props = {
     board: Board;
@@ -36,35 +37,77 @@ type Props = {
 };
 
 export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
+    const location = useLocation();
+    const { addToast, removeToast } = useAnimatedToast();
     const archiveBoard = useArchiveBoard();
     const deleteBoard = useDeleteBoard();
     const toggleStar = useToggleStarBoard();
-    const { addToast } = useAnimatedToast();
     const { data: members = [] } = useGetBoardMembers(board.id);
     const memberCount = members.length;
+    const getListsByBoardId = useListStore((state) => state.getListsByBoardId);
+
+    useEffect(() => {
+        if (board.id) {
+            getListsByBoardId(board.id);
+        }
+    }, [location.key]);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const confirmDelete = async () => {
-        try {
-            await deleteBoard.mutateAsync({ boardId: board.id });
-            addToast({ message: `Board "${board.title}" has been deleted.`, type: 'success' });
-            setIsDeleteDialogOpen(false);
-        } catch (err) {
-            console.error(err);
-            addToast({ message: 'Could not delete board. Please try again.', type: 'error' });
-        }
-    };
+    const handleDelete = () => {
+        const id = addToast({
+            title: 'Confirm delete',
+            message: `Delete "${board.title}"?`,
+            type: 'warning',
+            duration: 0,
 
+            action: {
+                label: 'Delete',
+                onClick: async () => {
+                    removeToast(id);
+
+                    try {
+                        await deleteBoard.mutateAsync({ boardId: board.id });
+
+                        addToast({
+                            title: 'Deleted',
+                            message: `Board "${board.title}" deleted successfully`,
+                            type: 'success',
+                        });
+                    } catch (err) {
+                        console.error(err);
+                        addToast({
+                            title: 'Error',
+                            message: 'Could not delete board.',
+                            type: 'error',
+                        });
+                    }
+                },
+            },
+
+            secondaryAction: {
+                label: 'Cancel',
+                onClick: () => removeToast(id),
+            },
+        });
+    };
     const handleArchiveToggle = async () => {
         try {
-            await archiveBoard.mutateAsync({ boardId: board.id });
-            addToast({ message: `Board "${board.title}" has been archived.`, type: 'success' });
+            await archiveBoard.mutateAsync({ boardId: board.id, workspaceId: board.workspace.id });
+            addToast({
+                title: board.isArchived ? 'Board unarchived' : 'Board archived',
+                message: `The board "${board.title}" has been ${board.isArchived ? 'unarchived' : 'archived'} successfully.`,
+                type: 'success',
+            });
         } catch (err) {
             console.error(err);
-            addToast({ message: 'Could not archive board. Please try again.', type: 'error' });
+            addToast({
+                title: 'Error',
+                message: 'Could not archive board.',
+                type: 'error',
+            });
         }
     };
 
@@ -102,7 +145,9 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                             </div>
 
                             <div className="flex-1 space-y-1.5 min-w-0">
-                                <h3 className="font-semibold truncate" title={board.title}>{board.title}</h3>
+                                <h3 className="font-semibold truncate" title={board.title}>
+                                    {board.title}
+                                </h3>
                                 <div className="flex gap-6 text-sm text-muted-foreground">
                                     <span>{listCount} lists</span>
                                     <span>{memberCount} members</span>
@@ -113,7 +158,9 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                             <button
                                 onClick={handleToggleStar}
                                 className={`p-1 rounded transition-colors ${
-                                    isStarred ? 'text-yellow-400 opacity-100' : 'text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-yellow-300'
+                                    isStarred
+                                        ? 'text-yellow-400 opacity-100'
+                                        : 'text-muted-foreground opacity-0 group-hover:opacity-100 hover:text-yellow-300'
                                 }`}
                                 title={isStarred ? 'Unstar board' : 'Star board'}
                             >
@@ -188,7 +235,9 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                     <button
                         onClick={handleToggleStar}
                         className={`p-1 rounded transition-colors ${
-                            isStarred ? 'text-yellow-400 opacity-100' : 'text-white/70 opacity-0 group-hover:opacity-100 hover:text-yellow-300'
+                            isStarred
+                                ? 'text-yellow-400 opacity-100'
+                                : 'text-white/70 opacity-0 group-hover:opacity-100 hover:text-yellow-300'
                         }`}
                         title={isStarred ? 'Unstar board' : 'Star board'}
                     >
@@ -260,8 +309,12 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                             <DialogTitle className="text-xl">Delete Board</DialogTitle>
                         </div>
                         <DialogDescription className="text-base break-words">
-                            Are you sure you want to delete <span className="font-semibold text-foreground break-all italic">"{board.title}"</span>? 
-                            This action is permanent and cannot be undone. All lists and cards within this board will be lost.
+                            Are you sure you want to delete{' '}
+                            <span className="font-semibold text-foreground break-all italic">
+                                "{board.title}"
+                            </span>
+                            ? This action is permanent and cannot be undone. All lists and cards
+                            within this board will be lost.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-6 gap-2 sm:gap-0">

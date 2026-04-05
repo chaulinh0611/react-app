@@ -15,19 +15,25 @@ import { RecentlyViewedSection } from './RecentlyViewedSection';
 import { useRecentBoards } from '@/entities/board/model/useRecentlyViewed';
 
 const BoardList = memo(
-    ({ workspaceId, onCreateBoard, boards: providedBoards, starredIds }: { workspaceId: string; onCreateBoard?: () => void; boards?: any[]; starredIds: Set<string> }) => {
-        const { data: res } = useWorkspaceBoardsQuery(providedBoards ? '' : workspaceId);
-        const boards = providedBoards || (Array.isArray(res) ? res : (res as any)?.data) || [];
-        
+    ({
+        workspaceId,
+        onCreateBoard,
+        boards: providedBoards,
+        starredIds,
+    }: {
+        workspaceId: string;
+        onCreateBoard?: () => void;
+        boards?: any[];
+        starredIds: Set<string>;
+    }) => {
+        const { data: boards = [] } = useWorkspaceBoardsQuery(workspaceId);
+        const filtered = boards.filter((b: any) => {
+            return !b.isArchived;
+        });
         return (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                {boards.map((board: any) => (
-                    <WorkspaceBoards 
-                        key={board.id} 
-                        board={board} 
-                        viewMode="grid" 
-                        isStarred={starredIds.has(board.id)} 
-                    />
+                {filtered.map((board: any) => (
+                    <WorkspaceBoards key={board.id} board={board} viewMode="grid" />
                 ))}
                 {onCreateBoard && <CreateBoardCard viewMode="grid" onClick={onCreateBoard} />}
             </div>
@@ -43,7 +49,10 @@ export const WorkspaceList = () => {
     const currentUser = profileRes?.data;
     const { getRecentIds } = useRecentBoards(currentUser?.id);
 
-    const starredIds = useMemo(() => new Set((starredBoards as any[]).map((b: any) => b.id)), [starredBoards]);
+    const starredIds = useMemo(
+        () => new Set((starredBoards as any[]).map((b: any) => b.id)),
+        [starredBoards],
+    );
 
     // Get recently viewed boards from allBoards using IDs from localStorage
     const recentlyViewedBoards = useMemo(() => {
@@ -59,15 +68,21 @@ export const WorkspaceList = () => {
         open: false,
         workspaceId: '',
     });
-    
+
     const [visibleCount, setVisibleCount] = useState(10);
     const [guestVisibleCount, setGuestVisibleCount] = useState(10);
 
-    const joinedWorkspaceIds = useMemo(() => new Set(workspaces.map((ws: any) => ws.id)), [workspaces]);
+    const joinedWorkspaceIds = useMemo(
+        () => new Set(workspaces.map((ws: any) => ws.id)),
+        [workspaces],
+    );
 
     const guestWorkspaces = useMemo(() => {
-        const guestMap: Record<string, { id: string; title: string; description: string; boards: any[] }> = {};
-        
+        const guestMap: Record<
+            string,
+            { id: string; title: string; description: string; boards: any[] }
+        > = {};
+
         allBoards.forEach((board: any) => {
             const ws = board.workspace;
             if (ws && !joinedWorkspaceIds.has(ws.id)) {
@@ -88,7 +103,7 @@ export const WorkspaceList = () => {
                 guestMap[ws.id].boards.push(board);
             }
         });
-        
+
         return Object.values(guestMap);
     }, [allBoards, joinedWorkspaceIds, currentUser]);
 
@@ -132,20 +147,31 @@ export const WorkspaceList = () => {
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 text-gray-700">
                         <User className="h-5 w-5" />
-                        <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900/80">Your Workspaces</h2>
+                        <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900/80">
+                            Your Workspaces
+                        </h2>
                     </div>
-                    
+
                     <div className="space-y-8">
                         {workspaces.slice(0, visibleCount).map((workspace: any) => (
-                            <div key={workspace.id} className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0">
+                            <div
+                                key={workspace.id}
+                                className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0"
+                            >
                                 <div className="flex items-center justify-between border-b pb-3 w-full">
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="font-bold text-xl text-gray-800 truncate" title={workspace.title}>
+                                            <h3
+                                                className="font-bold text-xl text-gray-800 truncate"
+                                                title={workspace.title}
+                                            >
                                                 {workspace.title}
                                             </h3>
                                             {workspace.description && (
-                                                <p className="text-sm text-gray-600 mt-1 truncate" title={workspace.description}>
+                                                <p
+                                                    className="text-sm text-gray-600 mt-1 truncate"
+                                                    title={workspace.description}
+                                                >
                                                     {workspace.description}
                                                 </p>
                                             )}
@@ -162,7 +188,10 @@ export const WorkspaceList = () => {
                     </div>
                     {workspaces.length > visibleCount && (
                         <div className="flex justify-center pt-2">
-                            <Button variant="outline" onClick={() => setVisibleCount(prev => prev + 10)}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setVisibleCount((prev) => prev + 10)}
+                            >
                                 Show more workspaces
                             </Button>
                         </div>
@@ -175,16 +204,24 @@ export const WorkspaceList = () => {
                 <div className="space-y-6 mt-12 bg-gray-50/50 p-6 rounded-xl border border-dashed border-gray-200">
                     <div className="flex items-center gap-2 text-indigo-700">
                         <Briefcase className="h-5 w-5" />
-                        <h2 className="text-xl font-bold uppercase tracking-tight">Guest Workspaces</h2>
+                        <h2 className="text-xl font-bold uppercase tracking-tight">
+                            Guest Workspaces
+                        </h2>
                     </div>
-                    
+
                     <div className="space-y-8">
                         {guestWorkspaces.slice(0, guestVisibleCount).map((workspace: any) => (
-                            <div key={workspace.id} className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0">
+                            <div
+                                key={workspace.id}
+                                className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0"
+                            >
                                 <div className="flex items-center justify-between border-b pb-3 w-full">
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="min-w-0 flex-1">
-                                            <h3 className="font-bold text-xl text-gray-800 truncate" title={workspace.title}>
+                                            <h3
+                                                className="font-bold text-xl text-gray-800 truncate"
+                                                title={workspace.title}
+                                            >
                                                 {workspace.title}
                                             </h3>
                                             <p className="text-xs font-semibold text-indigo-600 bg-indigo-50 w-fit px-2.5 py-1 rounded-md mt-2 border border-indigo-100">
@@ -203,7 +240,10 @@ export const WorkspaceList = () => {
                     </div>
                     {guestWorkspaces.length > guestVisibleCount && (
                         <div className="flex justify-center pt-2">
-                            <Button variant="outline" onClick={() => setGuestVisibleCount(prev => prev + 10)}>
+                            <Button
+                                variant="outline"
+                                onClick={() => setGuestVisibleCount((prev) => prev + 10)}
+                            >
                                 Show more guest workspaces
                             </Button>
                         </div>

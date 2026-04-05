@@ -16,7 +16,7 @@ export function BoardCard({ board }: { board: Board }) {
 
     const handleDelete = () => {
         if (confirm(`Delete board "${board.title}"?`)) {
-            deleteBoard.mutate(board.id);
+            deleteBoard.mutate({ boardId: board.id });
         }
     };
 

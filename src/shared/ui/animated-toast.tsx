@@ -30,6 +30,10 @@ interface Toast {
     label: string;
     onClick: () => void;
   };
+  secondaryAction?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 interface ToastContextType {
@@ -120,7 +124,14 @@ interface ToastItemProps {
 }
 
 function ToastItem({ toast, index, onRemove, isTop }: ToastItemProps) {
-  const { type = "default", title, message, duration = 5000, action } = toast;
+  const {
+    type = "default",
+    title,
+    message,
+    duration = 5000,
+    action,
+    secondaryAction,
+  } = toast;
 
   React.useEffect(() => {
     if (duration > 0) {
@@ -178,14 +189,25 @@ function ToastItem({ toast, index, onRemove, isTop }: ToastItemProps) {
           <p className={cn("text-muted-foreground text-sm", title && "mt-1")}>
             {message}
           </p>
-          {action && (
-            <button
-              onClick={action.onClick}
-              className="mt-2 font-medium text-primary text-sm hover:underline"
-            >
-              {action.label}
-            </button>
-          )}
+          <div className="mt-2 flex gap-2">
+            {action && (
+              <button
+                onClick={action.onClick}
+                className="px-3 py-1 rounded-md bg-red-600 text-white text-sm hover:bg-red-700"
+              >
+                {action.label}
+              </button>
+            )}
+
+            {secondaryAction && (
+              <button
+                onClick={secondaryAction.onClick}
+                className="px-3 py-1 rounded-md bg-gray-200 text-sm hover:bg-gray-300"
+              >
+                {secondaryAction.label}
+              </button>
+            )}
+          </div>
         </div>
         <button
           onClick={onRemove}
