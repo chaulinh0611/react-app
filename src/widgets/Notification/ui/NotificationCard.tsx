@@ -1,3 +1,4 @@
+export { NotificationCard } from '@/features/notification/ui/NotificationCard';
 import type { Notification } from '@/entities/notification/model/notification.type';
 import { formatDistanceToNow } from 'date-fns';
 import { Avatar, AvatarImage, AvatarFallback } from '@/shared/ui/avatar';

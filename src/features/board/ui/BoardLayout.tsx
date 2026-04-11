@@ -6,7 +6,6 @@ import { useListsByBoardId, useReorderLists } from '@/entities/list/model/useLis
 import { useQueries } from '@tanstack/react-query';
 import type { ReorderListsPayload } from '@/entities/list/model/list.type';
 import type { List } from '@/entities/list/model/list.type';
-import type { MoveCardToAnotherListPayload, ReorderCardPayload } from '@/entities/card/model/type';
 import { useReorderCard, useMoveCardToAnotherList } from '@/entities/card/model/useCard';
 import { CardApi } from '@/entities/card/api/card.api';
 

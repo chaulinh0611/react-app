@@ -1,11 +1,10 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { CheckListApi } from "../apis/checklist.api";
-
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CheckListApi } from '../api/checklist.api';
 
 // Checklist
 export const useChecklist = (cardId: string) => {
     return useQuery({
-        queryKey: ["checklists", cardId],
+        queryKey: ['checklists', cardId],
         queryFn: () => CheckListApi.getChecklists({ cardId }).then((res) => res.data),
     });
 };
@@ -15,7 +14,7 @@ export const useCreateChecklist = () => {
     return useMutation({
         mutationFn: (payload: any) => CheckListApi.createChecklist(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checklists"] });
+            queryClient.invalidateQueries({ queryKey: ['checklists'] });
         },
     });
 };
@@ -25,7 +24,7 @@ export const useDeleteChecklist = () => {
     return useMutation({
         mutationFn: (payload: any) => CheckListApi.deleteChecklist(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checklists"] });
+            queryClient.invalidateQueries({ queryKey: ['checklists'] });
         },
     });
 };
@@ -33,7 +32,7 @@ export const useDeleteChecklist = () => {
 // Checklist item
 export const useCheckListItem = (checklistId: string) => {
     return useQuery({
-        queryKey: ["checklist-items", checklistId],
+        queryKey: ['checklist-items', checklistId],
         queryFn: () => CheckListApi.getChecklistItems(checklistId).then((res) => res.data),
     });
 };
@@ -41,9 +40,10 @@ export const useCheckListItem = (checklistId: string) => {
 export const useCreateChecklistItem = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (payload: any) => CheckListApi.addChecklistItem(payload).then((res) => res.data),
+        mutationFn: (payload: any) =>
+            CheckListApi.addChecklistItem(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checklists"] });
+            queryClient.invalidateQueries({ queryKey: ['checklists'] });
         },
     });
 };
@@ -51,9 +51,10 @@ export const useCreateChecklistItem = () => {
 export const useUpdateChecklistItem = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (payload: any) => CheckListApi.updateChecklistItems(payload).then((res) => res.data),
+        mutationFn: (payload: any) =>
+            CheckListApi.updateChecklistItems(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checklists"] });
+            queryClient.invalidateQueries({ queryKey: ['checklists'] });
         },
     });
 };
@@ -61,9 +62,10 @@ export const useUpdateChecklistItem = () => {
 export const useDeleteChecklistItem = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (itemId: string) => CheckListApi.deleteChecklistItem(itemId).then((res) => res.data),
+        mutationFn: (itemId: string) =>
+            CheckListApi.deleteChecklistItem(itemId).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["checklists"] });
+            queryClient.invalidateQueries({ queryKey: ['checklists'] });
         },
     });
 };

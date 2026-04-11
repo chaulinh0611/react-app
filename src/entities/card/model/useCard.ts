@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
 import { CardApi } from '../api/card.api';
+import type { CardAttachment } from './type';
 import type {
     CreateCardPayload,
     ReorderCardPayload,
@@ -7,16 +8,25 @@ import type {
     MoveCardToAnotherListPayload,
 } from './type';
 
+export const cardQueryKeys = {
+    all: ['cards'] as const,
+    byId: (cardId: string) => ['card', cardId] as const,
+    lists: (listId: string) => ['cards', listId] as const,
+    members: (cardId: string) => ['card-members', cardId] as const,
+    unassignedMembers: (cardId: string) => ['unassigned-members', cardId] as const,
+    attachments: (cardId: string) => ['card-attachments', cardId] as const,
+};
+
 export const useCard = (cardId: string) => {
     return useQuery({
-        queryKey: ['card', cardId],
+        queryKey: cardQueryKeys.byId(cardId),
         queryFn: () => CardApi.getCardById(cardId).then((res) => res.data),
     });
 };
 
 export const useCardsOnList = (listId: string) => {
     return useQuery({
-        queryKey: ['cards', listId],
+        queryKey: cardQueryKeys.lists(listId),
         queryFn: () => CardApi.getCardsOnList({ listId }).then((res) => res.data),
     });
 };
@@ -27,7 +37,7 @@ export const useCreateCard = () => {
         mutationFn: (payload: CreateCardPayload) =>
             CardApi.createCard(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
         },
     });
 };
@@ -37,8 +47,9 @@ export const useUpdateCard = () => {
     return useMutation({
         mutationFn: ({ id, payload }: { id: string; payload: UpdateCardPayload }) =>
             CardApi.updateCard(id, payload).then((res) => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.byId(variables.id) });
         },
     });
 };
@@ -47,8 +58,9 @@ export const useDeleteCard = () => {
     const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (id: string) => CardApi.deleteCard(id).then((res) => res.data),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+        onSuccess: (_, cardId) => {
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
+            queryClient.removeQueries({ queryKey: cardQueryKeys.byId(cardId) });
         },
     });
 };
@@ -58,7 +70,7 @@ export const useArchiveCard = () => {
     return useMutation({
         mutationFn: (id: string) => CardApi.archiveCard(id).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
             queryClient.invalidateQueries({ queryKey: ['lists'] });
         },
     });
@@ -69,7 +81,7 @@ export const useUnarchiveCard = () => {
     return useMutation({
         mutationFn: (id: string) => CardApi.unarchiveCard(id).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
             queryClient.invalidateQueries({ queryKey: ['lists'] });
         },
     });
@@ -81,7 +93,7 @@ export const useReorderCard = () => {
         mutationFn: (payload: ReorderCardPayload) =>
             CardApi.reorderCards(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
         },
     });
 };
@@ -92,14 +104,14 @@ export const useMoveCardToAnotherList = () => {
         mutationFn: (payload: any) =>
             CardApi.moveCardToAnotherList(payload).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
         },
     });
 };
 
 export const useGetMembersOnCard = (cardId: string) => {
     return useQuery({
-        queryKey: ['card-members', cardId],
+        queryKey: cardQueryKeys.members(cardId),
         queryFn: () => CardApi.getMembersOnCard(cardId).then((res) => res.data),
     });
 };
@@ -110,8 +122,10 @@ export const useAddMemberToCard = () => {
         mutationFn: ({ cardId, memberId }: { cardId: string; memberId: string }) =>
             CardApi.addMemberToCard(cardId, memberId).then((res) => res.data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['card-members'] });
-            queryClient.invalidateQueries({ queryKey: ['unassigned-members', variables.cardId] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.members(variables.cardId) });
+            queryClient.invalidateQueries({
+                queryKey: cardQueryKeys.unassignedMembers(variables.cardId),
+            });
         },
     });
 };
@@ -122,15 +136,17 @@ export const useRemoveMemberFromCard = () => {
         mutationFn: ({ cardId, memberId }: { cardId: string; memberId: string }) =>
             CardApi.removeMemberFromCard(cardId, memberId).then((res) => res.data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['unassigned-members', variables.cardId] });
-            queryClient.invalidateQueries({ queryKey: ['card-members'] });
+            queryClient.invalidateQueries({
+                queryKey: cardQueryKeys.unassignedMembers(variables.cardId),
+            });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.members(variables.cardId) });
         },
     });
 };
 
 export const useGetUnassignedMembers = (cardId: string) => {
     return useQuery({
-        queryKey: ['unassigned-members', cardId],
+        queryKey: cardQueryKeys.unassignedMembers(cardId),
         queryFn: () => CardApi.getUnassignedMembers(cardId).then((res) => res.data),
     });
 };
@@ -155,7 +171,7 @@ export const useMoveCardToBoard = () => {
                 (res) => res.data,
             ),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
             queryClient.invalidateQueries({ queryKey: ['lists'] });
             queryClient.invalidateQueries({ queryKey: ['board'] });
         },
@@ -175,7 +191,7 @@ export const useDuplicateCard = () => {
             title: string;
         }) => CardApi.duplicateCard(cardId, listId, title).then((res) => res.data),
         onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['cards', variables.listId] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.lists(variables.listId) });
         },
     });
 };
@@ -186,7 +202,7 @@ export const useUploadBackground = () => {
         mutationFn: ({ cardId, file }: { cardId: string; file: File }) =>
             CardApi.uploadBackground(cardId, file).then((res) => res.data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
         },
     });
 };
@@ -195,6 +211,43 @@ export const useGetAssignedCards = (query?: any) => {
     return useQuery({
         queryKey: ['assigned-cards', query],
         queryFn: () => CardApi.getAssignedCards(query).then((res) => res.data),
+    });
+};
+
+export const useCardAttachments = (cardId: string) => {
+    return useQuery({
+        queryKey: cardQueryKeys.attachments(cardId),
+        queryFn: () => CardApi.getAttachments(cardId).then((res) => res.data),
+        enabled: !!cardId,
+    });
+};
+
+export const useUploadCardAttachment = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ cardId, file }: { cardId: string; file: File }) =>
+            CardApi.uploadAttachment(cardId, file),
+        onSuccess: (attachment, variables) => {
+            queryClient.setQueryData<CardAttachment[]>(
+                cardQueryKeys.attachments(variables.cardId),
+                (old = []) => [attachment, ...old],
+            );
+        },
+    });
+};
+
+export const useDeleteCardAttachment = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (attachmentId: string) =>
+            CardApi.deleteAttachment(attachmentId).then((res) => res.data),
+        onSuccess: (_, attachmentId) => {
+            queryClient.invalidateQueries({ queryKey: ['card-attachments'] });
+            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.removeQueries({ queryKey: ['card-attachments'], exact: false });
+        },
     });
 };
 

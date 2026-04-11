@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Card } from '@/entities/card/model/type';
 import { DialogHeader, DialogTitle } from '@/shared/ui/dialog';
 import { Input } from '@/shared/ui/input';
-import { useUpdateCard } from '@/entities/card/model/useCard';
+import { useUpdateCard, useUploadCardAttachment } from '@/entities/card';
 import { toast } from 'sonner';
 import CardAction from './CardAction';
 import CardComment from './CardComment';
@@ -16,6 +16,7 @@ import { validateHandle } from '@/shared/lib/validate_handle';
 import CardDescription from './CardDescription';
 import { Button } from '@/shared/ui/button';
 import CardLabels from './CardLabels';
+import CardAttachments from './CardAttachments';
 
 // Props
 interface CardDialogProps {
@@ -28,17 +29,30 @@ interface CardDialogProps {
 export default function CardDialog({ card, setOpen, boardId, listId }: CardDialogProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(card.title);
-    const [description, setDescription] = useState(card.description);
+    const [description, setDescription] = useState(card.description || '');
     const { mutate: updateCard } = useUpdateCard();
     const [menu, setMenu] = useState('main');
     const [isEditingDescription, setIsEditingDescription] = useState(false);
+    const uploadAttachment = useUploadCardAttachment();
+
+    useEffect(() => {
+        setTitle(card.title);
+        setDescription(card.description || '');
+        setIsEditing(false);
+        setIsEditingDescription(false);
+        setMenu('main');
+    }, [card.id, card.title, card.description]);
 
     // update card handle
     function handleUpdateCard() {
+        const normalizedDescription = description.trim();
         updateCard(
             {
                 id: card.id,
-                payload: { title, description: JSON.stringify(description) || undefined },
+                payload: {
+                    title: title.trim(),
+                    description: normalizedDescription || undefined,
+                },
             },
             {
                 onSuccess: () => {
@@ -59,6 +73,13 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                 },
             },
         );
+    }
+
+    async function handleAttachmentUpload(file: File) {
+        await uploadAttachment.mutateAsync({ cardId: card.id, file });
+        toast.success('Attachment uploaded successfully', {
+            position: 'top-center',
+        });
     }
 
     return (
@@ -119,7 +140,7 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
 
                 <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
                     {/* Card Action */}
-                    <CardAction cardId={card.id} />
+                    <CardAction cardId={card.id} onAttachmentUpload={handleAttachmentUpload} />
 
                     <CardLabels cardId={card.id} />
 
@@ -154,6 +175,8 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
 
                     {/* Card Checklist */}
                     <CardChecklist cardId={card.id} />
+
+                    <CardAttachments cardId={card.id} />
                 </div>
             </div>
             <CardComment cardId={card.id} />

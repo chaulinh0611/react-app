@@ -1,6 +1,6 @@
 import { Button } from '@/shared/ui/button';
 import { Settings } from 'lucide-react';
-import { BoardSettingContent } from '../Boards/BoardSetting/BoardSettingContent';
+import { BoardSettingContent } from '../../Boards/BoardSetting/BoardSettingContent';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from '@/shared/ui/dropdown-menu';
 export const SettingButton = () => {
     return (

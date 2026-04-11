@@ -4,10 +4,11 @@ import {
     DropdownMenuSeparator,
     DropdownMenuSub,
 } from '@/shared/ui/dropdown-menu';
-import { Archive, EarthIcon, Trash, User2 } from 'lucide-react';
+import { Archive, Trash, User2 } from 'lucide-react';
 import { ArchivedItemsSubMenu } from '@/widgets/Boards/BoardSetting/ArchivedItemsSubMenu';
 import { ChangeBackgroundSubMenu } from '@/widgets/Boards/BoardSetting/ChangeBackgroundSubMenu';
-import { useDeleteBoard, useArchiveBoard } from '@/entities/board/model/useBoard';
+import { VisibilitySubMenu } from '@/widgets/Boards/BoardSetting/VisibilitySubMenu';
+import { useDeleteBoard, useArchiveBoard } from '@/entities/board';
 import { useParams } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
@@ -59,10 +60,10 @@ export const BoardSettingContent = () => {
                 <ArchivedItemsSubMenu />
             </DropdownMenuSub>
 
-            <DropdownMenuItem>
-                <EarthIcon />
-                Visibility
-            </DropdownMenuItem>
+            <DropdownMenuSub>
+                <VisibilitySubMenu />
+            </DropdownMenuSub>
+
             <DropdownMenuSub>
                 <ChangeBackgroundSubMenu />
             </DropdownMenuSub>

@@ -4,6 +4,7 @@ import { Button } from '@/shared/ui/button';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Input } from '@/shared/ui/input';
 import { useCreateList } from '@/entities/list/model/useList';
+import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 interface CreateListButtonProps {
     boardId: string;
@@ -13,10 +14,30 @@ export function CreateListButton({ boardId }: CreateListButtonProps) {
     const [isAdding, setIsAdding] = useState(false);
     const [title, setTitle] = useState('');
     const { mutateAsync: createList, isPending } = useCreateList(boardId);
+    const { addToast } = useAnimatedToast();
 
     const handleCreate = async () => {
         if (title.trim()) {
-            await createList({ boardId, title: title.trim() });
+            await createList(
+                { boardId, title: title.trim() },
+                {
+                    onError: (error: any) => {
+                        addToast({
+                            title: 'Error creating list',
+                            message: error?.message || 'An unexpected error occurred.',
+                            type: 'error',
+                        });
+                    },
+
+                    onSuccess: () => {
+                        addToast({
+                            title: 'List created',
+                            message: `The list "${title.trim()}" has been created successfully.`,
+                            type: 'success',
+                        });
+                    },
+                },
+            );
             setTitle('');
             setIsAdding(false);
         }

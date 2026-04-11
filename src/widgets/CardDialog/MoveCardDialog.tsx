@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -9,8 +9,8 @@ import {
 import { Button } from '@/shared/ui/button/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
 import { Loader2 } from 'lucide-react';
-import { useMoveCardToBoard } from '@/entities/card/model/useCard';
-import { useGetAccessibleBoards } from '@/entities/board/model/useBoard';
+import { useMoveCardToBoard } from '@/entities/card';
+import { useGetAccessibleBoards } from '@/entities/board';
 import { useListsByBoardId } from '@/entities/list/model/useList';
 import { toast } from 'sonner';
 
@@ -38,11 +38,24 @@ export function MoveCardDialog({
 
     const boards = useMemo(() => boardsData || [], [boardsData]);
 
-    const handleBoardChange = (boardId: string) => {
-        setSelectedBoardId(boardId);
-        if (listsData && listsData.length > 0) {
+    useEffect(() => {
+        if (open) {
+            setSelectedBoardId(currentBoardId);
+            setSelectedListId(currentListId);
+        }
+    }, [open, currentBoardId, currentListId]);
+
+    useEffect(() => {
+        if (listsData.length === 0) return;
+
+        const currentSelectionExists = listsData.some((list: any) => list.id === selectedListId);
+        if (!currentSelectionExists) {
             setSelectedListId(listsData[0].id);
         }
+    }, [listsData, selectedListId]);
+
+    const handleBoardChange = (boardId: string) => {
+        setSelectedBoardId(boardId);
     };
 
     const handleMove = () => {

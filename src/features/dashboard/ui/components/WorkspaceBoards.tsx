@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
-import type { Board } from '@/entities/board/model/board.type';
+import type { Board } from '@/entities/board';
 import { Link } from 'react-router-dom';
-import { Users, Edit, MoreHorizontal, Trash, Star } from 'lucide-react';
+import { Users, Edit, MoreHorizontal, Trash, Star, Globe, Lock, UsersRound } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import {
@@ -25,7 +25,7 @@ import {
     useArchiveBoard,
     useGetBoardMembers,
     useToggleStarBoard,
-} from '@/entities/board/model/useBoard';
+} from '@/entities/board';
 import { useLocation } from 'react-router-dom';
 import { useListStore } from '@/entities/list/model/list.store';
 import { CreateBoardDialog } from './CreateBoardDialog';
@@ -35,6 +35,24 @@ type Props = {
     viewMode: 'grid' | 'list';
     isStarred?: boolean;
 };
+
+const visibilityMeta = {
+    private: {
+        label: 'Private',
+        icon: Lock,
+        className: 'bg-slate-900/70 text-white border-white/10',
+    },
+    workspace: {
+        label: 'Workspace',
+        icon: UsersRound,
+        className: 'bg-sky-500/80 text-white border-white/10',
+    },
+    public: {
+        label: 'Public',
+        icon: Globe,
+        className: 'bg-emerald-500/80 text-white border-white/10',
+    },
+} as const;
 
 export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
     const location = useLocation();
@@ -52,6 +70,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
         }
     }, [location.key]);
     const listCount = useListStore((state) => state.boardsLists[board.id]?.length || 0);
+    const visibility = visibilityMeta[board.permissionLevel];
 
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -128,7 +147,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                 <Link to={`/board/${board.id}`} className="block mb-3">
                     <Card className="group transition hover:bg-muted/30 overflow-hidden">
                         <CardContent className="flex items-center gap-4 p-3">
-                            <div className="relative h-12 w-20 rounded-md overflow-hidden flex-shrink-0">
+                            <div className="relative h-12 w-20 rounded-md overflow-hidden shrink-0">
                                 {board.backgroundPath ? (
                                     <>
                                         <div
@@ -153,6 +172,12 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                                     <span>{memberCount} members</span>
                                     <span>{new Date(board.createdAt).toLocaleDateString()}</span>
                                 </div>
+                                <span
+                                    className={`inline-flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${visibility.className}`}
+                                >
+                                    <visibility.icon className="h-3 w-3" />
+                                    {visibility.label}
+                                </span>
                             </div>
 
                             <button
@@ -228,7 +253,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                         <div className="absolute inset-0 bg-black/40" />
                     </>
                 ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-indigo-600" />
+                    <div className="absolute inset-0 bg-linear-to-br from-blue-500 to-indigo-600" />
                 )}
 
                 <div className="absolute top-2 right-2 z-20 opacity-0 group-hover:opacity-100 flex items-center gap-1">
@@ -278,6 +303,10 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
 
                 <Link to={`/board/${board.id}`} className="block h-full">
                     <CardContent className="relative z-10 text-white p-3 flex flex-col justify-between h-full">
+                        <span className="inline-flex w-fit items-center gap-1 rounded-full border border-white/20 bg-black/35 px-2 py-0.5 text-[11px] font-medium">
+                            <visibility.icon className="h-3 w-3" />
+                            {visibility.label}
+                        </span>
                         <h3 className="font-semibold line-clamp-2">{board.title}</h3>
                         <div className="flex justify-between text-xs">
                             <span>{listCount} lists</span>
@@ -300,7 +329,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
             )}
 
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-106.25">
                     <DialogHeader>
                         <div className="flex items-center gap-3 text-destructive mb-2">
                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-destructive/10">
@@ -308,7 +337,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                             </div>
                             <DialogTitle className="text-xl">Delete Board</DialogTitle>
                         </div>
-                        <DialogDescription className="text-base break-words">
+                        <DialogDescription className="text-base wrap-break-word">
                             Are you sure you want to delete{' '}
                             <span className="font-semibold text-foreground break-all italic">
                                 "{board.title}"
@@ -327,7 +356,7 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={confirmDelete}
+                            onClick={handleDelete}
                             className="w-full sm:w-auto shadow-sm shadow-destructive/20"
                         >
                             Delete Board

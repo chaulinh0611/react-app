@@ -1,6 +1,6 @@
-import type { Board } from '@/entities/board/model/board.type';
+import type { Board } from '@/entities/board';
 import { Link } from 'react-router-dom';
-import { Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { Edit, MoreHorizontal, Trash, Globe, Lock, UsersRound } from 'lucide-react';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 import { Button } from '@/shared/ui/button';
 import {
@@ -9,10 +9,29 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
-import { useDeleteBoard } from '@/entities/board/model/useBoard';
+import { useDeleteBoard } from '@/entities/board';
 
 export function BoardCard({ board }: { board: Board }) {
     const deleteBoard = useDeleteBoard();
+    const visibilityMeta = {
+        private: {
+            label: 'Private',
+            icon: Lock,
+            className: 'bg-slate-900/80 text-white',
+        },
+        workspace: {
+            label: 'Workspace',
+            icon: UsersRound,
+            className: 'bg-sky-500/80 text-white',
+        },
+        public: {
+            label: 'Public',
+            icon: Globe,
+            className: 'bg-emerald-500/80 text-white',
+        },
+    } as const;
+
+    const visibility = visibilityMeta[board.permissionLevel];
 
     const handleDelete = () => {
         if (confirm(`Delete board "${board.title}"?`)) {
@@ -46,6 +65,12 @@ export function BoardCard({ board }: { board: Board }) {
 
             <Link to={`/board/${board.id}`}>
                 <CardHeader>
+                    <span
+                        className={`mb-2 inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-medium ${visibility.className}`}
+                    >
+                        <visibility.icon className="h-3 w-3" />
+                        {visibility.label}
+                    </span>
                     <CardTitle className="pr-8">{board.title}</CardTitle>
                     {board.description && <CardDescription>{board.description}</CardDescription>}
                 </CardHeader>
