@@ -1,5 +1,4 @@
 import { SquareCheckBig, Trash } from 'lucide-react';
-import { Label } from '@/shared/ui/label';
 import {
     useChecklist,
     useCreateChecklistItem,
@@ -39,7 +38,7 @@ export function AddItemInput({
     return (
         <div className="flex items-center gap-2">
             <Input
-                placeholder="Add item"
+                placeholder="Add an item"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddChecklistItem()}
@@ -63,8 +62,11 @@ export function AddItemInput({
 
 function SingleChecklist({ item }: { item: any }) {
     const [isAddingItem, setIsAddingItem] = useState(false);
+    const [editingItemId, setEditingItemId] = useState<string | null>(null);
+    const [draftContent, setDraftContent] = useState('');
+
     const { mutate: deleteChecklist } = useDeleteChecklist();
-    const { mutate: updateChecklistItem } = useUpdateChecklistItem();
+    const { mutate: updateChecklistItem, isPending: isUpdatingItem } = useUpdateChecklistItem();
     const { mutate: deleteChecklistItem } = useDeleteChecklistItem();
 
     const items = item.items || [];
@@ -72,79 +74,131 @@ function SingleChecklist({ item }: { item: any }) {
     const totalCount = items.length;
     const progress = totalCount === 0 ? 0 : Math.round((completedCount / totalCount) * 100);
 
+    function beginEdit(checklistItem: any) {
+        setEditingItemId(checklistItem.id);
+        setDraftContent(checklistItem.content ?? '');
+    }
+
+    function cancelEdit() {
+        setEditingItemId(null);
+        setDraftContent('');
+    }
+
+    function commitEdit(checklistItem: any) {
+        const next = draftContent.trim();
+        if (!next) return;
+        if (next === (checklistItem.content ?? '')) {
+            cancelEdit();
+            return;
+        }
+
+        updateChecklistItem(
+            {
+                itemId: checklistItem.id,
+                isChecked: !!checklistItem.isChecked,
+                content: next,
+            },
+            {
+                onSuccess: () => cancelEdit(),
+            },
+        );
+    }
+
     return (
         <div className="mb-6">
-            <div className="flex items-center justify-between my-3 gap-2">
+            <div className="flex items-start justify-between gap-2">
                 <div className="flex items-center gap-2">
-                    <SquareCheckBig className="w-4 h-4" />
-                    <Label className="font-semibold text-base">{item.title}</Label>
+                    <SquareCheckBig className="h-4 w-4 text-muted-foreground" />
+                    <div className="font-semibold text-base leading-none">{item.title}</div>
                 </div>
-                <Button
-                    variant={'outline'}
-                    className="text-sm py-1! rounded-sm"
-                    onClick={() => deleteChecklist(item.id)}
-                >
+                <Button variant="outline" size="sm" onClick={() => deleteChecklist(item.id)}>
                     Delete
                 </Button>
             </div>
 
-            <div className="ml-6">
-                <div className="flex items-center gap-2 mb-3 text-xs text-gray-500">
-                    <span className="w-8 font-mono">{progress}%</span>
-                    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+            <div className="mt-3 ml-6">
+                <div className="flex items-center gap-3 mb-3 text-xs text-muted-foreground">
+                    <span className="w-9 font-mono tabular-nums">{progress}%</span>
+                    <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
                         <div
-                            className="h-full bg-blue-600 transition-all duration-300"
+                            className="h-full bg-primary transition-[width] duration-300"
                             style={{ width: `${progress}%` }}
                         />
                     </div>
                 </div>
 
-                <div className="flex flex-col gap-2">
-                    {items.map((checklistItem: any) => (
-                        <div key={checklistItem.id} className="flex items-start gap-2 group">
-                            <Checkbox
-                                checked={checklistItem.isChecked}
-                                onChange={(e) => {
-                                    updateChecklistItem({
-                                        itemId: checklistItem.id,
-                                        isChecked: e.target.checked,
-                                        content: checklistItem.content,
-                                    });
-                                }}
-                                className="mt-1 shrink-0 cursor-pointer"
-                            />
-                            <Label
-                                className={`flex-1 text-sm mt-0.5 cursor-pointer ${
-                                    checklistItem.isChecked ? 'line-through text-gray-400' : ''
-                                }`}
-                                onClick={() => {
-                                    updateChecklistItem({
-                                        itemId: checklistItem.id,
-                                        isChecked: !checklistItem.isChecked,
-                                        content: checklistItem.content,
-                                    });
-                                }}
+                <div className="flex flex-col gap-1">
+                    {items.map((checklistItem: any) => {
+                        const isEditing = editingItemId === checklistItem.id;
+                        const isChecked = !!checklistItem.isChecked;
+
+                        return (
+                            <div
+                                key={checklistItem.id}
+                                className="group flex items-start gap-2 rounded-md px-2 py-1.5 hover:bg-accent/50"
                             >
-                                {checklistItem.content}
-                            </Label>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                                onClick={() => deleteChecklistItem(checklistItem.id)}
-                            >
-                                <Trash className="h-3 w-3 text-red-500" />
-                            </Button>
-                        </div>
-                    ))}
+                                <Checkbox
+                                    checked={isChecked}
+                                    onCheckedChange={(next) => {
+                                        updateChecklistItem({
+                                            itemId: checklistItem.id,
+                                            isChecked: !!next,
+                                            content: checklistItem.content,
+                                        });
+                                    }}
+                                    className="mt-0.5 shrink-0"
+                                />
+
+                                <div className="min-w-0 flex-1">
+                                    {isEditing ? (
+                                        <Input
+                                            value={draftContent}
+                                            onChange={(e) => setDraftContent(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') commitEdit(checklistItem);
+                                                if (e.key === 'Escape') cancelEdit();
+                                            }}
+                                            onBlur={() => commitEdit(checklistItem)}
+                                            disabled={isUpdatingItem}
+                                            className="h-8"
+                                            autoFocus
+                                        />
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            className={
+                                                'w-full text-left text-sm leading-5 wrap-break-word ' +
+                                                (isChecked
+                                                    ? 'text-muted-foreground line-through'
+                                                    : 'text-foreground')
+                                            }
+                                            onClick={() => beginEdit(checklistItem)}
+                                        >
+                                            {checklistItem.content}
+                                        </button>
+                                    )}
+                                </div>
+
+                                <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-7 w-7 p-0 opacity-0 group-hover:opacity-100"
+                                    onClick={() => deleteChecklistItem(checklistItem.id)}
+                                >
+                                    <Trash className="h-3.5 w-3.5 text-destructive" />
+                                </Button>
+                            </div>
+                        );
+                    })}
+
                     <div className="mt-2">
                         {isAddingItem ? (
                             <AddItemInput checklistId={item.id} setIsAddingItem={setIsAddingItem} />
                         ) : (
                             <Button
-                                variant={'outline'}
-                                size={'sm'}
-                                className="text-sm py-1! rounded-sm"
+                                variant="secondary"
+                                size="sm"
                                 onClick={() => setIsAddingItem(true)}
                             >
                                 Add an item

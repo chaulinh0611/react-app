@@ -35,6 +35,7 @@ export const useCreateLabel = () => {
             LabelApi.createLabelOnCard(cardId, payload),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: labelKeys.byCard(variables.cardId) });
+            queryClient.invalidateQueries({ queryKey: ['board-labels'] });
             queryClient.invalidateQueries({ queryKey: ['cards'] });
             queryClient.invalidateQueries({ queryKey: ['card', variables.cardId] });
         },
@@ -63,6 +64,20 @@ export const useAssignExistingLabel = () => {
     });
 };
 
+export const useUnassignLabel = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ cardId, labelId }: { cardId: string; labelId: string }) =>
+            LabelApi.unassignExistingLabelFromCard(cardId, labelId),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: labelKeys.byCard(variables.cardId) });
+            queryClient.invalidateQueries({ queryKey: ['cards'] });
+            queryClient.invalidateQueries({ queryKey: ['card', variables.cardId] });
+        },
+    });
+};
+
 export const useUpdateLabel = () => {
     const queryClient = useQueryClient();
 
@@ -77,6 +92,7 @@ export const useUpdateLabel = () => {
         }) => LabelApi.updateLabel(labelId, payload),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: labelKeys.byCard(variables.cardId) });
+            queryClient.invalidateQueries({ queryKey: ['board-labels'] });
             queryClient.invalidateQueries({ queryKey: ['cards'] });
             queryClient.invalidateQueries({ queryKey: ['card', variables.cardId] });
         },
@@ -91,6 +107,7 @@ export const useDeleteLabel = () => {
             LabelApi.deleteLabel(labelId),
         onSuccess: (_, variables) => {
             queryClient.invalidateQueries({ queryKey: labelKeys.byCard(variables.cardId) });
+            queryClient.invalidateQueries({ queryKey: ['board-labels'] });
             queryClient.invalidateQueries({ queryKey: ['cards'] });
             queryClient.invalidateQueries({ queryKey: ['card', variables.cardId] });
         },

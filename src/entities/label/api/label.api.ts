@@ -29,6 +29,13 @@ export const LabelApi = {
         return axios.post(`/labels/cards/${cardId}/assign`, { labelId });
     },
 
+    unassignExistingLabelFromCard: (
+        cardId: string,
+        labelId: string,
+    ): Promise<ApiResponse<LabelItem>> => {
+        return axios.post(`/labels/cards/${cardId}/unassign`, { labelId });
+    },
+
     deleteLabel: (id: string): Promise<ApiResponse<void>> => {
         return axios.delete(`/labels/${id}`);
     },

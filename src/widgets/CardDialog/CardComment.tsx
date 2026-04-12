@@ -2,12 +2,7 @@ import { Label } from '@/shared/ui/label';
 import { MessageSquare } from 'lucide-react';
 import { ScrollArea } from '@/shared/ui/scroll-area';
 import { useAuth } from '@/entities/auth/model/useAuth';
-import {
-    useComment,
-    useCreateComment,
-    useDeleteComment,
-    useUpdateComment,
-} from '@/entities/comment/model/useComment';
+import { useComment, useCreateComment } from '@/entities/comment/model/useComment';
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Input } from '@/shared/ui/input';
 import { useState } from 'react';
@@ -44,7 +39,6 @@ export default function CardComment({ cardId }: Props) {
     }
 
     // handle update comment
-
     return (
         <div className="flex-2 min-h-0 py-6 px-4 flex flex-col bg-gray-100">
             <div className="flex items-center gap-2 mb-3 mt-3">

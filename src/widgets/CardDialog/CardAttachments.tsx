@@ -49,11 +49,6 @@ export default function CardAttachments({ cardId }: Props) {
     return (
         <div className="mt-4 space-y-3 rounded-lg border border-gray-200 p-3">
             <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                    <Paperclip className="h-4 w-4" />
-                    <Label>Attachments</Label>
-                </div>
-
                 <label>
                     <input className="hidden" type="file" onChange={handleFileChange} />
                     <Button type="button" variant="outline" size="sm" className="gap-2" asChild>

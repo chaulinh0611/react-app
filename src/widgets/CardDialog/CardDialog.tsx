@@ -6,7 +6,7 @@ import { useUpdateCard, useUploadCardAttachment } from '@/entities/card';
 import { toast } from 'sonner';
 import CardAction from './CardAction';
 import CardComment from './CardComment';
-import { Captions, EllipsisVertical, TextAlignJustify } from 'lucide-react';
+import { Captions, EllipsisVertical, Paperclip, TextAlignJustify } from 'lucide-react';
 import { Label } from '@/shared/ui/label';
 import { CardChecklist } from './CardChecklist';
 import CardMember from './CardMember';
@@ -17,6 +17,39 @@ import CardDescription from './CardDescription';
 import { Button } from '@/shared/ui/button';
 import CardLabels from './CardLabels';
 import CardAttachments from './CardAttachments';
+
+function normalizeDescriptionValue(value?: string | null): string {
+    if (!value) return '';
+
+    let next = value;
+    for (let i = 0; i < 2; i++) {
+        const trimmed = next.trim();
+        const looksLikeStringLiteral =
+            trimmed.startsWith('"') && trimmed.endsWith('"') && /\\["nrtu]/.test(trimmed);
+
+        if (!looksLikeStringLiteral) break;
+
+        try {
+            const parsed = JSON.parse(trimmed);
+            if (typeof parsed !== 'string') break;
+            next = parsed;
+        } catch {
+            break;
+        }
+    }
+
+    return next;
+}
+
+function sanitizeDescriptionForSave(value: string): string {
+    const normalized = normalizeDescriptionValue(value).trim();
+    if (!normalized) return '';
+
+    const compact = normalized.replace(/\s/g, '');
+    if (compact === '<p><br></p>' || compact === '<p></p>') return '';
+
+    return normalized;
+}
 
 // Props
 interface CardDialogProps {
@@ -29,7 +62,7 @@ interface CardDialogProps {
 export default function CardDialog({ card, setOpen, boardId, listId }: CardDialogProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [title, setTitle] = useState(card.title);
-    const [description, setDescription] = useState(card.description || '');
+    const [description, setDescription] = useState(normalizeDescriptionValue(card.description));
     const { mutate: updateCard } = useUpdateCard();
     const [menu, setMenu] = useState('main');
     const [isEditingDescription, setIsEditingDescription] = useState(false);
@@ -37,7 +70,7 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
 
     useEffect(() => {
         setTitle(card.title);
-        setDescription(card.description || '');
+        setDescription(normalizeDescriptionValue(card.description));
         setIsEditing(false);
         setIsEditingDescription(false);
         setMenu('main');
@@ -45,7 +78,7 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
 
     // update card handle
     function handleUpdateCard() {
-        const normalizedDescription = description.trim();
+        const normalizedDescription = sanitizeDescriptionForSave(description);
         updateCard(
             {
                 id: card.id,
@@ -139,11 +172,16 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                 </DialogHeader>
 
                 <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
-                    {/* Card Action */}
-                    <CardAction cardId={card.id} onAttachmentUpload={handleAttachmentUpload} />
+                    <div className="pl-4">
+                        {/* Card Action */}
+                        <CardAction cardId={card.id} onAttachmentUpload={handleAttachmentUpload} />
 
-                    <CardLabels cardId={card.id} />
+                        {/* Card Labels */}
+                        <CardLabels cardId={card.id} />
 
+                        {/* Card members */}
+                        <CardMember cardId={card.id} />
+                    </div>
                     {/* Card Description */}
                     <div className="flex flex-col mt-3  gap-2 justify-between ">
                         <div className="flex justify-between items-center">
@@ -162,7 +200,7 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                             )}
                         </div>
                         <CardDescription
-                            description={description || ''}
+                            description={normalizeDescriptionValue(description) || ''}
                             isEditingDescription={isEditingDescription}
                             setDescription={setDescription}
                             handleUpdateCard={handleUpdateCard}
@@ -170,13 +208,13 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                         />
                     </div>
 
-                    {/* Card members */}
-                    <CardMember cardId={card.id} />
-
                     {/* Card Checklist */}
                     <CardChecklist cardId={card.id} />
 
-                    <CardAttachments cardId={card.id} />
+                    <div className="flex items-center gap-2">
+                        <Paperclip className="h-4 w-4" />
+                        <Label>Attachments</Label>
+                    </div>
                 </div>
             </div>
             <CardComment cardId={card.id} />

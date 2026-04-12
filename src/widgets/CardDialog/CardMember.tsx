@@ -1,7 +1,9 @@
 import { useGetMembersOnCard, useRemoveMemberFromCard } from '@/entities/card/model/useCard';
-import { AvatarGroup } from '@/shared/ui/avatar';
+import { AvatarGroup, AvatarGroupCount } from '@/shared/ui/avatar';
 import { Label } from '@/shared/ui/label';
 import { CardMemberList } from './CardMemberList';
+import { Button } from '@/shared/ui/button';
+import { Plus } from 'lucide-react';
 
 export default function CardMember({ cardId }: { cardId: string }) {
     const { data: members } = useGetMembersOnCard(cardId);
@@ -13,10 +15,10 @@ export default function CardMember({ cardId }: { cardId: string }) {
 
     if (members?.length > 0) {
         return (
-            <div className="mt-3">
-                <Label className="my-3">Members</Label>
-                <div className="flex gap-2">
-                    <AvatarGroup>
+            <div className="mt-3 items-center gap-3">
+                <Label className="my-3 text-xs">Assignee</Label>
+                <div className="flex gap-1 items-center">
+                    <AvatarGroup className="items-center">
                         {members.map((member: any) => (
                             <CardMemberList
                                 key={member.userId}
