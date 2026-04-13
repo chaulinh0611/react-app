@@ -39,11 +39,11 @@ const normalizeMembers = (result: any): any[] => {
 
 // CRUD Board
 export const useGetBoardById = (boardId: string) => {
-    return useQuery({
-        queryKey: boardKeys.byId(boardId),
-        queryFn: async () => normalizeBoard(await BoardApi.getDetailBoard(boardId)),
-        enabled: !!boardId,
-    });
+  return useQuery({
+    queryKey: ['board', boardId],
+    queryFn: () => BoardApi.getDetailBoard(boardId), 
+    enabled: !!boardId,
+  });
 };
 
 export const useGetAccessibleBoards = () => {
@@ -249,5 +249,16 @@ export const useToggleStarBoard = () => {
             queryClient.invalidateQueries({ queryKey: ['starred-boards'] });
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
         },
+    });
+};
+
+export const useGetBoardActivities = (boardId: string) => {
+    return useQuery({
+        queryKey: ['board-activities', boardId],
+        queryFn: async () => {
+            const res = await BoardApi.getBoardActivities(boardId);
+            return res.data;
+        },
+        enabled: !!boardId,
     });
 };

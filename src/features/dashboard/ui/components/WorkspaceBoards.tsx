@@ -56,7 +56,7 @@ const visibilityMeta = {
 
 export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
     const location = useLocation();
-    const { addToast, removeToast } = useAnimatedToast();
+    const { addToast } = useAnimatedToast();
     const archiveBoard = useArchiveBoard();
     const deleteBoard = useDeleteBoard();
     const toggleStar = useToggleStarBoard();
@@ -75,42 +75,25 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
-    const handleDelete = () => {
-        const id = addToast({
-            title: 'Confirm delete',
-            message: `Delete "${board.title}"?`,
-            type: 'warning',
-            duration: 0,
+    const handleDelete = async () => {
+        try {
+            await deleteBoard.mutateAsync({ boardId: board.id });
 
-            action: {
-                label: 'Delete',
-                onClick: async () => {
-                    removeToast(id);
+            addToast({
+                title: 'Deleted',
+                message: `Board "${board.title}" deleted successfully`,
+                type: 'success',
+            });
 
-                    try {
-                        await deleteBoard.mutateAsync({ boardId: board.id });
-
-                        addToast({
-                            title: 'Deleted',
-                            message: `Board "${board.title}" deleted successfully`,
-                            type: 'success',
-                        });
-                    } catch (err) {
-                        console.error(err);
-                        addToast({
-                            title: 'Error',
-                            message: 'Could not delete board.',
-                            type: 'error',
-                        });
-                    }
-                },
-            },
-
-            secondaryAction: {
-                label: 'Cancel',
-                onClick: () => removeToast(id),
-            },
-        });
+            setIsDeleteDialogOpen(false);
+        } catch (err) {
+            console.error(err);
+            addToast({
+                title: 'Error',
+                message: 'Could not delete board.',
+                type: 'error',
+            });
+        }
     };
     const handleArchiveToggle = async () => {
         try {
@@ -149,17 +132,17 @@ export function WorkspaceBoards({ board, viewMode, isStarred = false }: Props) {
                         <CardContent className="flex items-center gap-4 p-3">
                             <div className="relative h-12 w-20 rounded-md overflow-hidden shrink-0">
                                 {board.backgroundPath ? (
-                                    <>
-                                        <div
-                                            className="absolute inset-0 bg-cover bg-center"
-                                            style={{
-                                                backgroundImage: `url(${board.backgroundPath})`,
-                                            }}
-                                        />
-                                        <div className="absolute inset-0 bg-black/20" />
-                                    </>
-                                ) : (
+                                <>
+                                    <div
+                                    className="absolute inset-0 bg-cover bg-center"
+                                    style={{
+                                        backgroundImage: `url(${board.backgroundPath})`,
+                                    }}
+                                    />
                                     <div className="absolute inset-0 bg-black/20" />
+                                </>
+                                ) : (
+                                <div className="absolute inset-0 bg-blue-500" />
                                 )}
                             </div>
 

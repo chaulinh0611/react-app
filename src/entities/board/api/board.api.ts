@@ -22,8 +22,9 @@ export const BoardApi = {
         return axios.get('/boards/public');
     },
 
-    getDetailBoard: (id: string): Promise<Board> => {
-        return axios.get(`/boards/${id}`);
+    getDetailBoard: async (id: string): Promise<Board> => {
+        const res = await axios.get(`/boards/${id}`);
+        return res.data;
     },
 
     getMembers: (boardId: string): Promise<any> => {
@@ -123,5 +124,9 @@ export const BoardApi = {
 
     getStarredBoards: (): Promise<any> => {
         return axios.get('/boards/starred');
+    },
+
+    getBoardActivities: (boardId: string) => {
+        return axios.get(`/activities/board/${boardId}`);
     },
 };

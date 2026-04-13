@@ -1,6 +1,20 @@
 import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, LayoutTemplate, ChevronRight } from 'lucide-react';
+import { Loader2, Search, LayoutTemplate, ChevronRight, DollarSign } from 'lucide-react';
+import {
+  LayoutGrid,
+  Briefcase,
+  Palette,
+  GraduationCap,
+  Cog,
+  Megaphone,
+  Users,
+  User,
+  Rocket,
+  BarChart3,
+  Globe,
+  Star
+} from "lucide-react";
 import { useBoardTemplateQuery, useCreateBoardFromTemplate } from '@/entities/board/model/useBoard';
 import { useWorkspacesQuery } from '@/entities/workspace/model/workspace.queries';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/ui/dialog';
@@ -9,18 +23,18 @@ import { Input } from '@/shared/ui/input';
 
 // Danh sách category cố định giống Trello
 const CATEGORIES = [
-    { key: 'all', label: 'All Templates', icon: '📋' },
-    { key: 'business', label: 'Business', icon: '💼' },
-    { key: 'design', label: 'Design', icon: '🎨' },
-    { key: 'education', label: 'Education', icon: '🎓' },
-    { key: 'engineering', label: 'Engineering', icon: '⚙️' },
-    { key: 'marketing', label: 'Marketing', icon: '📢' },
-    { key: 'hr', label: 'HR & Operations', icon: '👥' },
-    { key: 'personal', label: 'Personal', icon: '🙋' },
-    { key: 'productivity', label: 'Productivity', icon: '🚀' },
-    { key: 'project', label: 'Project Management', icon: '📊' },
-    { key: 'remote', label: 'Remote Work', icon: '🌐' },
-    { key: 'sales', label: 'Sales & CRM', icon: '💰' },
+  { key: 'all', label: 'All Templates', icon: LayoutGrid },
+  { key: 'business', label: 'Business', icon: Briefcase },
+  { key: 'design', label: 'Design', icon: Palette },
+  { key: 'education', label: 'Education', icon: GraduationCap },
+  { key: 'engineering', label: 'Engineering', icon: Cog },
+  { key: 'marketing', label: 'Marketing', icon: Megaphone },
+  { key: 'hr', label: 'HR & Operations', icon: Users },
+  { key: 'personal', label: 'Personal', icon: User },
+  { key: 'productivity', label: 'Productivity', icon: Rocket },
+  { key: 'project', label: 'Project Management', icon: BarChart3 },
+  { key: 'remote', label: 'Remote Work', icon: Globe },
+  { key: 'sales', label: 'Sales & CRM', icon: DollarSign },
 ];
 
 // Màu gradient placeholder cho thumbnail
@@ -194,20 +208,24 @@ export default function TemplatePage() {
             {/* ── Sidebar ── */}
             <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white border-r border-gray-100 py-6 px-3 gap-1 sticky top-0 h-screen overflow-y-auto">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-3 mb-2">Categories</p>
-                {CATEGORIES.map((cat) => (
-                    <button
-                        key={cat.key}
-                        onClick={() => setActiveCategory(cat.key)}
-                        className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
-                            activeCategory === cat.key
-                                ? 'bg-blue-50 text-blue-700'
-                                : 'text-gray-600 hover:bg-gray-100'
-                        }`}
-                    >
-                        <span className="text-base leading-none">{cat.icon}</span>
-                        <span className="truncate">{cat.label}</span>
-                    </button>
-                ))}
+                {CATEGORIES.map((cat) => {
+                    const Icon = cat.icon;
+
+                    return (
+                        <button
+                            key={cat.key}
+                            onClick={() => setActiveCategory(cat.key)}
+                            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
+                                activeCategory === cat.key
+                                    ? 'bg-blue-50 text-blue-700'
+                                    : 'text-gray-600 hover:bg-gray-100'
+                            }`}
+                        >
+                            <Icon className="w-4 h-4" />
+                            <span className="truncate">{cat.label}</span>
+                        </button>
+                    );
+                })}
             </aside>
 
             {/* ── Main Content ── */}
@@ -236,20 +254,24 @@ export default function TemplatePage() {
 
                 {/* Mobile category chips */}
                 <div className="flex lg:hidden gap-2 overflow-x-auto pb-3 mb-6 scrollbar-none">
-                    {CATEGORIES.map((cat) => (
-                        <button
-                            key={cat.key}
-                            onClick={() => setActiveCategory(cat.key)}
-                            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
-                                activeCategory === cat.key
-                                    ? 'bg-blue-600 text-white border-blue-600'
-                                    : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400'
-                            }`}
-                        >
-                            <span>{cat.icon}</span>
-                            {cat.label}
-                        </button>
-                    ))}
+                    {CATEGORIES.map((cat) => {
+                        const Icon = cat.icon;
+
+                        return (
+                            <button
+                                key={cat.key}
+                                onClick={() => setActiveCategory(cat.key)}
+                                className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                                    activeCategory === cat.key
+                                        ? 'bg-blue-600 text-white border-blue-600'
+                                        : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400'
+                                }`}
+                            >
+                                <Icon className="w-3.5 h-3.5" />
+                                {cat.label}
+                            </button>
+                        );
+                    })}
                 </div>
 
                 {/* No results */}
@@ -278,7 +300,7 @@ export default function TemplatePage() {
                         {filteredTemplates.length > 0 && !searchQuery && (
                             <section>
                                 <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-lg">⭐</span>
+                                    <Star className="w-5 h-5 text-yellow-500" />
                                     <h2 className="text-lg font-bold text-gray-800">Featured Templates</h2>
                                 </div>
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -297,11 +319,12 @@ export default function TemplatePage() {
                         {/* Category groups */}
                         {Object.entries(groupedTemplates).map(([catKey, catTemplates]) => {
                             const catInfo = CATEGORIES.find(c => c.key === catKey);
+                            const Icon = catInfo?.icon;
                             return (
                                 <section key={catKey}>
                                     <div className="flex items-center justify-between mb-4">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-lg">{catInfo?.icon}</span>
+                                            <span className="text-lg">{Icon && <Icon className="w-5 h-5" />}</span>
                                             <h2 className="text-lg font-bold text-gray-800">{catInfo?.label || catKey}</h2>
                                         </div>
                                         {catTemplates.length > 4 && (
