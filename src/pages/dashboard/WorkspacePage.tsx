@@ -29,7 +29,6 @@ export default function WorkspacePage() {
         return Array.isArray(workspaceBoardsData) ? workspaceBoardsData : [];
     }, [workspaceBoardsData]);
 
-
     const { data: currentWorkspace } = useWorkspaceByIdQuery(workspaceId ?? '');
     const { data: workspaces = [] } = useWorkspacesQuery();
     const [searchQuery, setSearchQuery] = useState('');
@@ -50,18 +49,15 @@ export default function WorkspacePage() {
         'Workspace description';
 
     const filteredBoards = useMemo(() => {
-    if (!Array.isArray(workspaceBoards)) return [];
+        if (!Array.isArray(workspaceBoards)) return [];
 
-    const filtered = workspaceBoards.filter((b: any) => {
-        if (b.isArchived) return false;
+        const filtered = workspaceBoards.filter((b: any) => {
+            if (b.isArchived) return false;
 
-        const q = searchQuery.toLowerCase();
+            const q = searchQuery.toLowerCase();
 
-        return (
-            b.title?.toLowerCase().includes(q) ||
-            b.description?.toLowerCase().includes(q)
-        );
-    });
+            return b.title?.toLowerCase().includes(q) || b.description?.toLowerCase().includes(q);
+        });
 
         switch (sortBy) {
             case 'az':
