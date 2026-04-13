@@ -110,7 +110,7 @@ export default function WorkspaceSettingsPage() {
     }
 
     return (
-        <div className="w-full min-h-screen bg-gray-100 flex justify-center py-10">
+        <div className="w-full min-h-screen  flex justify-center py-10">
             <div className="w-full max-w-3xl space-y-8">
                 {/* HEADER */}
                 <div className="flex items-center gap-4">
@@ -119,7 +119,9 @@ export default function WorkspaceSettingsPage() {
                     </div>
 
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-800">{currentWorkspace.title}</h1>
+                        <h1 className="text-2xl font-semibold text-gray-800">
+                            {currentWorkspace.title}
+                        </h1>
                         <p className="text-sm text-gray-500">Manage workspace settings</p>
                     </div>
                 </div>

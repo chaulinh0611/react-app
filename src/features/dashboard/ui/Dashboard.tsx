@@ -1,10 +1,10 @@
 import { WorkspaceList } from './components/WorkspaceList';
-import { CreateWorkspaceDialog } from './components/CreateWorkspaceDialog';
+import { Card } from '@/shared/ui/card';
 
 export const Dashboard = () => {
     return (
-        <div className="flex min-h-full bg-white w-full rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="flex flex-col flex-1 transition-all duration-300 min-w-0">
+        <Card className="flex min-h-full  w-full  border shadow-sm! border-gray-100 overflow-hidden">
+            <div className="flex flex-col flex-1  transition-all duration-300 min-w-0">
                 <main className="flex-1 p-8 space-y-6 min-w-0">
                     <div className="flex justify-between items-start mb-8">
                         <div>
@@ -13,7 +13,6 @@ export const Dashboard = () => {
                                 Manage your workspaces and boards
                             </p>
                         </div>
-                        <CreateWorkspaceDialog />
                     </div>
 
                     <div className="space-y-10">
@@ -21,6 +20,6 @@ export const Dashboard = () => {
                     </div>
                 </main>
             </div>
-        </div>
+        </Card>
     );
 };

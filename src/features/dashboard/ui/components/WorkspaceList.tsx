@@ -13,6 +13,7 @@ import { Button } from '@/shared/ui/button';
 import { StarredBoardsSection } from './StarredBoardsSection';
 import { RecentlyViewedSection } from './RecentlyViewedSection';
 import { useRecentBoards } from '@/entities/board/model/useRecentlyViewed';
+import { CreateWorkspaceDialog } from './CreateWorkspaceDialog';
 
 const BoardList = memo(
     ({
@@ -86,8 +87,6 @@ export const WorkspaceList = () => {
         allBoards.forEach((board: any) => {
             const ws = board.workspace;
             if (ws && !joinedWorkspaceIds.has(ws.id)) {
-                // Additional check: is the current user the owner of the workspace?
-                // If they are, it should NOT be in Guest Workspaces
                 if (currentUser && ws.owner?.id === currentUser.id) {
                     return;
                 }
@@ -128,7 +127,7 @@ export const WorkspaceList = () => {
 
     if (workspaces.length === 0 && guestWorkspaces.length === 0) {
         return (
-            <div className="text-center text-gray-500 py-10 bg-gray-50 rounded-lg border-2 border-dashed">
+            <div className="text-center text-gray-500 py-10  rounded-lg border-2 border-dashed">
                 <p>You don't have any workspaces yet. Create one now!</p>
             </div>
         );
@@ -145,20 +144,23 @@ export const WorkspaceList = () => {
             {/* YOUR WORKSPACES */}
             {workspaces.length > 0 && (
                 <div className="space-y-6">
-                    <div className="flex items-center gap-2 text-gray-700">
-                        <User className="h-5 w-5" />
-                        <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900/80">
-                            Your Workspaces
-                        </h2>
+                    <div className="flex justify-between">
+                        <div className="flex items-center gap-2  text-gray-700">
+                            <User className="h-5 w-5" />
+                            <h2 className="text-xl font-bold uppercase tracking-tight text-gray-900/80">
+                                Your Workspaces
+                            </h2>
+                        </div>
+                        <CreateWorkspaceDialog />
                     </div>
 
                     <div className="space-y-8">
                         {workspaces.slice(0, visibleCount).map((workspace: any) => (
                             <div
                                 key={workspace.id}
-                                className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0"
+                                className="space-y-4 p-6 rounded-lg overflow-hidden min-w-0"
                             >
-                                <div className="flex items-center justify-between border-b pb-3 w-full">
+                                <div className="flex items-center justify-between  pb-3 w-full">
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
                                         <div className="min-w-0 flex-1">
                                             <h3

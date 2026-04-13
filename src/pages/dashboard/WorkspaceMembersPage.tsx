@@ -71,7 +71,7 @@ export default function WorkspaceMembersPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex justify-center p-10">
+        <div className="min-h-screen  flex justify-center p-10">
             <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border p-8 space-y-8">
                 {/* HEADER */}
                 <h1 className="text-2xl font-semibold text-gray-800">Workspace Members</h1>
