@@ -43,7 +43,7 @@ export const BoardApi = {
         return axios.post(`/boards/${boardId}/invite/link`);
     },
 
-    joinBoard: (token: string): Promise<ApiResponse<void>> => {
+    joinBoard: (token: string): Promise<ApiResponse<{ boardId: string }>> => {
         return axios.get(`/boards/join?token=${token}`);
     },
 
@@ -88,8 +88,16 @@ export const BoardApi = {
         return axios.get('/boards/template');
     },
 
-    createBoardTemplate: (boardId: string): Promise<ApiResponse<void>> => {
-        return axios.post(`/boards/${boardId}/template`);
+    createBoardTemplate: (
+        boardId: string,
+        payload?: { category?: string; copyCard?: boolean },
+    ): Promise<ApiResponse<void>> => {
+        return axios.post(`/boards/${boardId}/template`, payload, {
+            params:
+                payload?.copyCard !== undefined
+                    ? { copyCard: payload.copyCard ? '1' : '0' }
+                    : undefined,
+        });
     },
 
     createBoardFromTemplate: (
@@ -107,15 +115,15 @@ export const BoardApi = {
     },
 
     getArchivedBoards: (): Promise<any[]> => {
-        return axios.get('/boards/archived');
+        return axios.get('/boards/archived').then((res) => res.data);
     },
 
     getArchivedListsInBoard: (boardId: string): Promise<any[]> => {
-        return axios.get(`/boards/${boardId}/archived/lists`);
+        return axios.get(`/boards/${boardId}/archived/lists`).then((res) => res.data);
     },
 
     getArchivedCardsInBoard: (boardId: string): Promise<any[]> => {
-        return axios.get(`/boards/${boardId}/archived/cards`);
+        return axios.get(`/boards/${boardId}/archived/cards`).then((res) => res.data);
     },
 
     toggleStarBoard: (boardId: string): Promise<any> => {

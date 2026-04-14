@@ -1,9 +1,10 @@
 export type BoardVisibility = 'private' | 'workspace' | 'public';
 
-interface Board {
+export interface Board {
     id: string;
     title: string;
     description?: string;
+    category?: string;
     workspace: {
         id: string;
         title?: string;
@@ -18,7 +19,7 @@ interface Board {
     boardMembers?: BoardMember[];
 }
 
-interface BoardMember {
+export interface BoardMember {
     id: string;
     boardId: string;
     userId: string;
@@ -26,34 +27,33 @@ interface BoardMember {
 }
 
 // API INTERFACE
-interface CreateBoardPayload {
+export interface CreateBoardPayload {
     title: string;
     description?: string;
+    category?: string;
     workspaceId: string;
     permissionLevel?: BoardVisibility;
     backgroundUrl?: string;
 }
 
-interface UpdateBoardPayload {
+export interface UpdateBoardPayload {
     title: string;
     description: string | null;
     permissionLevel?: BoardVisibility;
 }
 
 // STORE INTERFACE
-interface BoardState {
+export interface BoardState {
     boards: Record<string, Board>;
     workspaceBoards: Record<string, string[]>;
     isLoading: boolean;
     error: string | null;
 }
 
-interface BoardAction {
+export interface BoardAction {
     getBoardsByWorkspace: (workspaceId: string) => Promise<any>;
     getBoardById: (id: string) => Promise<any>;
 
     createBoard: (data: CreateBoardPayload) => Promise<any>;
     updateBoard: (data: UpdateBoardPayload) => Promise<any>;
 }
-
-export type { Board, BoardMember, BoardVisibility, CreateBoardPayload, BoardState, BoardAction };

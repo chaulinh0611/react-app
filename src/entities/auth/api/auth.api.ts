@@ -20,7 +20,7 @@ export const authApi = {
         return axios.post('/auth/reset-password', payload);
     },
 
-    refreshToken: (): Promise<ApiResponse<null>> => {
+    refreshToken: (): Promise<ApiResponse<{ accessToken: string }>> => {
         return axios.post('/auth/refresh-token');
     },
 

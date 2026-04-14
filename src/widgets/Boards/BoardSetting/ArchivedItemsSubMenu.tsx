@@ -43,14 +43,14 @@ export const ArchivedItemsSubMenu = () => {
     // Fetch archived lists directly
     const { data: archivedListsData = [] } = useQuery({
         queryKey: ['archivedLists', boardId],
-        queryFn: () => BoardApi.getArchivedListsInBoard(boardId).then((res) => res.data),
+        queryFn: () => BoardApi.getArchivedListsInBoard(boardId),
         enabled: !!boardId,
     });
 
     // Fetch archived cards directly
     const { data: archivedCardsData = [] } = useQuery({
         queryKey: ['archivedCards', boardId],
-        queryFn: () => BoardApi.getArchivedCardsInBoard(boardId).then((res) => res.data),
+        queryFn: () => BoardApi.getArchivedCardsInBoard(boardId),
         enabled: !!boardId,
     });
 

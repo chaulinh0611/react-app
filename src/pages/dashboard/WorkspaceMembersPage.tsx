@@ -5,6 +5,7 @@ import {
     useInviteWorkspaceMemberMutation,
     useRemoveWorkspaceMemberMutation,
     useCreateShareLinkMutation,
+    useWorkspaceByIdQuery,
 } from '@/entities/workspace/model/workspace.queries';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
@@ -12,7 +13,7 @@ import { useAnimatedToast } from '@/shared/ui/animated-toast';
 
 export default function WorkspaceMembersPage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
-
+    const { data: workspace } = useWorkspaceByIdQuery(workspaceId ?? '');
     const {
         data: workspaceMembers = [],
         isLoading,
@@ -32,29 +33,32 @@ export default function WorkspaceMembersPage() {
             return;
         }
 
-        try {
-            await inviteWorkspaceMember.mutateAsync({ workspaceId: workspaceId!, email });
-            addToast({ message: 'Invitation sent!', type: 'success' });
-            setEmail('');
-        } catch {
-            addToast({ message: 'Failed to send invitation', type: 'error' });
-        }
+        await inviteWorkspaceMember.mutateAsync(
+            { workspaceId: workspaceId!, email },
+            {
+                onError(err) {
+                    addToast({ message: err.message, type: 'error' });
+                },
+            },
+        );
+        addToast({ message: 'Invitation sent!', type: 'success' });
+        setEmail('');
     };
 
     const handleCreateLink = async () => {
-        try {
-            const link = await createShareLink.mutateAsync(workspaceId!);
-            setShareLink(link);
-            addToast({ message: 'Share link created', type: 'success' });
-        } catch {
-            addToast({ message: 'Failed to create share link', type: 'error' });
-        }
+        const link = await createShareLink.mutateAsync(workspaceId!, {
+            onError(err) {
+                addToast({ message: err.message, type: 'error' });
+            },
+        });
+        setShareLink(link);
+        addToast({ message: 'Share link created', type: 'success' });
     };
 
     const copyLink = async () => {
         await navigator.clipboard.writeText(shareLink);
         addToast({ message: 'Link copied!', type: 'success' });
-        setShareLink(''); // quay lại nút ban đầu
+        setShareLink('');
     };
 
     const handleRemove = async (email: string) => {
@@ -71,11 +75,20 @@ export default function WorkspaceMembersPage() {
     };
 
     return (
-        <div className="min-h-screen  flex justify-center p-10">
-            <div className="w-full max-w-3xl bg-white rounded-xl shadow-sm border p-8 space-y-8">
-                {/* HEADER */}
-                <h1 className="text-2xl font-semibold text-gray-800">Workspace Members</h1>
+        <div className="min-h-screen max-w-4xl mx-auto flex-col gap-5 flex items-center p-10">
+            {/* HEADER */}
 
+            <div className="flex w-full gap-4">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold shadow">
+                    {workspace?.title.charAt(0).toUpperCase()}
+                </div>
+
+                <div>
+                    <h1 className="text-2xl font-semibold text-gray-800">{workspace?.title}</h1>
+                    <p className="text-sm text-gray-500">Manage workspace members</p>
+                </div>
+            </div>
+            <div className="w-full bg-white rounded-xl shadow-sm border p-8 space-y-8">
                 {/* INVITE EMAIL */}
                 <div className="space-y-3">
                     <p className="font-medium text-gray-700">Invite by email</p>

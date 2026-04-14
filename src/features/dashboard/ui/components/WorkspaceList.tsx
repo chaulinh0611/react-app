@@ -14,21 +14,21 @@ import { StarredBoardsSection } from './StarredBoardsSection';
 import { RecentlyViewedSection } from './RecentlyViewedSection';
 import { useRecentBoards } from '@/entities/board/model/useRecentlyViewed';
 import { CreateWorkspaceDialog } from './CreateWorkspaceDialog';
+import { Card } from '@/shared/ui/card';
 
 const BoardList = memo(
     ({
         workspaceId,
         onCreateBoard,
         boards: providedBoards,
-        starredIds,
     }: {
         workspaceId: string;
         onCreateBoard?: () => void;
         boards?: any[];
-        starredIds: Set<string>;
     }) => {
-        const { data: boards = [] } = useWorkspaceBoardsQuery(workspaceId);
-        const filtered = boards.filter((b: any) => {
+        const { data: queriedBoards = [] } = useWorkspaceBoardsQuery(workspaceId);
+        const sourceBoards = providedBoards ?? queriedBoards;
+        const filtered = sourceBoards.filter((b: any) => {
             return !b.isArchived;
         });
         return (
@@ -55,7 +55,6 @@ export const WorkspaceList = () => {
         [starredBoards],
     );
 
-    // Get recently viewed boards from allBoards using IDs from localStorage
     const recentlyViewedBoards = useMemo(() => {
         const ids = getRecentIds();
         return ids
@@ -135,11 +134,13 @@ export const WorkspaceList = () => {
 
     return (
         <div className="space-y-12 min-w-0">
-            {/* STARRED BOARDS */}
-            <StarredBoardsSection boards={starredBoards as any[]} />
+            <Card className="p-6">
+                {/* STARRED BOARDS */}
+                <StarredBoardsSection boards={starredBoards as any[]} />
 
-            {/* RECENTLY VIEWED */}
-            <RecentlyViewedSection boards={recentlyViewedBoards as any[]} />
+                {/* RECENTLY VIEWED */}
+                <RecentlyViewedSection boards={recentlyViewedBoards as any[]} />
+            </Card>
 
             {/* YOUR WORKSPACES */}
             {workspaces.length > 0 && (
@@ -154,14 +155,14 @@ export const WorkspaceList = () => {
                         <CreateWorkspaceDialog />
                     </div>
 
-                    <div className="space-y-8">
+                    <Card className="">
                         {workspaces.slice(0, visibleCount).map((workspace: any) => (
                             <div
                                 key={workspace.id}
-                                className="space-y-4 p-6 rounded-lg overflow-hidden min-w-0"
+                                className=" p-6 rounded-lg overflow-hidden min-w-0"
                             >
                                 <div className="flex items-center justify-between  pb-3 w-full">
-                                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                                    <div className="flex items-center min-w-0 flex-1">
                                         <div className="min-w-0 flex-1">
                                             <h3
                                                 className="font-bold text-xl text-gray-800 truncate"
@@ -183,11 +184,10 @@ export const WorkspaceList = () => {
                                 <BoardList
                                     workspaceId={workspace.id}
                                     onCreateBoard={() => handleCreateBoard(workspace.id)}
-                                    starredIds={starredIds}
                                 />
                             </div>
                         ))}
-                    </div>
+                    </Card>
                     {workspaces.length > visibleCount && (
                         <div className="flex justify-center pt-2">
                             <Button
@@ -203,19 +203,19 @@ export const WorkspaceList = () => {
 
             {/* GUEST WORKSPACES */}
             {guestWorkspaces.length > 0 && (
-                <div className="space-y-6 mt-12 bg-gray-50/50 p-6 rounded-xl border border-dashed border-gray-200">
-                    <div className="flex items-center gap-2 text-indigo-700">
+                <div className="space-y-6 mt-12  rounded-xl  border-gray-200">
+                    <div className="flex items-center gap-2">
                         <Briefcase className="h-5 w-5" />
                         <h2 className="text-xl font-bold uppercase tracking-tight">
                             Guest Workspaces
                         </h2>
                     </div>
 
-                    <div className="space-y-8">
+                    <Card className="space-y-8">
                         {guestWorkspaces.slice(0, guestVisibleCount).map((workspace: any) => (
                             <div
                                 key={workspace.id}
-                                className="space-y-4 p-6 rounded-lg bg-white shadow-sm border border-gray-100 overflow-hidden min-w-0"
+                                className="space-y-4 p-6 rounded-lg  overflow-hidden min-w-0"
                             >
                                 <div className="flex items-center justify-between border-b pb-3 w-full">
                                     <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -232,14 +232,10 @@ export const WorkspaceList = () => {
                                         </div>
                                     </div>
                                 </div>
-                                <BoardList
-                                    workspaceId={workspace.id}
-                                    boards={workspace.boards}
-                                    starredIds={starredIds}
-                                />
+                                <BoardList workspaceId={workspace.id} boards={workspace.boards} />
                             </div>
                         ))}
-                    </div>
+                    </Card>
                     {guestWorkspaces.length > guestVisibleCount && (
                         <div className="flex justify-center pt-2">
                             <Button

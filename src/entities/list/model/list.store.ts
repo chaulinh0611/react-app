@@ -19,7 +19,11 @@ export const useListStore = create<ListState & ListAction>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await ListApi.createList({ boardId, title });
-            const newList = response.data;
+            const newList = response.data.data;
+
+            if (!newList) {
+                throw new Error('Failed to create list');
+            }
 
             set((state) => ({
                 ...state,
@@ -44,7 +48,11 @@ export const useListStore = create<ListState & ListAction>((set) => ({
         set({ isLoading: true, error: null });
         try {
             const response = await ListApi.updateList(listId, data);
-            const updatedList = response.data;
+            const updatedList = response.data.data;
+
+            if (!updatedList) {
+                throw new Error('Failed to update list');
+            }
 
             set((state) => ({
                 ...state,

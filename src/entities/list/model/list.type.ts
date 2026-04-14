@@ -1,4 +1,4 @@
-interface List {
+export interface List {
     id: string;
     title: string;
     position: number;
@@ -10,16 +10,16 @@ interface List {
 
 // API INTERFACE
 
-interface CreateList {
+export interface CreateList {
     title: string;
     boardId: string;
 }
 
-interface UpdateList {
+export interface UpdateList {
     title?: string;
 }
 
-interface ReorderListsPayload {
+export interface ReorderListsPayload {
     boardId: string;
     beforeId: string | null;
     afterId: string | null;
@@ -28,7 +28,7 @@ interface ReorderListsPayload {
 
 // STORE INTERFACE
 
-interface ListState {
+export interface ListState {
     lists: Record<string, List>;
     boardsLists: Record<string, string[]>;
 
@@ -37,7 +37,7 @@ interface ListState {
     error: string | null;
 }
 
-interface ListAction {
+export interface ListAction {
     setIsEditDialogOpen: (open: boolean) => void;
     getListsByBoardId: (boardId: string) => Promise<List[]>;
 
@@ -47,5 +47,3 @@ interface ListAction {
 
     reorderLists: (data: ReorderListsPayload) => Promise<boolean>;
 }
-
-export type { List, CreateList, UpdateList, ListState, ListAction, ReorderListsPayload };

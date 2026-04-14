@@ -1,9 +1,7 @@
 import { useGetMembersOnCard, useRemoveMemberFromCard } from '@/entities/card/model/useCard';
-import { AvatarGroup, AvatarGroupCount } from '@/shared/ui/avatar';
+import { AvatarGroup } from '@/shared/ui/avatar';
 import { Label } from '@/shared/ui/label';
 import { CardMemberList } from './CardMemberList';
-import { Button } from '@/shared/ui/button';
-import { Plus } from 'lucide-react';
 
 export default function CardMember({ cardId }: { cardId: string }) {
     const { data: members } = useGetMembersOnCard(cardId);

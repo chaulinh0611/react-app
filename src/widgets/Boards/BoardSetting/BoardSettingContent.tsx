@@ -4,29 +4,53 @@ import {
     DropdownMenuSeparator,
     DropdownMenuSub,
 } from '@/shared/ui/dropdown-menu';
-import { Archive, Trash, User2, Activity } from 'lucide-react';
+import { Archive, Trash, User2, Activity, LayoutTemplate } from 'lucide-react';
 import { ArchivedItemsSubMenu } from '@/widgets/Boards/BoardSetting/ArchivedItemsSubMenu';
 import { ChangeBackgroundSubMenu } from '@/widgets/Boards/BoardSetting/ChangeBackgroundSubMenu';
 import { VisibilitySubMenu } from '@/widgets/Boards/BoardSetting/VisibilitySubMenu';
-import { useDeleteBoard, useArchiveBoard } from '@/entities/board';
+import { useDeleteBoard, useArchiveBoard, useCreateBoardTemplate } from '@/entities/board';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
 import { BoardActivity } from '@/widgets/Boards/BoardSetting/BoardActivity';
 import { useState } from 'react';
 import {
     Dialog,
+    DialogDescription,
     DialogContent,
+    DialogFooter,
     DialogHeader,
     DialogTitle,
 } from '@/shared/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { Label } from '@/shared/ui/label';
+import { Switch } from '@/shared/ui/switch';
+import { Button } from '@/shared/ui/button';
+
+const TEMPLATE_CATEGORIES = [
+    'Business',
+    'Design',
+    'Education',
+    'Engineering',
+    'Marketing',
+    'HR',
+    'Personal',
+    'Productivity',
+    'Project Management',
+    'Remote Work',
+    'Sales & CRM',
+];
 
 export const BoardSettingContent = () => {
     const { mutate: deleteBoard } = useDeleteBoard();
     const { mutate: archiveBoard } = useArchiveBoard();
+    const { mutate: createBoardTemplate, isPending: isCreatingTemplate } = useCreateBoardTemplate();
     const { boardId = '' } = useParams();
     const navigate = useNavigate();
     const { addToast } = useAnimatedToast();
     const [openActivity, setOpenActivity] = useState(false);
+    const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
+    const [templateCategory, setTemplateCategory] = useState('Business');
+    const [copyCards, setCopyCards] = useState(true);
 
     const deleteBoardHandler = () => {
         deleteBoard(
@@ -40,7 +64,7 @@ export const BoardSettingContent = () => {
                         type: 'success',
                     });
                 },
-            }
+            },
         );
     };
 
@@ -56,7 +80,27 @@ export const BoardSettingContent = () => {
                         type: 'success',
                     });
                 },
-            }
+            },
+        );
+    };
+
+    const createBoardTemplateHandler = () => {
+        createBoardTemplate(
+            {
+                boardId,
+                category: templateCategory,
+                copyCard: copyCards,
+            },
+            {
+                onSuccess: () => {
+                    setOpenTemplateDialog(false);
+                    addToast({
+                        title: 'Success',
+                        message: 'Board template created successfully.',
+                        type: 'success',
+                    });
+                },
+            },
         );
     };
 
@@ -94,6 +138,17 @@ export const BoardSettingContent = () => {
                     Activity
                 </DropdownMenuItem>
 
+                <DropdownMenuItem
+                    onSelect={(e) => {
+                        e.preventDefault();
+                        setOpenTemplateDialog(true);
+                    }}
+                    disabled={isCreatingTemplate}
+                >
+                    <LayoutTemplate />
+                    {isCreatingTemplate ? 'Creating template...' : 'Make Board Template'}
+                </DropdownMenuItem>
+
                 <DropdownMenuItem onClick={archiveBoardHandler}>
                     <Archive /> Archive Board
                 </DropdownMenuItem>
@@ -114,6 +169,54 @@ export const BoardSettingContent = () => {
                     <div className="max-h-96 overflow-y-auto">
                         <BoardActivity />
                     </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={openTemplateDialog} onOpenChange={setOpenTemplateDialog}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Create Board Template</DialogTitle>
+                        <DialogDescription>
+                            Save this board as a reusable template and choose its category.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="template-category">Category</Label>
+                            <Select value={templateCategory} onValueChange={setTemplateCategory}>
+                                <SelectTrigger id="template-category">
+                                    <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {TEMPLATE_CATEGORIES.map((category) => (
+                                        <SelectItem key={category} value={category}>
+                                            {category}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="flex items-center justify-between rounded-md border px-3 py-2">
+                            <div>
+                                <p className="text-sm font-medium">Copy cards</p>
+                                <p className="text-xs text-muted-foreground">
+                                    Include all cards from each list in this template.
+                                </p>
+                            </div>
+                            <Switch checked={copyCards} onCheckedChange={setCopyCards} />
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setOpenTemplateDialog(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={createBoardTemplateHandler} disabled={isCreatingTemplate}>
+                            {isCreatingTemplate ? 'Creating...' : 'Create Template'}
+                        </Button>
+                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </>

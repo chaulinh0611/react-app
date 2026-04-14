@@ -37,6 +37,24 @@ const CATEGORIES = [
   { key: 'sales', label: 'Sales & CRM', icon: DollarSign },
 ];
 
+const CATEGORY_ALIASES: Record<string, string> = {
+        business: 'business',
+        design: 'design',
+        education: 'education',
+        engineering: 'engineering',
+        marketing: 'marketing',
+        hr: 'hr',
+        'hr & operations': 'hr',
+        personal: 'personal',
+        productivity: 'productivity',
+        'project management': 'project',
+        project: 'project',
+        'remote work': 'remote',
+        remote: 'remote',
+        'sales & crm': 'sales',
+        sales: 'sales',
+};
+
 // Màu gradient placeholder cho thumbnail
 const GRADIENT_COLORS = [
     'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
@@ -54,6 +72,11 @@ function getGradient(index: number) {
 }
 
 function getCategory(template: any): string {
+    const rawCategory = String(template.category || '').trim().toLowerCase();
+    if (rawCategory && CATEGORY_ALIASES[rawCategory]) {
+        return CATEGORY_ALIASES[rawCategory];
+    }
+
     const title = (template.title || '').toLowerCase();
     const desc = (template.description || '').toLowerCase();
     if (title.includes('market') || desc.includes('market')) return 'marketing';
@@ -117,6 +140,11 @@ function TemplateCard({ template, index, onClick, compact = false }: TemplateCar
                 {!compact && (
                     <>
                         <p className="mt-1 text-xs text-gray-400">by Kanby Team</p>
+                        {template.category && (
+                            <p className="mt-1 inline-block rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+                                {template.category}
+                            </p>
+                        )}
                         {template.description && (
                             <p className="mt-2 text-sm text-gray-500 line-clamp-2 leading-relaxed">
                                 {template.description}

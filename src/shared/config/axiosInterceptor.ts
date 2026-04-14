@@ -87,12 +87,12 @@ const onResponseError = async (error: AxiosError) => {
             if (!refreshToken) throw new Error('Missing refresh token');
             const res = await authApi.refreshToken();
 
-            localStorage.setItem(keyStorage.ACCESS_TOKEN, res.accessToken);
+            localStorage.setItem(keyStorage.ACCESS_TOKEN, res.data.accessToken);
 
-            processQueue(null, res.accessToken);
+            processQueue(null, res.data.accessToken);
 
             const headers = (originalRequest.headers || {}) as AxiosRequestHeaders;
-            headers.Authorization = `Bearer ${res.accessToken}`;
+            headers.Authorization = `Bearer ${res.data.accessToken}`;
             originalRequest.headers = headers;
 
             return axios(originalRequest);

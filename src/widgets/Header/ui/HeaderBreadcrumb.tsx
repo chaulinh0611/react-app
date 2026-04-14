@@ -28,7 +28,7 @@ export default function HeaderBreadCrumb() {
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <Label>
-                            <BreadcrumbLink href="/react-app/dashboard">Dashboard</BreadcrumbLink>
+                            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                         </Label>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
@@ -48,13 +48,13 @@ export default function HeaderBreadCrumb() {
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <Label>
-                            <BreadcrumbLink href="/react-app/dashboard">Dashboard</BreadcrumbLink>
+                            <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                         </Label>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator />
                     <BreadcrumbItem>
                         <Label>
-                            <BreadcrumbLink href={`/react-app/workspace/${board?.workspace.id}`}>
+                            <BreadcrumbLink href={`/workspace/${board?.workspace.id}`}>
                                 {board?.workspace.title}
                             </BreadcrumbLink>
                         </Label>
@@ -79,7 +79,7 @@ export default function HeaderBreadCrumb() {
             <BreadcrumbList>
                 <BreadcrumbItem>
                     <Label>
-                        <BreadcrumbLink href="/react-app/dashboard">Dashboard</BreadcrumbLink>
+                        <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
                     </Label>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator />

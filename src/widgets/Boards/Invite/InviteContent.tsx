@@ -33,7 +33,7 @@ export const InvitePopover = () => {
             { boardId: boardId as string, email },
             {
                 onError: (error) => {
-                    return toast.error(validateHandle(error) || 'Something went wrong', {
+                    return toast.error(String(validateHandle(error) || 'Something went wrong'), {
                         position: 'top-center',
                     });
                 },

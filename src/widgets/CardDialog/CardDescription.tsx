@@ -22,7 +22,7 @@ export default function CardDescription({
         <div className="mt-2">
             {isEditingDescription ? (
                 <div className="rounded-lg border bg-card p-3">
-                    <TextEditor value={description} onChange={setDescription} />
+                    <TextEditor value={description ?? ''} onChange={setDescription} />
                     <div className="mt-3 flex items-center gap-2">
                         <Button onClick={handleUpdateCard}>Save</Button>
                         <Button variant="secondary" onClick={() => setIsEditingDescription(false)}>

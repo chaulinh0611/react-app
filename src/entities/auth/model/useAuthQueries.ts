@@ -119,7 +119,7 @@ export const useUploadAvatar = () => {
 export const useRefreshToken = () => {
     const queryClient = useQueryClient();
 
-    return useMutation<ApiResponse<null>, Error>({
+    return useMutation<ApiResponse<{ accessToken: string }>, Error>({
         mutationFn: () => authApi.refreshToken(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });

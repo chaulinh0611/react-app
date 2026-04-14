@@ -15,8 +15,7 @@ export default function ArchivedBoards() {
     } = useQuery({
         queryKey: ['archivedBoards'],
         queryFn: async () => {
-            const res = await BoardApi.getArchivedBoards();
-            return res.data;
+            return BoardApi.getArchivedBoards();
         },
     });
 

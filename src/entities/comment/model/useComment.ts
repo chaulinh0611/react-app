@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { commentApi } from "../api/comment.api";
-import type { CreateComment, UpdateComment } from "./type";
+import type { CreateComment } from "./type";
 
 export function useComment(cardId: string) {
     return useQuery({

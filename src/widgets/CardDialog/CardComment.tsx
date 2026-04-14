@@ -16,6 +16,7 @@ interface Props {
 export default function CardComment({ cardId }: Props) {
     const { data: me } = useAuth();
     const { data: comments } = useComment(cardId);
+    const currentUser = me?.data;
     const sortedComments = [...(comments || [])].sort(
         (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
@@ -51,8 +52,8 @@ export default function CardComment({ cardId }: Props) {
                     {/* Enter comment */}
                     <div className="flex items-center gap-2">
                         <Avatar>
-                            <AvatarImage src={me?.data?.avatarUrl} />
-                            <AvatarFallback>{me?.data?.username}</AvatarFallback>
+                            <AvatarImage src={currentUser?.avatarUrl} />
+                            <AvatarFallback>{currentUser?.username}</AvatarFallback>
                         </Avatar>
                         <Input
                             placeholder="Enter your comment"
@@ -63,9 +64,10 @@ export default function CardComment({ cardId }: Props) {
                     </div>
                     {/* Comment list */}
                     <div>
-                        {sortedComments?.map((cmt: any) => (
-                            <CommentItem key={cmt.id} cmt={cmt} user={me.data} />
-                        ))}
+                        {currentUser &&
+                            sortedComments?.map((cmt: any) => (
+                                <CommentItem key={cmt.id} cmt={cmt} user={currentUser} />
+                            ))}
                     </div>
                 </div>
             </ScrollArea>

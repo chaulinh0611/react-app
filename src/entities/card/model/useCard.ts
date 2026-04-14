@@ -1,11 +1,10 @@
-import { useQuery, useMutation, useQueryClient, QueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardApi } from '../api/card.api';
 import type { CardAttachment } from './type';
 import type {
     CreateCardPayload,
     ReorderCardPayload,
     UpdateCardPayload,
-    MoveCardToAnotherListPayload,
 } from './type';
 
 export const cardQueryKeys = {
@@ -243,7 +242,7 @@ export const useDeleteCardAttachment = () => {
     return useMutation({
         mutationFn: (attachmentId: string) =>
             CardApi.deleteAttachment(attachmentId).then((res) => res.data),
-        onSuccess: (_, attachmentId) => {
+        onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['card-attachments'] });
             queryClient.invalidateQueries({ queryKey: ['cards'] });
             queryClient.removeQueries({ queryKey: ['card-attachments'], exact: false });

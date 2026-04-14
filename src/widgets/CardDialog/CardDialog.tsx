@@ -16,7 +16,6 @@ import { validateHandle } from '@/shared/lib/validate_handle';
 import CardDescription from './CardDescription';
 import { Button } from '@/shared/ui/button';
 import CardLabels from './CardLabels';
-import CardAttachments from './CardAttachments';
 
 function normalizeDescriptionValue(value?: string | null): string {
     if (!value) return '';

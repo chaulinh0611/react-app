@@ -100,7 +100,7 @@ export const useUpdateBoard = () => {
             payload,
         }: {
             boardId: string;
-            workspaceId: string; 
+            workspaceId?: string;
             payload: Partial<CreateBoardPayload>;
         }) => normalizeBoard(await BoardApi.updateBoard(boardId, payload)),
         onSuccess: (board, variables) => {
@@ -112,9 +112,11 @@ export const useUpdateBoard = () => {
                 )
             );
 
-            queryClient.invalidateQueries({
-                queryKey: ['workspaces', variables.workspaceId, 'boards'],
-            });
+            if (variables.workspaceId) {
+                queryClient.invalidateQueries({
+                    queryKey: ['workspaces', variables.workspaceId, 'boards'],
+                });
+            }
         }
     });
 };
@@ -123,13 +125,15 @@ export const useArchiveBoard = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: ({ boardId }: { boardId: string; workspaceId: string }) =>
+        mutationFn: ({ boardId }: { boardId: string; workspaceId?: string }) =>
             BoardApi.archiveBoard(boardId),
 
         onSuccess: (_, { boardId, workspaceId }) => {
-            queryClient.invalidateQueries({
-                queryKey: ['workspaces', workspaceId, 'boards'],
-            });
+            if (workspaceId) {
+                queryClient.invalidateQueries({
+                    queryKey: ['workspaces', workspaceId, 'boards'],
+                });
+            }
 
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
             queryClient.invalidateQueries({ queryKey: boardKeys.byId(boardId) });
@@ -193,7 +197,7 @@ export const useRevokeLink = () => {
 export const useJoinBoard = (token: string) => {
     return useQuery({
         queryKey: ['join-board', token],
-        queryFn: () => BoardApi.joinBoard(token),
+        queryFn: () => BoardApi.joinBoard(token).then((res) => res.data),
         enabled: !!token,
     });
 };
@@ -230,6 +234,25 @@ export const useCreateBoardFromTemplate = () => {
             if (board?.id) {
                 queryClient.setQueryData(boardKeys.byId(board.id), board);
             }
+        },
+    });
+};
+
+export const useCreateBoardTemplate = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            boardId,
+            category,
+            copyCard,
+        }: {
+            boardId: string;
+            category?: string;
+            copyCard?: boolean;
+        }) => BoardApi.createBoardTemplate(boardId, { category, copyCard }),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: boardKeys.template() });
         },
     });
 };

@@ -1,8 +1,7 @@
 import { useMemo } from 'react';
-import { FileText, Paperclip, Trash2, Upload } from 'lucide-react';
+import { FileText, Trash2, Upload } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Card } from '@/shared/ui/card';
-import { Label } from '@/shared/ui/label';
 import {
     useCardAttachments,
     useDeleteCardAttachment,

@@ -1,4 +1,3 @@
-import { Tag } from 'lucide-react';
 import { Label } from '@/shared/ui/label';
 import { ScrollArea } from '@/shared/ui/scroll-area';
 import { LABEL_COLOR_HEX, type LabelColor } from '@/entities/label/model/label.type';

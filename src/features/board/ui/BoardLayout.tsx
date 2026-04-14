@@ -89,7 +89,7 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
             const destList = boardLists.find((l) => l.id === destination.droppableId);
             if (!sourceList || !destList) return;
 
-            const getPosition = (cards, index) => ({
+            const getPosition = (cards: any[], index: number) => ({
                 beforeId: index > 0 ? cards[index - 1].id : null,
                 afterId: index < cards.length - 1 ? cards[index + 1].id : null,
             });

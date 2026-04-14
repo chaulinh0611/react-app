@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { WorkspaceApi } from '@/entities/workspace/api/workspace.api';
 import { Loader2, ArchiveRestore, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/shared/ui/card';

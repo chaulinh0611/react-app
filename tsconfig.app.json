@@ -25,10 +25,5 @@
         "noFallthroughCasesInSwitch": true,
         "noUncheckedSideEffectImports": true
     },
-    "include": [
-        "src",
-        ".agents/FSD_ARCHITECTURE.ts",
-        ".agents/ARCHITECTURAL_DECISIONS.ts",
-        ".agents/ENTITY_PATTERN.ts"
-    ]
+    "include": ["src"]
 }

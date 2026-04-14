@@ -24,7 +24,7 @@ export function InputOTPForm() {
     const { addToast } = useAnimatedToast();
 
     const { mutate: verifyEmail, isPending: isVerifying } = useVerifyEmail();
-    const { mutate: sendVerifyEmail, isPending: isSending } = useSendVerifyEmail();
+    const { mutate: sendVerifyEmail } = useSendVerifyEmail();
 
     const hasSent = useRef(false);
 

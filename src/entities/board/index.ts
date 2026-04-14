@@ -10,6 +10,7 @@ export {
     useArchiveBoard,
     useBoardTemplateQuery,
     useCreateBoard,
+    useCreateBoardTemplate,
     useCreateBoardFromTemplate,
     useDeleteBoard,
     useGetAccessibleBoards,

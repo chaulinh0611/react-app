@@ -15,7 +15,6 @@ import { useCreateWorkspaceMutation } from '@/entities/workspace/model/workspace
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 export const CreateWorkspaceDialog = () => {
     const { addToast } = useAnimatedToast();

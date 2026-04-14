@@ -15,7 +15,7 @@ export default function JoinBoardPage() {
         return <LoadingSpinner />;
     }
     if (data) {
-        return <Navigate to={`/board/${data.data.boardId}`} />;
+        return <Navigate to={`/board/${data.boardId}`} />;
     }
     return (
         <Card className="w-[700px] px-10 mx-auto mt-30 flex flex-col items-center justify-center">
