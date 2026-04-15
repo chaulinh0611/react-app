@@ -39,11 +39,6 @@ const ErrorPage2 = () => {
                     </Button>
                 </div>
             </div>
-            <img
-                src="/react-app/Scrum.png"
-                alt="Scrum"
-                className="hidden bg-cover object-cover xl:inline dark:brightness-[0.95] dark:invert"
-            />
         </div>
     );
 };

@@ -6,7 +6,7 @@ import { useUpdateCard, useUploadCardAttachment } from '@/entities/card';
 import { toast } from 'sonner';
 import CardAction from './CardAction';
 import CardComment from './CardComment';
-import { Captions, EllipsisVertical, Paperclip, TextAlignJustify } from 'lucide-react';
+import { Captions, EllipsisVertical, TextAlignJustify } from 'lucide-react';
 import { Label } from '@/shared/ui/label';
 import { CardChecklist } from './CardChecklist';
 import CardMember from './CardMember';
@@ -16,6 +16,7 @@ import { validateHandle } from '@/shared/lib/validate_handle';
 import CardDescription from './CardDescription';
 import { Button } from '@/shared/ui/button';
 import CardLabels from './CardLabels';
+import CardAttachments from './CardAttachments';
 
 function normalizeDescriptionValue(value?: string | null): string {
     if (!value) return '';
@@ -173,7 +174,11 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                 <div className="flex-1 mt-2 overflow-y-auto px-4 pb-4">
                     <div className="pl-4">
                         {/* Card Action */}
-                        <CardAction cardId={card.id} onAttachmentUpload={handleAttachmentUpload} />
+                        <CardAction
+                            cardId={card.id}
+                            dueDate={card.dueDate}
+                            onAttachmentUpload={handleAttachmentUpload}
+                        />
 
                         {/* Card Labels */}
                         <CardLabels cardId={card.id} />
@@ -210,9 +215,9 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                     {/* Card Checklist */}
                     <CardChecklist cardId={card.id} />
 
-                    <div className="flex items-center gap-2">
-                        <Paperclip className="h-4 w-4" />
-                        <Label>Attachments</Label>
+                    {/* Card Attachments */}
+                    <div className="mt-4 space-y-2">
+                        <CardAttachments cardId={card.id} />
                     </div>
                 </div>
             </div>

@@ -11,7 +11,7 @@ export const InviteButton = () => {
                     <Plus /> Share
                 </Button>
             </PopoverTrigger>
-            <PopoverContent align="end" className="w-[400px]">
+            <PopoverContent align="end" className="w-[600px]">
                 <InvitePopover />
             </PopoverContent>
         </Popover>

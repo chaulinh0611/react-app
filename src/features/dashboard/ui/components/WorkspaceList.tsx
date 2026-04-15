@@ -126,21 +126,24 @@ export const WorkspaceList = () => {
 
     if (workspaces.length === 0 && guestWorkspaces.length === 0) {
         return (
-            <div className="text-center text-gray-500 py-10  rounded-lg border-2 border-dashed">
-                <p>You don't have any workspaces yet. Create one now!</p>
+            <div className="text-center  text-gray-500 py-10  rounded-lg border-2 border-dashed">
+                <p className="mb-5">You don't have any workspaces yet. Create one now!</p>
+                <CreateWorkspaceDialog />
             </div>
         );
     }
 
     return (
         <div className="space-y-12 min-w-0">
-            <Card className="p-6">
-                {/* STARRED BOARDS */}
-                <StarredBoardsSection boards={starredBoards as any[]} />
+            {(starredBoards.length > 0 || recentlyViewedBoards.length > 0) && (
+                <Card className="p-6">
+                    {/* STARRED BOARDS */}
+                    <StarredBoardsSection boards={starredBoards as any[]} />
 
-                {/* RECENTLY VIEWED */}
-                <RecentlyViewedSection boards={recentlyViewedBoards as any[]} />
-            </Card>
+                    {/* RECENTLY VIEWED */}
+                    <RecentlyViewedSection boards={recentlyViewedBoards as any[]} />
+                </Card>
+            )}
 
             {/* YOUR WORKSPACES */}
             {workspaces.length > 0 && (

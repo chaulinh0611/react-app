@@ -8,6 +8,12 @@ interface InviteByEmail {
     role?: string;
 }
 
+interface UpdateMemberRolePayload {
+    boardId: string;
+    userId: string;
+    roleName: string;
+}
+
 const boardKeys = {
     all: ['boards'] as const,
     byId: (boardId: string) => ['board', boardId] as const,
@@ -39,11 +45,11 @@ const normalizeMembers = (result: any): any[] => {
 
 // CRUD Board
 export const useGetBoardById = (boardId: string) => {
-  return useQuery({
-    queryKey: ['board', boardId],
-    queryFn: () => BoardApi.getDetailBoard(boardId), 
-    enabled: !!boardId,
-  });
+    return useQuery({
+        queryKey: ['board', boardId],
+        queryFn: () => BoardApi.getDetailBoard(boardId),
+        enabled: !!boardId,
+    });
 };
 
 export const useGetAccessibleBoards = () => {
@@ -107,9 +113,7 @@ export const useUpdateBoard = () => {
             queryClient.setQueryData(boardKeys.byId(variables.boardId), board);
 
             queryClient.setQueryData(boardKeys.all, (old: Board[] = []) =>
-                old.map((b) =>
-                    b.id === variables.boardId ? { ...b, ...board } : b
-                )
+                old.map((b) => (b.id === variables.boardId ? { ...b, ...board } : b)),
             );
 
             if (variables.workspaceId) {
@@ -117,7 +121,7 @@ export const useUpdateBoard = () => {
                     queryKey: ['workspaces', variables.workspaceId, 'boards'],
                 });
             }
-        }
+        },
     });
 };
 
@@ -174,9 +178,27 @@ export const useDeleteBoard = () => {
 };
 
 export const useInviteMemberByEmail = () => {
+    const queryClient = useQueryClient();
+
     return useMutation({
         mutationFn: ({ boardId, email, role = 'board_member' }: InviteByEmail) =>
             BoardApi.inviteMemberViaEmail(boardId, email, role),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: boardKeys.members(variables.boardId) });
+        },
+    });
+};
+
+export const useUpdateBoardMemberRole = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ boardId, userId, roleName }: UpdateMemberRolePayload) =>
+            BoardApi.updateMemberRole(boardId, userId, roleName),
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: boardKeys.members(variables.boardId) });
+            queryClient.invalidateQueries({ queryKey: boardKeys.byId(variables.boardId) });
+        },
     });
 };
 

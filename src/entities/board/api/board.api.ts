@@ -39,6 +39,14 @@ export const BoardApi = {
         return axios.post(`/boards/${boardId}/members/invite/email`, { email, role });
     },
 
+    updateMemberRole: (
+        boardId: string,
+        userId: string,
+        roleName: string,
+    ): Promise<ApiResponse<void>> => {
+        return axios.patch(`/boards/${boardId}/members/${userId}/role`, { roleName });
+    },
+
     createLinkInvite: (boardId: string): Promise<ApiResponse<string>> => {
         return axios.post(`/boards/${boardId}/invite/link`);
     },

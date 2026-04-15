@@ -35,7 +35,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<'div'>) 
                     'Login failed. Please try again.';
 
                 if (err.error_code === AuthErrorCode.EMAIL_NOT_VERIFIED) {
-                    navigator('/verify-email?email=' + form.getValues('email'));
+                    navigator(`/verify-email?email=${encodeURIComponent(data.email)}`);
                     return;
                 }
                 addToast({

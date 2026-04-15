@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/shared/ui/label';
 import { Switch } from '@/shared/ui/switch';
 import { Button } from '@/shared/ui/button';
+import { InvitePopover } from '@/widgets/Boards/Invite/InviteContent';
 
 const TEMPLATE_CATEGORIES = [
     'Business',
@@ -48,6 +49,7 @@ export const BoardSettingContent = () => {
     const navigate = useNavigate();
     const { addToast } = useAnimatedToast();
     const [openActivity, setOpenActivity] = useState(false);
+    const [openMembers, setOpenMembers] = useState(false);
     const [openTemplateDialog, setOpenTemplateDialog] = useState(false);
     const [templateCategory, setTemplateCategory] = useState('Business');
     const [copyCards, setCopyCards] = useState(true);
@@ -123,7 +125,12 @@ export const BoardSettingContent = () => {
                     <ChangeBackgroundSubMenu />
                 </DropdownMenuSub>
 
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                    onSelect={(e) => {
+                        e.preventDefault();
+                        setOpenMembers(true);
+                    }}
+                >
                     <User2 />
                     Members
                 </DropdownMenuItem>
@@ -168,6 +175,21 @@ export const BoardSettingContent = () => {
 
                     <div className="max-h-96 overflow-y-auto">
                         <BoardActivity />
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog open={openMembers} onOpenChange={setOpenMembers}>
+                <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Board Members</DialogTitle>
+                        <DialogDescription>
+                            Invite members to the board and change their role.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="max-h-[70vh] overflow-y-auto pr-1">
+                        <InvitePopover />
                     </div>
                 </DialogContent>
             </Dialog>

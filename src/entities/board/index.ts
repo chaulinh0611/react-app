@@ -22,6 +22,7 @@ export {
     useInviteMemberByLink,
     useJoinBoard,
     useRevokeLink,
+    useUpdateBoardMemberRole,
     useToggleStarBoard,
     useUnarchiveBoard,
     useUpdateBoard,

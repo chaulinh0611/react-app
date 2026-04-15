@@ -24,7 +24,7 @@ const VerifyPage = lazy(() => import('@/pages/auth/VerifyPage'));
 const OAuth2CallbackPage = lazy(() => import('@/pages/auth/OAuth2CallbackPage'));
 
 export default function AppRoutes() {
-    const routerBasename = import.meta.env.VITE_ROUTER_BASENAME || '/';
+    const routerBasename = import.meta.env.VITE_APP_BASE_PATH || '/';
 
     return (
         <BrowserRouter basename={routerBasename}>

@@ -24,6 +24,10 @@ export interface BoardMember {
     boardId: string;
     userId: string;
     roleId: string;
+    role?: string;
+    fullName?: string;
+    email?: string;
+    avatarUrl?: string | null;
 }
 
 // API INTERFACE

@@ -51,8 +51,8 @@ export const useRegister = () => {
 
     return useMutation<ApiResponse<void>, Error, AuthType.RegisterPayload>({
         mutationFn: (payload) => authApi.register(payload),
-        onSuccess: () => {
-            navigate('/login');
+        onSuccess: (_, variables) => {
+            navigate(`/verify-email?email=${encodeURIComponent(variables.email)}`);
         },
     });
 };

@@ -20,6 +20,8 @@ export default function CardActionMembers({ cardId }: CardActionMembersProps) {
     const { data: unassignedMembers } = useGetUnassignedMembers(cardId);
 
     function handleAssignMember(memberId: string) {
+        if (!memberId) return;
+
         addMemberToCard(
             { cardId, memberId },
             {
@@ -52,9 +54,9 @@ export default function CardActionMembers({ cardId }: CardActionMembersProps) {
                     )}
                     {unassignedMembers?.map((member: any) => (
                         <div
-                            key={member.id}
-                            className="flex items-center gap-2 hover:bg-gray-200"
-                            onClick={() => handleAssignMember(member.userId)}
+                            key={member.userId || member.id}
+                            className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1 transition-colors hover:bg-gray-200"
+                            onClick={() => handleAssignMember(member.userId || member.id)}
                         >
                             <Avatar>
                                 <AvatarImage src={member.avatarUrl} />

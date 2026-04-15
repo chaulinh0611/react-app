@@ -1,4 +1,3 @@
-
 export interface CardMember {
     userId: string;
     username: string;
@@ -31,8 +30,13 @@ export interface CardLabel {
 
 export interface CardAttachment {
     id: string;
-    name: string;
-    url: string;
+    fileName: string;
+    fileUrl: string;
+    createdAt?: string;
+    uploadedBy?: {
+        id: string;
+        email?: string;
+    };
 }
 
 export interface CardChecklist {
@@ -56,6 +60,7 @@ export interface CreateCardPayload {
 export interface UpdateCardPayload {
     title?: string;
     description?: string;
+    dueDate?: string | null;
 }
 
 export interface ReorderCardPayload {

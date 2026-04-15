@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import {
     Dialog,
@@ -45,11 +44,10 @@ type Props = {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     workspaceId: string;
-    boardToEdit?: Board | null; // if present convert dialog to edit mode
+    boardToEdit?: Board | null;
 };
 
 export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit }: Props) {
-    const navigate = useNavigate();
     const createBoardMutation = useCreateBoard();
     const updateBoardMutation = useUpdateBoard();
 
@@ -59,7 +57,6 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
     const [loading, setLoading] = useState(false);
     const { addToast } = useAnimatedToast();
 
-    // populate fields when editing
     useEffect(() => {
         if (boardToEdit) {
             setTitle(boardToEdit.title);
@@ -92,7 +89,7 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                 });
                 onOpenChange(false);
             } else {
-                const board = await createBoardMutation.mutateAsync({
+                await createBoardMutation.mutateAsync({
                     title: title.trim(),
                     description: description.trim(),
                     workspaceId,
@@ -100,9 +97,6 @@ export function CreateBoardDialog({ open, onOpenChange, workspaceId, boardToEdit
                 });
 
                 onOpenChange(false);
-                if (board?.id) {
-                    navigate(`/board/${board.id}`);
-                }
             }
 
             setTitle('');
