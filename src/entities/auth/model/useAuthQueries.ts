@@ -154,7 +154,6 @@ export const useVerifyEmail = () => {
  * Logout
  */
 export const useLogout = () => {
-    const navigate = useNavigate();
     const queryClient = useQueryClient();
 
     return useMutation<void, Error>({
@@ -165,7 +164,7 @@ export const useLogout = () => {
         onSuccess: () => {
             queryClient.setQueryData(authQueryKeys.profile(), null);
             queryClient.invalidateQueries({ queryKey: authQueryKeys.all });
-            navigate('/login');
+            window.location.assign('/login');
         },
     });
 };

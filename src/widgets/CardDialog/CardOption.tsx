@@ -8,10 +8,11 @@ import {
 } from '@/shared/ui/dropdown-menu';
 import { DropdownMenuGroup } from '@radix-ui/react-dropdown-menu';
 import { UserRoundPlus, ArrowRightLeft, Copy, FileText, Archive, Trash, Image } from 'lucide-react';
-import { useArchiveCard, useDeleteCard } from '@/entities/card/model/useCard';
+import { useArchiveCard, useDeleteCard, useDuplicateCard } from '@/entities/card/model/useCard';
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { useState } from 'react';
+import { toast } from 'sonner';
 
 import CoverMenu from './DropdownMenu/CoverMenu';
 import { MoveCardDialog } from './MoveCardDialog';
@@ -20,16 +21,26 @@ interface Props {
     cardId: string;
     listId: string;
     boardId: string;
+    cardTitle: string;
     menu: string;
     setOpen: (open: boolean) => void;
     setMenu: (menu: string) => void;
 }
 
-export default function CardOption({ cardId, listId, boardId, menu, setOpen, setMenu }: Props) {
+export default function CardOption({
+    cardId,
+    listId,
+    boardId,
+    cardTitle,
+    menu,
+    setOpen,
+    setMenu,
+}: Props) {
     const { mutate: deleteCard } = useDeleteCard();
     const { mutate: archiveCard } = useArchiveCard();
+    const { mutate: duplicateCard, isPending: isDuplicating } = useDuplicateCard();
     const [isMoveDialogOpen, setIsMoveDialogOpen] = useState(false);
-    // const { mutate: duplicateCard } = useDuplicateCard();
+    const [copyTitle, setCopyTitle] = useState(`${cardTitle} (Copy)`);
 
     function handleDeleteCard() {
         setOpen(false);
@@ -49,6 +60,25 @@ export default function CardOption({ cardId, listId, boardId, menu, setOpen, set
 
     function handleMoveClick() {
         setIsMoveDialogOpen(true);
+    }
+
+    function handleDuplicateCard() {
+        duplicateCard(
+            {
+                cardId,
+                listId,
+                title: copyTitle.trim() || undefined,
+            },
+            {
+                onSuccess: () => {
+                    toast.success('Card copied successfully');
+                    setCopyTitle(`${cardTitle} (Copy)`);
+                },
+                onError: (error: any) => {
+                    toast.error(error?.message || 'Failed to copy card');
+                },
+            },
+        );
     }
 
     if (menu == 'main')
@@ -71,11 +101,31 @@ export default function CardOption({ cardId, listId, boardId, menu, setOpen, set
                             <DropdownMenuSubTrigger>
                                 <Copy /> Copy
                             </DropdownMenuSubTrigger>
-                            <DropdownMenuSubContent>
-                                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                    <Input placeholder="Title" />
-                                    <Button>Copy</Button>
-                                </DropdownMenuItem>
+                            <DropdownMenuSubContent className="w-80 p-3">
+                                <div
+                                    className="space-y-2"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleDuplicateCard();
+                                        }
+                                    }}
+                                >
+                                    <p className="text-xs text-muted-foreground">Card title</p>
+                                    <Input
+                                        value={copyTitle}
+                                        onChange={(e) => setCopyTitle(e.target.value)}
+                                        placeholder="Title"
+                                    />
+                                    <Button
+                                        type="button"
+                                        className="w-full"
+                                        onClick={handleDuplicateCard}
+                                        disabled={isDuplicating}
+                                    >
+                                        {isDuplicating ? 'Copying...' : 'Copy'}
+                                    </Button>
+                                </div>
                             </DropdownMenuSubContent>
                         </DropdownMenuSub>
 

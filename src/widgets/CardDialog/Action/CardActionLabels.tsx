@@ -1,6 +1,5 @@
 import { Pencil, Tag, X } from 'lucide-react';
-import { createPortal } from 'react-dom';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useParams } from 'react-router-dom';
 
@@ -60,7 +59,6 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
 
     const labelTriggerRef = useRef<HTMLButtonElement | null>(null);
     const labelPanelRef = useRef<HTMLDivElement | null>(null);
-    const [labelPanelPos, setLabelPanelPos] = useState<{ top: number; left: number } | null>(null);
 
     const labelTextClass = (color: LabelColor) =>
         color === 'yellow' || color === 'orange' ? 'text-foreground' : 'text-primary-foreground';
@@ -79,22 +77,6 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
         setLabelColor('blue');
     };
 
-    const openLabelPanelAtTrigger = () => {
-        const rect = labelTriggerRef.current?.getBoundingClientRect();
-        if (!rect) {
-            setLabelPanelPos({ top: 80, left: 24 });
-            return;
-        }
-
-        const panelWidth = 320; // w-80
-        const margin = 12;
-
-        const left = Math.max(margin, Math.min(rect.left, window.innerWidth - panelWidth - margin));
-        const top = Math.min(rect.bottom + 8, window.innerHeight - margin);
-
-        setLabelPanelPos({ top, left });
-    };
-
     useEffect(() => {
         if (!labelPopoverOpen) return;
 
@@ -111,8 +93,6 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
             if (labelPanelRef.current?.contains(target)) return;
             if (labelTriggerRef.current?.contains(target)) return;
 
-            e.preventDefault();
-            e.stopPropagation();
             setLabelPopoverOpen(false);
             resetLabelPanel();
         };
@@ -125,29 +105,6 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
             window.removeEventListener('mousedown', handlePointerDown, true);
         };
     }, [labelPopoverOpen]);
-
-    useLayoutEffect(() => {
-        if (!labelPopoverOpen) return;
-        if (!labelPanelPos) return;
-        const panel = labelPanelRef.current;
-        if (!panel) return;
-
-        const margin = 12;
-        const rect = panel.getBoundingClientRect();
-        let nextTop = labelPanelPos.top;
-        let nextLeft = labelPanelPos.left;
-
-        if (rect.bottom > window.innerHeight - margin) {
-            nextTop = Math.max(margin, window.innerHeight - margin - rect.height);
-        }
-        if (rect.right > window.innerWidth - margin) {
-            nextLeft = Math.max(margin, window.innerWidth - margin - rect.width);
-        }
-
-        if (nextTop !== labelPanelPos.top || nextLeft !== labelPanelPos.left) {
-            setLabelPanelPos({ top: nextTop, left: nextLeft });
-        }
-    }, [labelPopoverOpen, labelPanelPos, labelView, filteredBoardLabels.length]);
 
     const openCreateLabel = () => {
         setLabelView('create');
@@ -242,7 +199,7 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
     }
 
     return (
-        <>
+        <div className="relative">
             <Button
                 ref={labelTriggerRef}
                 type="button"
@@ -251,9 +208,7 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
                 onClick={() => {
                     setLabelPopoverOpen((prev) => {
                         const next = !prev;
-                        if (next) {
-                            openLabelPanelAtTrigger();
-                        } else {
+                        if (!next) {
                             resetLabelPanel();
                         }
                         return next;
@@ -264,272 +219,259 @@ export default function CardActionLabels({ cardId }: CardActionLabelsProps) {
                 Label
             </Button>
 
-            {labelPopoverOpen && labelPanelPos
-                ? createPortal(
-                      <div className="fixed inset-0 z-50 pointer-events-none" aria-hidden={false}>
-                          <div
-                              ref={labelPanelRef}
-                              className="pointer-events-auto fixed w-80 rounded-md border border-border bg-popover p-0 text-popover-foreground shadow-md"
-                              style={{ top: labelPanelPos.top, left: labelPanelPos.left }}
-                              onWheel={(e) => e.stopPropagation()}
-                              onTouchMove={(e) => e.stopPropagation()}
-                              role="dialog"
-                              aria-label="Labels"
-                          >
-                              <div className="flex items-center border-b border-border px-3 py-2">
-                                  <div className="w-7" />
-                                  <p className="flex-1 text-center text-sm font-semibold">
-                                      {labelView === 'list'
-                                          ? 'Labels'
-                                          : labelView === 'create'
-                                            ? 'Create label'
-                                            : 'Edit label'}
-                                  </p>
-                                  <Button
-                                      type="button"
-                                      size="icon-xs"
-                                      variant="ghost"
-                                      onClick={() => {
-                                          setLabelPopoverOpen(false);
-                                          resetLabelPanel();
-                                      }}
-                                      aria-label="Close"
-                                  >
-                                      <X />
-                                  </Button>
-                              </div>
+            {labelPopoverOpen ? (
+                <div
+                    className="absolute top-full left-0 z-50 mt-2 pointer-events-none"
+                    aria-hidden={false}
+                >
+                    <div
+                        ref={labelPanelRef}
+                        className="pointer-events-auto w-80 max-w-[calc(100vw-2rem)] rounded-md border border-border bg-popover p-0 text-popover-foreground shadow-md"
+                        onWheel={(e) => e.stopPropagation()}
+                        onTouchMove={(e) => e.stopPropagation()}
+                        role="dialog"
+                        aria-label="Labels"
+                    >
+                        <div className="flex items-center border-b border-border px-3 py-2">
+                            <div className="w-7" />
+                            <p className="flex-1 text-center text-sm font-semibold">
+                                {labelView === 'list'
+                                    ? 'Labels'
+                                    : labelView === 'create'
+                                      ? 'Create label'
+                                      : 'Edit label'}
+                            </p>
+                            <Button
+                                type="button"
+                                size="icon-xs"
+                                variant="ghost"
+                                onClick={() => {
+                                    setLabelPopoverOpen(false);
+                                    resetLabelPanel();
+                                }}
+                                aria-label="Close"
+                            >
+                                <X />
+                            </Button>
+                        </div>
 
-                              <div className="flex flex-col gap-3 p-3">
-                                  {labelView === 'list' ? (
-                                      <>
-                                          <Input
-                                              value={labelSearch}
-                                              onChange={(e) => setLabelSearch(e.target.value)}
-                                              placeholder="Search labels..."
-                                          />
+                        <div className="flex flex-col gap-3 p-3">
+                            {labelView === 'list' ? (
+                                <>
+                                    <Input
+                                        value={labelSearch}
+                                        onChange={(e) => setLabelSearch(e.target.value)}
+                                        placeholder="Search labels..."
+                                    />
 
-                                          <div className="flex flex-col gap-2">
-                                              <p className="text-xs font-medium text-muted-foreground">
-                                                  Labels
-                                              </p>
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                            Labels
+                                        </p>
 
-                                              <ScrollArea className="max-h-64">
-                                                  <div className="flex flex-col gap-2 pr-2">
-                                                      {filteredBoardLabels.length === 0 ? (
-                                                          <p className="py-2 text-center text-xs text-muted-foreground">
-                                                              No labels found
-                                                          </p>
-                                                      ) : null}
+                                        <ScrollArea className="max-h-64">
+                                            <div className="flex flex-col gap-2 pr-2">
+                                                {filteredBoardLabels.length === 0 ? (
+                                                    <p className="py-2 text-center text-xs text-muted-foreground">
+                                                        No labels found
+                                                    </p>
+                                                ) : null}
 
-                                                      {filteredBoardLabels.map((item) => {
-                                                          const checked = cardLabels.some(
-                                                              (l) => l.id === item.id,
-                                                          );
-                                                          const isPending =
-                                                              assignLabel.isPending ||
-                                                              unassignLabel.isPending;
+                                                {filteredBoardLabels.map((item) => {
+                                                    const checked = cardLabels.some(
+                                                        (l) => l.id === item.id,
+                                                    );
+                                                    const isPending =
+                                                        assignLabel.isPending ||
+                                                        unassignLabel.isPending;
 
-                                                          return (
-                                                              <div
-                                                                  key={item.id}
-                                                                  className="flex items-center gap-2"
-                                                              >
-                                                                  <Checkbox
-                                                                      checked={checked}
-                                                                      onCheckedChange={(v) => {
-                                                                          const nextChecked =
-                                                                              v === true;
-                                                                          if (nextChecked) {
-                                                                              handleAssignExistingLabel(
-                                                                                  item.id,
-                                                                              );
-                                                                          } else {
-                                                                              handleUnassignExistingLabel(
-                                                                                  item.id,
-                                                                              );
-                                                                          }
-                                                                      }}
-                                                                      disabled={isPending}
-                                                                      aria-label={
-                                                                          checked
-                                                                              ? 'Remove label from card'
-                                                                              : 'Add label to card'
-                                                                      }
-                                                                  />
+                                                    return (
+                                                        <div
+                                                            key={item.id}
+                                                            className="flex items-center gap-2"
+                                                        >
+                                                            <Checkbox
+                                                                checked={checked}
+                                                                onCheckedChange={(v) => {
+                                                                    const nextChecked = v === true;
+                                                                    if (nextChecked) {
+                                                                        handleAssignExistingLabel(
+                                                                            item.id,
+                                                                        );
+                                                                    } else {
+                                                                        handleUnassignExistingLabel(
+                                                                            item.id,
+                                                                        );
+                                                                    }
+                                                                }}
+                                                                disabled={isPending}
+                                                                aria-label={
+                                                                    checked
+                                                                        ? 'Remove label from card'
+                                                                        : 'Add label to card'
+                                                                }
+                                                            />
 
-                                                                  <button
-                                                                      type="button"
-                                                                      className={cn(
-                                                                          'h-8 flex-1 rounded-sm px-3 text-left text-sm font-medium',
-                                                                          labelTextClass(
-                                                                              item.color,
-                                                                          ),
-                                                                      )}
-                                                                      style={{
-                                                                          backgroundColor:
-                                                                              LABEL_COLOR_HEX[
-                                                                                  item.color
-                                                                              ],
-                                                                      }}
-                                                                      onClick={() =>
-                                                                          checked
-                                                                              ? handleUnassignExistingLabel(
-                                                                                    item.id,
-                                                                                )
-                                                                              : handleAssignExistingLabel(
-                                                                                    item.id,
-                                                                                )
-                                                                      }
-                                                                      disabled={isPending}
-                                                                  >
-                                                                      {item.name || item.color}
-                                                                  </button>
+                                                            <button
+                                                                type="button"
+                                                                className={cn(
+                                                                    'h-8 flex-1 rounded-sm px-3 text-left text-sm font-medium',
+                                                                    labelTextClass(item.color),
+                                                                )}
+                                                                style={{
+                                                                    backgroundColor:
+                                                                        LABEL_COLOR_HEX[item.color],
+                                                                }}
+                                                                onClick={() =>
+                                                                    checked
+                                                                        ? handleUnassignExistingLabel(
+                                                                              item.id,
+                                                                          )
+                                                                        : handleAssignExistingLabel(
+                                                                              item.id,
+                                                                          )
+                                                                }
+                                                                disabled={isPending}
+                                                            >
+                                                                {item.name || item.color}
+                                                            </button>
 
-                                                                  <Button
-                                                                      type="button"
-                                                                      size="icon-xs"
-                                                                      variant="ghost"
-                                                                      onClick={() =>
-                                                                          openEditLabel(item)
-                                                                      }
-                                                                      aria-label="Edit label"
-                                                                  >
-                                                                      <Pencil />
-                                                                  </Button>
-                                                              </div>
-                                                          );
-                                                      })}
-                                                  </div>
-                                              </ScrollArea>
-                                          </div>
+                                                            <Button
+                                                                type="button"
+                                                                size="icon-xs"
+                                                                variant="ghost"
+                                                                onClick={() => openEditLabel(item)}
+                                                                aria-label="Edit label"
+                                                            >
+                                                                <Pencil />
+                                                            </Button>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </ScrollArea>
+                                    </div>
 
-                                          <Button
-                                              type="button"
-                                              variant="secondary"
-                                              className="w-full"
-                                              onClick={openCreateLabel}
-                                          >
-                                              Create a new label
-                                          </Button>
+                                    <Button
+                                        type="button"
+                                        variant="secondary"
+                                        className="w-full"
+                                        onClick={openCreateLabel}
+                                    >
+                                        Create a new label
+                                    </Button>
 
-                                          <Separator />
+                                    <Separator />
 
-                                          <div className="flex items-center justify-between gap-3">
-                                              <p className="text-sm">
-                                                  Enable colorblind friendly mode
-                                              </p>
-                                              <Switch
-                                                  checked={colorblindMode}
-                                                  onCheckedChange={handleToggleColorblind}
-                                                  aria-label="Enable colorblind friendly mode"
-                                              />
-                                          </div>
-                                      </>
-                                  ) : (
-                                      <>
-                                          <div
-                                              className={cn(
-                                                  'h-9 rounded-sm px-3 text-sm font-medium flex items-center',
-                                                  labelTextClass(labelColor),
-                                              )}
-                                              style={{
-                                                  backgroundColor: LABEL_COLOR_HEX[labelColor],
-                                              }}
-                                          >
-                                              {labelName.trim() ||
-                                                  (editingLabel?.name ?? 'Label') ||
-                                                  labelColor}
-                                          </div>
+                                    <div className="flex items-center justify-between gap-3">
+                                        <p className="text-sm">Enable colorblind friendly mode</p>
+                                        <Switch
+                                            checked={colorblindMode}
+                                            onCheckedChange={handleToggleColorblind}
+                                            aria-label="Enable colorblind friendly mode"
+                                        />
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div
+                                        className={cn(
+                                            'h-9 rounded-sm px-3 text-sm font-medium flex items-center',
+                                            labelTextClass(labelColor),
+                                        )}
+                                        style={{
+                                            backgroundColor: LABEL_COLOR_HEX[labelColor],
+                                        }}
+                                    >
+                                        {labelName.trim() ||
+                                            (editingLabel?.name ?? 'Label') ||
+                                            labelColor}
+                                    </div>
 
-                                          <div className="flex flex-col gap-2">
-                                              <p className="text-xs font-medium text-muted-foreground">
-                                                  Title
-                                              </p>
-                                              <Input
-                                                  value={labelName}
-                                                  onChange={(e) => setLabelName(e.target.value)}
-                                                  placeholder="Label name"
-                                              />
-                                          </div>
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                            Title
+                                        </p>
+                                        <Input
+                                            value={labelName}
+                                            onChange={(e) => setLabelName(e.target.value)}
+                                            placeholder="Label name"
+                                        />
+                                    </div>
 
-                                          <div className="flex flex-col gap-2">
-                                              <p className="text-xs font-medium text-muted-foreground">
-                                                  Select a color
-                                              </p>
-                                              <div className="flex flex-wrap gap-2">
-                                                  {LABEL_COLORS.map((color) => (
-                                                      <button
-                                                          key={color}
-                                                          type="button"
-                                                          className={cn(
-                                                              'size-7 rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
-                                                              labelColor === color
-                                                                  ? 'ring-2 ring-ring ring-offset-2'
-                                                                  : 'ring-1 ring-border',
-                                                          )}
-                                                          style={{
-                                                              backgroundColor:
-                                                                  LABEL_COLOR_HEX[color],
-                                                          }}
-                                                          onClick={() => setLabelColor(color)}
-                                                          aria-label={`Select ${color}`}
-                                                      />
-                                                  ))}
-                                              </div>
-                                          </div>
+                                    <div className="flex flex-col gap-2">
+                                        <p className="text-xs font-medium text-muted-foreground">
+                                            Select a color
+                                        </p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {LABEL_COLORS.map((color) => (
+                                                <button
+                                                    key={color}
+                                                    type="button"
+                                                    className={cn(
+                                                        'size-7 rounded-sm ring-offset-background focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50',
+                                                        labelColor === color
+                                                            ? 'ring-2 ring-ring ring-offset-2'
+                                                            : 'ring-1 ring-border',
+                                                    )}
+                                                    style={{
+                                                        backgroundColor: LABEL_COLOR_HEX[color],
+                                                    }}
+                                                    onClick={() => setLabelColor(color)}
+                                                    aria-label={`Select ${color}`}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
 
-                                          {labelView === 'create' ? (
-                                              <Button
-                                                  type="button"
-                                                  className="w-full"
-                                                  onClick={handleCreateLabel}
-                                                  disabled={createLabel.isPending}
-                                              >
-                                                  {createLabel.isPending ? 'Creating...' : 'Create'}
-                                              </Button>
-                                          ) : (
-                                              <>
-                                                  <Button
-                                                      type="button"
-                                                      className="w-full"
-                                                      onClick={handleUpdateEditingLabel}
-                                                      disabled={updateLabel.isPending}
-                                                  >
-                                                      {updateLabel.isPending ? 'Saving...' : 'Save'}
-                                                  </Button>
-                                                  <Button
-                                                      type="button"
-                                                      variant="secondary"
-                                                      className="w-full"
-                                                      onClick={handleDeleteEditingLabel}
-                                                      disabled={deleteLabel.isPending}
-                                                  >
-                                                      {deleteLabel.isPending
-                                                          ? 'Deleting...'
-                                                          : 'Delete'}
-                                                  </Button>
-                                              </>
-                                          )}
+                                    {labelView === 'create' ? (
+                                        <Button
+                                            type="button"
+                                            className="w-full"
+                                            onClick={handleCreateLabel}
+                                            disabled={createLabel.isPending}
+                                        >
+                                            {createLabel.isPending ? 'Creating...' : 'Create'}
+                                        </Button>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                type="button"
+                                                className="w-full"
+                                                onClick={handleUpdateEditingLabel}
+                                                disabled={updateLabel.isPending}
+                                            >
+                                                {updateLabel.isPending ? 'Saving...' : 'Save'}
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="secondary"
+                                                className="w-full"
+                                                onClick={handleDeleteEditingLabel}
+                                                disabled={deleteLabel.isPending}
+                                            >
+                                                {deleteLabel.isPending ? 'Deleting...' : 'Delete'}
+                                            </Button>
+                                        </>
+                                    )}
 
-                                          <Button
-                                              type="button"
-                                              variant="ghost"
-                                              className="w-full"
-                                              onClick={() => {
-                                                  setLabelView('list');
-                                                  setEditingLabel(null);
-                                              }}
-                                          >
-                                              Back
-                                          </Button>
-                                      </>
-                                  )}
-                              </div>
-                          </div>
-                      </div>,
-                      document.body,
-                  )
-                : null}
-        </>
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        className="w-full"
+                                        onClick={() => {
+                                            setLabelView('list');
+                                            setEditingLabel(null);
+                                        }}
+                                    >
+                                        Back
+                                    </Button>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            ) : null}
+        </div>
     );
 }

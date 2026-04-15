@@ -161,6 +161,7 @@ export default function CardDialog({ card, setOpen, boardId, listId }: CardDialo
                                         cardId={card.id}
                                         boardId={boardId}
                                         listId={listId}
+                                        cardTitle={card.title}
                                         menu={menu}
                                         setOpen={setOpen}
                                         setMenu={setMenu}

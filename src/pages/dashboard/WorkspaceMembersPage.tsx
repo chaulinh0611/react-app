@@ -10,6 +10,7 @@ import {
 import { Input } from '@/shared/ui/input';
 import { Button } from '@/shared/ui/button';
 import { useAnimatedToast } from '@/shared/ui/animated-toast';
+import { copyTextToClipboard } from '@/shared/lib/clipboard';
 
 export default function WorkspaceMembersPage() {
     const { workspaceId } = useParams<{ workspaceId: string }>();
@@ -56,9 +57,18 @@ export default function WorkspaceMembersPage() {
     };
 
     const copyLink = async () => {
-        await navigator.clipboard.writeText(shareLink);
-        addToast({ message: 'Link copied!', type: 'success' });
-        setShareLink('');
+        const copied = await copyTextToClipboard(shareLink);
+        if (copied) {
+            addToast({ message: 'Link copied!', type: 'success' });
+            setShareLink('');
+            return;
+        }
+
+        addToast({
+            message: 'Could not auto-copy on this network. Please copy manually.',
+            type: 'warning',
+        });
+        window.prompt('Copy this link:', shareLink);
     };
 
     const handleRemove = async (email: string) => {

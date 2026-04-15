@@ -1,11 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardApi } from '../api/card.api';
 import type { CardAttachment } from './type';
-import type {
-    CreateCardPayload,
-    ReorderCardPayload,
-    UpdateCardPayload,
-} from './type';
+import type { CreateCardPayload, ReorderCardPayload, UpdateCardPayload } from './type';
 
 export const cardQueryKeys = {
     all: ['cards'] as const,
@@ -187,9 +183,10 @@ export const useDuplicateCard = () => {
         }: {
             cardId: string;
             listId: string;
-            title: string;
+            title?: string;
         }) => CardApi.duplicateCard(cardId, listId, title).then((res) => res.data),
         onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: cardQueryKeys.all });
             queryClient.invalidateQueries({ queryKey: cardQueryKeys.lists(variables.listId) });
         },
     });

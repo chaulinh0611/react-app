@@ -15,6 +15,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { validateHandle } from '@/shared/lib/validate_handle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/shared/ui/select';
+import { copyTextToClipboard } from '@/shared/lib/clipboard';
 
 const ROLE_OPTIONS = [
     { value: 'board_admin', label: 'Board Admin', icon: Shield },
@@ -81,9 +82,31 @@ export const InvitePopover = () => {
                         position: 'top-center',
                     });
                 },
-                onSuccess: (data: any) => {
-                    toast.success('Share link generated successfully', { position: 'top-center' });
-                    navigator.clipboard.writeText(data.link);
+                onSuccess: async (data: any) => {
+                    const link =
+                        typeof data === 'string' ? data : data?.link || data?.data?.link || '';
+
+                    if (!link) {
+                        toast.error('Cannot generate share link', { position: 'top-center' });
+                        return;
+                    }
+
+                    const copied = await copyTextToClipboard(link);
+
+                    if (copied) {
+                        toast.success('Share link generated and copied', {
+                            position: 'top-center',
+                        });
+                        return;
+                    }
+
+                    toast.warning(
+                        'Could not auto-copy on this network. Link is ready to copy manually.',
+                        {
+                            position: 'top-center',
+                        },
+                    );
+                    window.prompt('Copy this link:', link);
                 },
             },
         );

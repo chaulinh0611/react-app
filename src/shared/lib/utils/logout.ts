@@ -1,5 +1,4 @@
-
 export const logout = () => {
     localStorage.clear();
-    window.location.href = '/react-app/login';
-}
+    window.location.assign('/login');
+};

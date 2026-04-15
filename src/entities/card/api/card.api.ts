@@ -155,8 +155,11 @@ export const CardApi = {
         return axios.get(`/cards/${cardId}/unassigned-members`);
     },
 
-    duplicateCard: (cardId: string, listId: string, title: string) => {
-        return axios.post(`/cards/${cardId}/duplicate`, { targetListId: listId, title });
+    duplicateCard: (cardId: string, listId: string, title?: string) => {
+        return axios.post(`/cards/${cardId}/duplicate`, {
+            targetListId: listId,
+            ...(title ? { title } : {}),
+        });
     },
 
     moveCardToBoard: (

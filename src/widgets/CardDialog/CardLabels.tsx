@@ -19,6 +19,7 @@ export default function CardLabels({ cardId }: CardLabelsProps) {
     return (
         <div className="mt-4 flex flex-col gap-3 rounded-md">
             <div className="flex items-center gap-2">
+                cả
                 <Label className="text-xs">Labels</Label>
             </div>
 

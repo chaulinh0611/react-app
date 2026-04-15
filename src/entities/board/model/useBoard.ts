@@ -49,6 +49,7 @@ export const useGetBoardById = (boardId: string) => {
         queryKey: ['board', boardId],
         queryFn: () => BoardApi.getDetailBoard(boardId),
         enabled: !!boardId,
+        retry: false,
     });
 };
 
@@ -88,8 +89,24 @@ export const useCreateBoard = () => {
     return useMutation({
         mutationFn: async (payload: CreateBoardPayload) =>
             normalizeBoard(await BoardApi.createBoard(payload)),
-        onSuccess: (board) => {
+        onSuccess: (board, variables) => {
             queryClient.invalidateQueries({ queryKey: boardKeys.all });
+
+            queryClient.invalidateQueries({
+                queryKey: ['workspaces', variables.workspaceId, 'boards'],
+            });
+
+            if (board) {
+                queryClient.setQueryData(
+                    ['workspaces', variables.workspaceId, 'boards'],
+                    (old: Board[] | undefined) => {
+                        const current = Array.isArray(old) ? old : [];
+                        if (current.some((b) => b.id === board.id)) return current;
+                        return [board, ...current];
+                    },
+                );
+            }
+
             if (board?.id) {
                 queryClient.setQueryData(boardKeys.byId(board.id), board);
             }

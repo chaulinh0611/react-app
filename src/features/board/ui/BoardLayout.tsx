@@ -120,6 +120,9 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
                     listId: destList.id,
                 });
 
+                // Store previous state for rollback
+                const previousBoardLists = boardLists;
+
                 setBoardLists((prev) =>
                     prev.map((l) => {
                         if (l.id === sourceList.id) return { ...l, items: sourceCards };
@@ -130,11 +133,19 @@ export default function BoardLayout({ boardId }: { boardId: string }) {
 
                 const pos = getPosition(destCards, destination.index);
 
-                moveCardToAnotherList({
-                    cardId: draggableId,
-                    listId: destList.id,
-                    ...pos,
-                });
+                moveCardToAnotherList(
+                    {
+                        cardId: draggableId,
+                        targetListId: destList.id, // ✅ Fixed: use targetListId instead of listId
+                        ...pos,
+                    },
+                    {
+                        onError: () => {
+                            // Rollback on error
+                            setBoardLists(previousBoardLists);
+                        },
+                    },
+                );
             }
         }
     };
